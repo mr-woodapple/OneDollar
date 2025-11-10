@@ -1,8 +1,8 @@
 export default function HomeView() {
 
   return(
-    <>
-      Home
-    </>
+    <div className="m-5">
+      <span className="text-4xl font-bold">Home</span>
+    </div>
   )
 }

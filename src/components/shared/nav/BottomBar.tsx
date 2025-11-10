@@ -15,7 +15,7 @@ export default function BottomBar({ onAddClick, onShowHome}: BottomBarProps){
           <House />
         </Button>
 
-        <Button onClick={onAddClick} className="cursor-pointer">
+        <Button onClick={onAddClick}>
           <Plus />
         </Button>
 
