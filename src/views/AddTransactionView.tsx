@@ -19,6 +19,7 @@ export default function AddTransactionView({ isOpen, onOpenChange }: Props) {
   // Handle button presses from the keypad
   function handleNumpadInput(token: string) {
     let tempAmount = amount;
+    let hasDecimal = tempAmount.includes(",");
     let hasMoreThanTwoDecimals = tempAmount.includes(",") && tempAmount.split(",")[1].length >= 2;
 
     if (token === "backspace") {
@@ -31,7 +32,9 @@ export default function AddTransactionView({ isOpen, onOpenChange }: Props) {
 
     } else if (token === "decimal") {
       // Handle decimal seperator, but only if not already set
-      tempAmount += ",";
+      if (!hasDecimal) {
+        tempAmount += ",";
+      }
       
     } else {
       // Should be a number by now, add that to the end of the string

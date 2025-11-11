@@ -11,7 +11,7 @@ export default function BottomBar({ onAddClick, onShowHome}: BottomBarProps){
   return (
     <div className="fixed bottom-0 left-0 z-50 w-full h-16 bg-white border-t border-gray-200">
       <div className="grid grid-cols-3 h-full justify-items-center content-center">
-        <Button onClick={() => onShowHome(true)} variant="ghost" size="icon">
+        <Button onClick={() => onShowHome(true)} variant="ghost">
           <House />
         </Button>
 
@@ -19,7 +19,7 @@ export default function BottomBar({ onAddClick, onShowHome}: BottomBarProps){
           <Plus />
         </Button>
 
-        <Button onClick={() => onShowHome(false)} variant="ghost" size="icon">
+        <Button onClick={() => onShowHome(false)} variant="ghost">
           <UserCog />
         </Button>
       </div>

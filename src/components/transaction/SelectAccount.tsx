@@ -5,7 +5,7 @@ import { Item, ItemGroup } from "../ui/item"
 import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "../ui/drawer"
 
 import { AccountData } from "@/content/AccountData"
-import { type Account } from "@/models/Account"
+import type { Account } from "@/models/Account.ts"
 
 export default function SelectAccount() {
   const [selectedAccount, setSelectedAccount] = useState<Account>();
@@ -15,7 +15,10 @@ export default function SelectAccount() {
       <DrawerTrigger asChild>
         <div className="w-full h-12 border-2 border-neutral-200 hover:bg-neutral-200 rounded-full grid place-items-center cursor-pointer">
           {selectedAccount?.name 
-            ? <div><span>{selectedAccount.icon}</span><span>{selectedAccount.name}</span></div>
+            ? <div className="space-x-2.5">
+                <span>{selectedAccount.icon}</span>
+                <span>{selectedAccount.name}</span>
+              </div>
             : "Select Account"}
         </div>
       </DrawerTrigger>
