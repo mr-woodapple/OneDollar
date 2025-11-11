@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { X } from "lucide-react"
+import { Slash, X } from "lucide-react"
 import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer"
 
 import { Button } from "@/components/ui/button"
@@ -54,6 +54,7 @@ export default function AddTransactionView({ isOpen, onOpenChange }: Props) {
       <DrawerContent className="px-5">
         <DrawerHeader>
           <div className="flex flex-row justify-between items-center">
+            {/* TODO: Replace with buttons for date, time (?) and concurrend option */}
             <DrawerTitle>Add Transaction</DrawerTitle>
             <DrawerClose asChild>
               <Button variant="ghost" size="icon">
@@ -68,6 +69,7 @@ export default function AddTransactionView({ isOpen, onOpenChange }: Props) {
 
           <div className="flex flex-row gap-2.5 my-2.5">
             <SelectCategory />
+            <Slash className="h-12 w-12"/>
             <SelectAccount />
           </div>
           

@@ -13,13 +13,13 @@ export default function SelectAccount() {
   return (
     <Drawer>
       <DrawerTrigger asChild>
-        <div className="w-full h-12 border-2 border-neutral-200 hover:bg-neutral-200 rounded-full grid place-items-center cursor-pointer">
+        <div className="w-full h-12 grid place-items-center cursor-pointer">
           {selectedAccount?.name 
             ? <div className="space-x-2.5">
                 <span>{selectedAccount.icon}</span>
                 <span>{selectedAccount.name}</span>
               </div>
-            : "Select Account"}
+            : <span className="underline underline-offset-5">Select Account</span>}
         </div>
       </DrawerTrigger>
 

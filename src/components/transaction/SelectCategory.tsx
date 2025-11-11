@@ -13,13 +13,13 @@ export default function SelectCategory() {
   return (
     <Drawer>
       <DrawerTrigger asChild>
-        <div className="w-full h-12 border-2 border-neutral-200 hover:bg-neutral-200 rounded-full grid place-items-center cursor-pointer">
+        <div className="w-full h-12 grid place-items-center cursor-pointer">
           {selectedCategory?.name 
             ? <div className="space-x-2.5">
                 <span>{selectedCategory.icon}</span>
                 <span>{selectedCategory.name}</span>
               </div>
-            : "Select Category"}
+            : <span className="underline underline-offset-5">Select Category</span>}
         </div>
       </DrawerTrigger>
 
