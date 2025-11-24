@@ -1,0 +1,6 @@
+@one_dollar.AspNetCoreBackend_HostAddress = http://localhost:5091
+
+GET {{one_dollar.AspNetCoreBackend_HostAddress}}/Transaction/
+Accept: application/json
+
+###

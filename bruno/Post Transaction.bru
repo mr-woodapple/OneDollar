@@ -1,0 +1,23 @@
+meta {
+  name: Post Transaction
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{API_URL}}/transaction
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "amount": 0.99,
+    "currency": "EUR"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
