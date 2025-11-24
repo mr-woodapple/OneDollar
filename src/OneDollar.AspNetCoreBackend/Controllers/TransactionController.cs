@@ -38,6 +38,11 @@ public class TransactionController : ODataController
         try
         {
             _context.Transaction.Add(transaction);
+            var account = await _context.Account.SingleAsync(a => a.AccountId == transaction.AccountId);
+
+            // Update the linked accounts balance before saving
+            // account.Balance += transaction.Amount;
+
             await _context.SaveChangesAsync();
 
             var t = _context.Transaction

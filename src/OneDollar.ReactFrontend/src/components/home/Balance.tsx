@@ -1,5 +1,8 @@
-export default function Balance() {
-  const amount = 17.88;
+interface BalanceProps {
+  amount: number;
+}
+
+export default function Balance({ amount }: BalanceProps) {
   const humandReadableAmount = amount.toString().replace(".", ",");
 
   return(

@@ -1,8 +1,5 @@
-using Microsoft.AspNetCore.OData;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OData.ModelBuilder;
 using OneDollar.Api.Context;
-using OneDollar.Api.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 

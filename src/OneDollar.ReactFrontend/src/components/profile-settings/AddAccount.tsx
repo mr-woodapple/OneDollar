@@ -52,7 +52,7 @@ export default function AddAccount({ addAccount, loading, error }: AddAccountPro
             <Label htmlFor="accountName">Account Name</Label>
             <Input
               id="accountName"
-              placeholder="Girokarte, ..." value={accountName}
+              placeholder="VisaCard, Savings, ..." value={accountName}
               onChange={(e) => setAccountName(e.target.value)} />
           </div>
 

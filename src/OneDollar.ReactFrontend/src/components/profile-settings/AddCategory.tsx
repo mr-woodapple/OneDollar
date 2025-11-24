@@ -9,18 +9,19 @@ import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerT
 import type { Category } from "@/models/Category";
 
 interface AddCategoryProps  {
+  isExpenseCategory: boolean;
   addCategory: (account: Omit<Category, "id">) => Promise<any>;
   loading: boolean;
   error: string | null;
 }
 
-export default function AddCategory({ addCategory, loading, error }: AddCategoryProps) {
+export default function AddCategory({ isExpenseCategory, addCategory, loading, error }: AddCategoryProps) {
   const [open, setOpen] = useState<boolean>(false);
   const [categoryTitle, setCategoryTitle] = useState<string>();
   const [categoryIcon, setCategoryIcon] = useState<string>();
 
   async function handleCreate() {
-    const category: Category = { icon: categoryIcon || "", name: categoryTitle || "" };
+    const category: Category = { icon: categoryIcon || "", name: categoryTitle || "", isExpenseCategory:  isExpenseCategory };
     await addCategory(category);
 
     if (error == null) { setOpen(false) };
@@ -38,7 +39,9 @@ export default function AddCategory({ addCategory, loading, error }: AddCategory
       <DrawerContent>
         <DrawerHeader>
           <div className="flex flex-row justify-between items-center">
-            <DrawerTitle>Create Category</DrawerTitle>
+            <DrawerTitle>
+              {isExpenseCategory ? "Create Expense Category" : "Create Income Category"}
+            </DrawerTitle>
             <DrawerClose>
               <Button variant="ghost" size="icon">
                 <X />

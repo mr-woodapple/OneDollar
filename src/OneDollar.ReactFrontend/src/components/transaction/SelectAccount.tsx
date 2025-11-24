@@ -1,4 +1,3 @@
-import { useState } from "react"
 import { X } from "lucide-react"
 import { Button } from "../ui/button"
 import { Item, ItemGroup } from "../ui/item"
@@ -49,7 +48,7 @@ export default function SelectAccount({ selectedAccount, onSelectAccount }: Sele
         {accounts &&
           <ItemGroup className="bg-neutral-100 rounded-xl m-5 cursor-pointer">
             {accounts.map((account) => (
-              <DrawerClose asChild key={account.id}>
+              <DrawerClose asChild key={account.accountId}>
                 <Item onClick={() => onSelectAccount(account)} className="hover:bg-neutral-200">
                   <span>💳</span>
                   <span>{account.name}</span>

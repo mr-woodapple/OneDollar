@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
+import { toast } from "sonner";
+
 import { fetchApi } from "@/lib/api";
 import type { Category } from "@/models/Category";
-import { toast } from "sonner";
 
 export function useCategories() {
   const [categories, setCategories] = useState<Category[]>([]);

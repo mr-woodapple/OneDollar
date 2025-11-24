@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Trash, X } from "lucide-react";
 import { Button } from "../ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
@@ -8,6 +9,7 @@ import { useCategories } from "@/hooks/useCategories";
 import EmptyCategories from "../shared/empty/EmptyCategories";
 import AddCategory from "./AddCategory";
 import ErrorAlert from "../shared/alerts/ErrorAlert";
+import type { Category } from "@/models/Category";
 
 interface EditCategoriesProps {
   isOpen: boolean
@@ -16,7 +18,20 @@ interface EditCategoriesProps {
 
 export default function EditCategories({ isOpen, onOpenChange }: EditCategoriesProps) {
   const { categories, fetching, loading, error, addCategory, deleteCategory } = useCategories();
+  const [tab, setTab] = useState("expense");
+  const [expenseCategories, setExpenseCategories] = useState<Category[]>();
+  const [incomeCategories, setIncomeCategories] = useState<Category[]>();
 
+  useEffect(() => {
+    // Using this to split the categories into two groups for easier handling
+    setExpenseCategories(categories.filter(c => c.isExpenseCategory == true));
+    setIncomeCategories(categories.filter(c => c.isExpenseCategory == false));
+  }, [categories])
+
+  // Make the tabs controlled
+  const onTabChange = (value: string) => { setTab(value); }
+
+  // Handle deleting categories
   async function handleDelete(id?: number) {
     if (id == null) { return; }
 
@@ -38,7 +53,7 @@ export default function EditCategories({ isOpen, onOpenChange }: EditCategoriesP
         </DrawerHeader>
 
         <div className="drawer-content mb-1">
-          <Tabs defaultValue="expense">
+          <Tabs value={tab} onValueChange={onTabChange}>
             <TabsList className="w-full">
               <TabsTrigger value="expense">Expense</TabsTrigger>
               <TabsTrigger value="income">Income</TabsTrigger>
@@ -47,18 +62,19 @@ export default function EditCategories({ isOpen, onOpenChange }: EditCategoriesP
             {error && <ErrorAlert errorMessage={error} />}
             {categories && !error &&
               <>
-                <AddCategory 
+                <AddCategory
+                  isExpenseCategory={tab === "expense" ? true : false}
                   addCategory={addCategory}
-                  loading={loading} 
+                  loading={loading}
                   error={error} />
 
                 <TabsContent value="expense">
-                  {categories.length === 0 && <EmptyCategories />}
+                  {expenseCategories?.length === 0 && <EmptyCategories />}
 
-                  {categories &&
+                  {expenseCategories &&
                     <div className="overflow-y-auto">
                       <ItemGroup className="bg-neutral-100 rounded-xl my-5">
-                        {categories.map((category) => (
+                        {expenseCategories.map((category) => (
                           <Item>
                             <ItemMedia>
                               <span>{category.icon}</span>
@@ -84,8 +100,34 @@ export default function EditCategories({ isOpen, onOpenChange }: EditCategoriesP
                 </TabsContent>
 
                 <TabsContent value="income">
-                  <EmptyCategories />
-                  {/* {categories.length === 0 && <EmptyCategories />} */}
+                  {incomeCategories?.length === 0 && <EmptyCategories />}
+
+                  {incomeCategories &&
+                    <div className="overflow-y-auto">
+                      <ItemGroup className="bg-neutral-100 rounded-xl my-5">
+                        {incomeCategories.map((category) => (
+                          <Item>
+                            <ItemMedia>
+                              <span>{category.icon}</span>
+                            </ItemMedia>
+                            <ItemContent>
+                              <span>{category.name}</span>
+                            </ItemContent>
+
+                            <ItemActions>
+                              {/* TODO: Implement functionality */}
+                              {/* <Button variant="ghost" size="sm">
+                                <Pencil />
+                              </Button> */}
+                              <Button variant="ghost" size="sm" className="text-red-500" onClick={() => handleDelete(category.categoryId)}>
+                                <Trash />
+                              </Button>
+                            </ItemActions>
+                          </Item>
+                        ))}
+                      </ItemGroup>
+                    </div>
+                  }
                 </TabsContent>
               </>
             }

@@ -1,16 +1,36 @@
 import EditAccounts from "@/components/profile-settings/EditAccounts";
 import EditCategories from "@/components/profile-settings/EditCategories";
-import { Item, ItemContent, ItemGroup, ItemSeparator, ItemTitle } from "@/components/ui/item";
-import { useState } from "react";
+import { Item, ItemActions, ItemContent, ItemDescription, ItemGroup, ItemSeparator, ItemTitle } from "@/components/ui/item";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useAccounts } from "@/hooks/useAccounts";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export default function ProfileSettingsView() {
+  const { accounts } = useAccounts();
   const [editCategoriesDrawerState, setEditCategoriesDrawerState] = useState(false)
   const [editAccountsDrawerState, setEditAccountsDrawerState] = useState(false)
+  const [defaultAccountId, setDefaultAccountId] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    const savedAccount = localStorage.getItem("defaultAccount");
+    if (savedAccount) {
+      setDefaultAccountId(savedAccount);
+    }
+  }, []);
+
+  // Save the id of the selected account to local storage
+  async function onDefaultAccountChange(id: number) {
+    localStorage.setItem("defaultAccount", id.toString());
+    setDefaultAccountId(id.toString());
+    toast.success("Hooray, updated your default account!")
+  }
 
   return (
     <div className="m-5">
       <div className="text-center">Profile Settings</div>
 
+      {/* Managing categories and accounts */}
       <div className="text-sm text-neutral-500 pb-2 ps-4 mt-5">
         Configuration
       </div>
@@ -27,6 +47,45 @@ export default function ProfileSettingsView() {
           <ItemContent className="cursor-pointer" onClick={() => setEditAccountsDrawerState(true)}>
             <ItemTitle>Accounts</ItemTitle>
           </ItemContent>
+        </Item>
+
+        <ItemSeparator />
+
+        <Item className="cursor-pointer">
+          <ItemContent className="cursor-pointer">
+            <ItemTitle>Standard Account</ItemTitle>
+            <ItemDescription>The account that is selected by default on the transaction list.</ItemDescription>
+          </ItemContent>
+          <ItemActions>
+            <Select value={defaultAccountId} onValueChange={(val) => onDefaultAccountChange(Number(val))}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select account" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {accounts.map((acc) => (
+                    <SelectItem className="cursor-pointer"
+                      value={acc.accountId!.toString()} key={acc.accountId}>
+                      {acc.name}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </ItemActions>
+        </Item>
+      </ItemGroup>
+
+      {/* General app information */}
+      <div className="text-sm text-neutral-500 pb-2 ps-4 mt-5">
+        App Info
+      </div>
+      <ItemGroup className="border border-neutral-200 rounded-lg">
+        <Item>
+          <ItemContent>
+            <ItemTitle>Version</ItemTitle>
+          </ItemContent>
+          <ItemActions className="text-neutral-700">{import.meta.env.VITE_APP_VERSION}</ItemActions>
         </Item>
       </ItemGroup>
 

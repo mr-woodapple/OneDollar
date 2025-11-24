@@ -17,7 +17,7 @@ interface AddTransactionProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   addTransaction: (transaction: Omit<Transaction, "id">) => Promise<any>;
-  updateTransaction: (id: number, transaction: Partial<Transaction>) => Promise<any>;
+  updateTransaction: (id: number, transaction: Transaction) => Promise<any>;
   deleteTransaction: (id: number) => Promise<any>;
   loading: boolean;
   error: string | null;
@@ -34,7 +34,7 @@ export default function AddTransactionView({ isOpen, onOpenChange, loading, erro
     if (isOpen) {
       if (transaction) {
         // Edit mode: populate fields
-        setAmount(transaction.amount.toString().replace(".", ","));
+        setAmount(Math.abs(transaction.amount).toString().replace(".", ","));
         setSelectedCategory(transaction.category);
         setSelectedAccount(transaction.account);
       } else {
@@ -85,12 +85,19 @@ export default function AddTransactionView({ isOpen, onOpenChange, loading, erro
       return;
     }
 
+    let finalAmount = Number(amount.replace(",", ".")) || 0;
+    if (selectedCategory.isExpenseCategory) {
+      finalAmount = -Math.abs(finalAmount);
+    } else {
+      finalAmount = Math.abs(finalAmount);
+    }
+
     const t: Transaction = {
       transactionId: transaction?.transactionId ?? undefined,
       timestamp: transaction?.timestamp ?? new Date,
       categoryId: selectedCategory.categoryId!,
       accountId: selectedAccount.accountId!,
-      amount: Number(amount) || 0,
+      amount: finalAmount,
       currency: "EUR",
       note: note
     };
@@ -106,7 +113,6 @@ export default function AddTransactionView({ isOpen, onOpenChange, loading, erro
       setSelectedCategory(undefined);
     };
   }
-
 
   async function handleDelete(id?: number) {
     if (!id) { return; }
@@ -133,7 +139,9 @@ export default function AddTransactionView({ isOpen, onOpenChange, loading, erro
         </DrawerHeader>
 
         <div className="drawer-content mb-1">
-          <Amount amount={amount} />
+          <Amount 
+            amount={amount} 
+            isExpenseCategory={selectedCategory?.isExpenseCategory} />
 
           <div className="flex flex-row gap-2.5 my-2.5">
             <SelectCategory

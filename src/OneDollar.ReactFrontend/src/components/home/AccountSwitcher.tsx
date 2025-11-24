@@ -1,21 +1,38 @@
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem, SelectGroup } from "@/components/ui/select";
+import type { Account } from "@/models/Account";
 
-export default function AccountSwitcher() {
+interface AccountSwitcherProps {
+  onAccountChange: (accountId: number) => void;
+  selectedAccountId: number | null;
+  accounts: Account[] | null;
+  fetching: boolean;
+  error: string | null;
+}
 
-  return(
+export default function AccountSwitcher({ onAccountChange, selectedAccountId, accounts, fetching, error }: AccountSwitcherProps) {
+
+  return (
     <div className="header flex justify-center">
-        <Select defaultValue="privateAccount">
+      {!error && !fetching && accounts && accounts.length > 0 &&
+        <Select value={selectedAccountId?.toString()} onValueChange={(val) => onAccountChange(Number(val))}>
           <SelectTrigger className="border-0 shadow-none focus-visible:ring-0">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              <SelectItem value="privateAccount">Private Account</SelectItem>
-              <SelectItem value="sharedAccount">Shared Account</SelectItem>
-              <SelectItem value="debitCard">Debit Card</SelectItem>
+              {accounts.map((acc) => (
+                <SelectItem className="cursor-pointer"
+                  value={acc.accountId!.toString()} key={acc.accountId}>
+                  {acc.name}
+                </SelectItem>
+              ))}
             </SelectGroup>
           </SelectContent>
         </Select>
-      </div>
+      }
+
+      {/* TODO: Add skeleton loading animation */}
+      {/* {!error && fetching && <p>Fetching...</p>} */}
+    </div>
   )
 }
