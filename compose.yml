@@ -4,7 +4,7 @@ services:
     build:
       context: ./src/OneDollar.ReactFrontend
     ports:
-      - 8080:80
+      - 7134:80
     restart: unless-stopped
 
   backend:
@@ -17,7 +17,7 @@ services:
     depends_on:
       - sql-server
     ports:
-      - 5571:8080
+      - 7135:8080
     restart: unless-stopped
 
   sql-server:
@@ -29,7 +29,7 @@ services:
     volumes:
       - sqlData:/var/opt/mssql
     ports:
-      - 1433:1433
+      - 7136:1433
     restart: unless-stopped
     
 volumes:
