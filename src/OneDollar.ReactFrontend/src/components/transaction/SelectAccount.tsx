@@ -14,7 +14,7 @@ interface SelectAccountProps {
 }
 
 export default function SelectAccount({ selectedAccount, onSelectAccount }: SelectAccountProps) {
-  const { accounts, loading, error } = useAccounts();
+  const { accounts, error } = useAccounts();
 
   return (
     <Drawer>

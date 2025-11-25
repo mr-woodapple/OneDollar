@@ -1,0 +1,36 @@
+services:
+  frontend-onedollar: 
+    container_name: OneDollar.ReactFrontend
+    build:
+      context: ./src/OneDollar.ReactFrontend
+    ports:
+      - 8080:80
+    restart: unless-stopped
+
+  backend:
+    container_name: OneDollar.AspNetCoreBackend
+    build:
+      context: ./src/OneDollar.AspNetCoreBackend
+    environment:
+      ConnectionStrings__DatabaseConnection: ${DatabaseConnection}
+      FrontendUrl: ${FrontendUrl}
+    depends_on:
+      - sql-server
+    ports:
+      - 5571:8080
+    restart: unless-stopped
+
+  sql-server:
+    container_name: OneDollar.SqlServer
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      MSSQL_SA_PASSWORD: ${DatabaseSAPassword}
+      ACCEPT_EULA: "Y"
+    volumes:
+      - sqlData:/var/opt/mssql
+    ports:
+      - 1433:1433
+    restart: unless-stopped
+    
+volumes:
+  sqlData:

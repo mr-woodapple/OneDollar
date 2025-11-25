@@ -14,7 +14,7 @@ interface EditAccountsProps {
 }
 
 export default function EditAccounts({ isOpen, onOpenChange }: EditAccountsProps) {
-  const { accounts, fetching, loading, error, addAccount, deleteAccount } = useAccounts();
+  const { accounts, loading, error, addAccount, deleteAccount } = useAccounts();
 
   async function handleDelete(accountId?: number) {
     if (accountId == null) { return; }

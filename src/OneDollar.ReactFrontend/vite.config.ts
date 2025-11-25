@@ -16,5 +16,14 @@ export default defineConfig({
   define: {
     // Expose the app version from package.json as a ENV variable to be displayed on the page
     'import.meta.env.VITE_APP_VERSION' : JSON.stringify(packageJson.version)
+  },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://localhost:7034',
+        changeOrigin: true,
+        secure: false,
+      }
+    }
   }
 })

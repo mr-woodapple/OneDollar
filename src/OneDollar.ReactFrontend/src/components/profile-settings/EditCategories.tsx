@@ -17,7 +17,7 @@ interface EditCategoriesProps {
 }
 
 export default function EditCategories({ isOpen, onOpenChange }: EditCategoriesProps) {
-  const { categories, fetching, loading, error, addCategory, deleteCategory } = useCategories();
+  const { categories, loading, error, addCategory, deleteCategory } = useCategories();
   const [tab, setTab] = useState("expense");
   const [expenseCategories, setExpenseCategories] = useState<Category[]>();
   const [incomeCategories, setIncomeCategories] = useState<Category[]>();
