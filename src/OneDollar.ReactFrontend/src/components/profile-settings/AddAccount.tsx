@@ -7,23 +7,19 @@ import { Spinner } from "../ui/spinner";
 import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "../ui/drawer";
 
 import type { Account } from "@/models/Account";
+import { useAccounts } from "@/api/hooks/useAccounts";
 
-interface AddAccountProps {
-  addAccount: (account: Omit<Account, "id">) => Promise<any>;
-  loading: boolean;
-  error: string | null;
-}
-
-export default function AddAccount({ addAccount, loading, error }: AddAccountProps) {
+export default function AddAccount() {
+  const { addAccount } = useAccounts();
   const [open, setOpen] = useState<boolean>(false);
   const [accountName, setAccountName] = useState<string>();
   const [accountBalance, setAccountBalance] = useState<number>();
 
   async function handleCreate() {
     const account: Account =  { name: accountName || "", balance: accountBalance || 0 };
-    await addAccount(account);
+    await addAccount.mutateAsync(account)
 
-    if (error == null) { setOpen(false) };
+    if (addAccount.error == null) { setOpen(false) };
   }
 
   return (
@@ -66,9 +62,9 @@ export default function AddAccount({ addAccount, loading, error }: AddAccountPro
         </div>
 
         <DrawerFooter className="mt-10">
-          <Button onClick={() => handleCreate()} disabled={loading}>
-            {loading && <Spinner />}
-            {loading ? "Creating" : "Create"}
+          <Button onClick={() => handleCreate()} disabled={addAccount.isPending}>
+            {addAccount.isPending && <Spinner />}
+            {addAccount.isPending ? "Creating" : "Create"}
           </Button>
         </DrawerFooter>
       </DrawerContent>

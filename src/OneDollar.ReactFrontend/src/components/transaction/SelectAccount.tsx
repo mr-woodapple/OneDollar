@@ -4,7 +4,7 @@ import { Item, ItemGroup } from "../ui/item"
 import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "../ui/drawer"
 
 import type { Account } from "@/models/Account.ts"
-import { useAccounts } from "@/hooks/useAccounts"
+import { useAccounts } from "@/api/hooks/useAccounts"
 import EmptyAccounts from "../shared/empty/EmptyAccounts"
 import ErrorAlert from "../shared/alerts/ErrorAlert"
 
@@ -14,7 +14,7 @@ interface SelectAccountProps {
 }
 
 export default function SelectAccount({ selectedAccount, onSelectAccount }: SelectAccountProps) {
-  const { accounts, error } = useAccounts();
+  const { accounts } = useAccounts();
 
   return (
     <Drawer>
@@ -41,21 +41,22 @@ export default function SelectAccount({ selectedAccount, onSelectAccount }: Sele
           </div>
         </DrawerHeader>
 
-         {error && <ErrorAlert errorMessage={error} />}
-
-        {!error && accounts.length === 0 && <EmptyAccounts />}
-
-        {accounts &&
-          <ItemGroup className="bg-neutral-100 rounded-xl m-5 cursor-pointer">
-            {accounts.map((account) => (
-              <DrawerClose asChild key={account.accountId}>
-                <Item onClick={() => onSelectAccount(account)} className="hover:bg-neutral-200">
-                  <span>💳</span>
-                  <span>{account.name}</span>
-                </Item>
-              </DrawerClose>
-            ))}
-          </ItemGroup>
+        {
+          accounts.isPending ? (<p className="dbg">Loading...</p>) :
+          accounts.isError ? (<ErrorAlert error={accounts.error} />) :
+          accounts.data.length === 0 ? (<EmptyAccounts />) :
+          (
+            <ItemGroup className="bg-neutral-100 rounded-xl m-5 cursor-pointer">
+              {accounts.data.map((account) => (
+                <DrawerClose asChild key={account.accountId}>
+                  <Item onClick={() => onSelectAccount(account)} className="hover:bg-neutral-200">
+                    <span>💳</span>
+                    <span>{account.name}</span>
+                  </Item>
+                </DrawerClose>
+              ))}
+            </ItemGroup>
+          )
         }
       </DrawerContent>
     </Drawer>

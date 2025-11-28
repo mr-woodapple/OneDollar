@@ -1,6 +1,6 @@
 {
   "version": "1",
-  "name": "one-dollar",
+  "name": "OneDollar",
   "type": "collection",
   "ignore": [
     "node_modules",

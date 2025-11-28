@@ -1,16 +1,17 @@
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
 import EditAccounts from "@/components/profile-settings/EditAccounts";
 import EditCategories from "@/components/profile-settings/EditCategories";
 import { Item, ItemActions, ItemContent, ItemDescription, ItemGroup, ItemSeparator, ItemTitle } from "@/components/ui/item";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useAccounts } from "@/hooks/useAccounts";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
+import { useAccounts } from "@/api/hooks/useAccounts";
 
 export default function ProfileSettingsView() {
   const { accounts } = useAccounts();
   const [editCategoriesDrawerState, setEditCategoriesDrawerState] = useState(false)
   const [editAccountsDrawerState, setEditAccountsDrawerState] = useState(false)
-  const [defaultAccountId, setDefaultAccountId] = useState<string | undefined>(undefined);
+  const [defaultAccountId, setDefaultAccountId] = useState<string | undefined>();
 
   useEffect(() => {
     const savedAccount = localStorage.getItem("defaultAccount");
@@ -63,7 +64,8 @@ export default function ProfileSettingsView() {
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  {accounts.map((acc) => (
+                  {/* TODO: Implement properly without the question mark syntax */}
+                  {accounts?.data?.map((acc) => (
                     <SelectItem className="cursor-pointer"
                       value={acc.accountId!.toString()} key={acc.accountId}>
                       {acc.name}

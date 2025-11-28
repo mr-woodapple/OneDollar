@@ -12,19 +12,16 @@ import SelectAccount from "@/components/transaction/SelectAccount"
 import type { Account } from "@/models/Account"
 import type { Category } from "@/models/Category"
 import type { Transaction } from "@/models/Transaction"
+import { useTransactions } from "@/api/hooks/useTransactions"
 
 interface AddTransactionProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  addTransaction: (transaction: Omit<Transaction, "id">) => Promise<any>;
-  updateTransaction: (id: number, transaction: Transaction) => Promise<any>;
-  deleteTransaction: (id: number) => Promise<any>;
-  loading: boolean;
-  error: string | null;
   transaction?: Transaction;
 }
 
-export default function AddTransactionView({ isOpen, onOpenChange, loading, error, transaction, addTransaction, updateTransaction, deleteTransaction }: AddTransactionProps) {
+export default function AddTransactionView({ isOpen, onOpenChange, transaction }: AddTransactionProps) {
+  const { addTransaction, updateTransaction, deleteTransaction } = useTransactions();
   const [note] = useState<string>();
   const [amount, setAmount] = useState<string>("0");
   const [selectedCategory, setSelectedCategory] = useState<Category>();
@@ -103,10 +100,10 @@ export default function AddTransactionView({ isOpen, onOpenChange, loading, erro
     };
 
     isUpdate
-      ? await updateTransaction(transaction!.transactionId!, t)
-      : await addTransaction(t);
+      ? await updateTransaction.mutateAsync({ id: transaction!.transactionId!, data: t })
+      : await addTransaction.mutateAsync(t);
 
-    if (error == null) {
+    if (isUpdate ? (updateTransaction.error == null) : (addTransaction.error == null)) {
       onOpenChange(false);
       setAmount("0");
       setSelectedAccount(undefined);
@@ -116,9 +113,9 @@ export default function AddTransactionView({ isOpen, onOpenChange, loading, erro
 
   async function handleDelete(id?: number) {
     if (!id) { return; }
-    
-    await deleteTransaction(id);
-    if (error == null) {
+
+    await deleteTransaction.mutateAsync(id);
+    if (deleteTransaction.error == null) {
       onOpenChange(false);
     };
   }
@@ -139,8 +136,8 @@ export default function AddTransactionView({ isOpen, onOpenChange, loading, erro
         </DrawerHeader>
 
         <div className="drawer-content mb-1">
-          <Amount 
-            amount={amount} 
+          <Amount
+            amount={amount}
             isExpenseCategory={selectedCategory?.isExpenseCategory} />
 
           <div className="flex flex-row gap-2.5 my-2.5">
@@ -155,14 +152,23 @@ export default function AddTransactionView({ isOpen, onOpenChange, loading, erro
           <NumPad handleNumpadInput={handleNumpadInput} />
 
           <div className="flex flex-row w-full gap-x-2.5">
-            <Button onClick={() => handleSaveOrUpdate(transaction ? true : false)} disabled={loading} className="grow mt-2.5 h-12 rounded-full">
-              {loading && <Spinner />}
-              {loading ? (transaction ? "Updating" : "Creating") : (transaction ? "Update" : "Create")}
-            </Button>
-            {transaction &&
-              <Button onClick={() => handleDelete(transaction.transactionId)} className="mt-2.5 h-12 w-12 rounded-full bg-red-500">
-                <Trash />
+            {!transaction &&
+              <Button onClick={() => handleSaveOrUpdate(false)} disabled={addTransaction.isPending} className="grow mt-2.5 h-12 rounded-full">
+                {addTransaction.isPending && <Spinner />}
+                {addTransaction.isPending ? "Creating" : "Create"}
               </Button>
+            }
+
+            {transaction &&
+              <>
+                <Button onClick={() => handleSaveOrUpdate(true)} disabled={updateTransaction.isPending} className="grow mt-2.5 h-12 rounded-full">
+                  {updateTransaction.isPending && <Spinner />}
+                  {updateTransaction.isPending ? "Updating" : "Update"}
+                </Button>
+                <Button onClick={() => handleDelete(transaction.transactionId)} className="mt-2.5 h-12 w-12 rounded-full bg-red-500">
+                  <Trash />
+                </Button>
+              </>
             }
           </div>
         </div>

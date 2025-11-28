@@ -7,24 +7,23 @@ import { Spinner } from "../ui/spinner";
 import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "../ui/drawer";
 
 import type { Category } from "@/models/Category";
+import { useCategories } from "@/api/hooks/useCategories";
 
 interface AddCategoryProps  {
   isExpenseCategory: boolean;
-  addCategory: (account: Omit<Category, "id">) => Promise<any>;
-  loading: boolean;
-  error: string | null;
 }
 
-export default function AddCategory({ isExpenseCategory, addCategory, loading, error }: AddCategoryProps) {
+export default function AddCategory({ isExpenseCategory }: AddCategoryProps) {
+  const { addCategory } = useCategories();
   const [open, setOpen] = useState<boolean>(false);
   const [categoryTitle, setCategoryTitle] = useState<string>();
   const [categoryIcon, setCategoryIcon] = useState<string>();
 
   async function handleCreate() {
     const category: Category = { icon: categoryIcon || "", name: categoryTitle || "", isExpenseCategory:  isExpenseCategory };
-    await addCategory(category);
+    await addCategory.mutateAsync(category);
 
-    if (error == null) { setOpen(false) };
+    if (addCategory.error == null) { setOpen(false) };
   }
 
   return (
@@ -69,9 +68,9 @@ export default function AddCategory({ isExpenseCategory, addCategory, loading, e
         </div>
 
         <DrawerFooter className="mt-10">
-          <Button onClick={() => handleCreate()} disabled={loading}>
-            {loading && <Spinner />}
-            {loading ? "Creating" : "Create"}
+          <Button onClick={() => handleCreate()} disabled={addCategory.isPending}>
+            {addCategory.isPending && <Spinner />}
+            {addCategory.isPending ? "Creating" : "Create"}
           </Button>
         </DrawerFooter>
       </DrawerContent>
