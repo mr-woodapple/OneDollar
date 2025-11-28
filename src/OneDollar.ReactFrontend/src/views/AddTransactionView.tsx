@@ -135,7 +135,7 @@ export default function AddTransactionView({ isOpen, onOpenChange, transaction }
           </div>
         </DrawerHeader>
 
-        <div className="drawer-content mb-1">
+        <div className="drawer-content mb-1 apple-safe-area">
           <Amount
             amount={amount}
             isExpenseCategory={selectedCategory?.isExpenseCategory} />

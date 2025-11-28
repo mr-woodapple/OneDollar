@@ -135,6 +135,11 @@
   }
 }
 
+/* Handling apple safe areas */
+.apple-safe-area {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
 /* Only for debugging */
 .dbg {
   border: 2px dashed red;

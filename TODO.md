@@ -14,6 +14,7 @@ A list so I don't forget what needs to be done:
 - [ ] Prevent deleting accounts / categories, that are linked in an transaction (as that is deleting the transactions as well!)
 - [ ] Implement adding / subtracting from the accounts balance (-> ideally find a way to manage the hook states globally on the FE)
 - [ ] Fix sorting on the transaction view
+- [ ] Implement generic bottom drawer that handles the `apple-safe-area` css tag
 
 ## PWA
 

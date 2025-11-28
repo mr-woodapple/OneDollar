@@ -31,7 +31,7 @@ export default function AddAccount() {
         </div>
       </DrawerTrigger>
 
-      <DrawerContent>
+      <DrawerContent className="apple-safe-area">
         <DrawerHeader>
           <div className="flex flex-row justify-between items-center">
             <DrawerTitle>Create Account</DrawerTitle>

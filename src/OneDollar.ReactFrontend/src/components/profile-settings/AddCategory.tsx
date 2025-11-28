@@ -35,7 +35,7 @@ export default function AddCategory({ isExpenseCategory }: AddCategoryProps) {
         </div>
       </DrawerTrigger>
 
-      <DrawerContent>
+      <DrawerContent className="apple-safe-area">
         <DrawerHeader>
           <div className="flex flex-row justify-between items-center">
             <DrawerTitle>

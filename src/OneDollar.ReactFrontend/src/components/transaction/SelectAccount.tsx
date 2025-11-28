@@ -29,7 +29,7 @@ export default function SelectAccount({ selectedAccount, onSelectAccount }: Sele
         </div>
       </DrawerTrigger>
 
-      <DrawerContent>
+      <DrawerContent className="apple-safe-area">
         <DrawerHeader>
           <div className="flex flex-row justify-between items-center">
             <DrawerTitle>Select Account</DrawerTitle>

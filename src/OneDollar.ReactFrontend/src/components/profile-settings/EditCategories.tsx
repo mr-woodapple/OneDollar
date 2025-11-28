@@ -54,7 +54,7 @@ export default function EditCategories({ isOpen, onOpenChange }: EditCategoriesP
           </div>
         </DrawerHeader>
 
-        <div className="drawer-content mb-1">
+        <div className="apple-safe-area drawer-content  mb-1">
           <Tabs value={tab} onValueChange={onTabChange}>
             <TabsList className="w-full">
               <TabsTrigger value="expense">Expense</TabsTrigger>

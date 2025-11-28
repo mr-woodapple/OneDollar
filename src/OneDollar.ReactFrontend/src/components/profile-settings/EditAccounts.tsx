@@ -36,7 +36,7 @@ export default function EditAccounts({ isOpen, onOpenChange }: EditAccountsProps
           </div>
         </DrawerHeader>
 
-        <div className="drawer-content mb-1">
+        <div className="apple-safe-area drawer-content mb-1">
           {
             accounts.isPending ? (<p className="dbg">Loading...</p>) :
             accounts.isError ? (<ErrorAlert error={accounts.error} />) :
