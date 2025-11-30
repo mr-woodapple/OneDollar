@@ -1,6 +1,8 @@
+import { useEffect, useState } from "react"
 import { X } from "lucide-react"
 import { Button } from "../ui/button"
-import { Item, ItemGroup } from "../ui/item"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { Item, ItemActions, ItemContent, ItemGroup, ItemMedia } from "../ui/item";
 import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "../ui/drawer"
 
 import type { Category } from "@/models/Category"
@@ -13,8 +15,25 @@ interface SelectCategoryProps {
   onSelectCategory: (category: Category) => void;
 }
 
-export default function SelectCategory({ selectedCategory, onSelectCategory}: SelectCategoryProps) {
+export default function SelectCategory({ selectedCategory, onSelectCategory }: SelectCategoryProps) {
   const { categories } = useCategories();
+
+  const [tab, setTab] = useState("expense");
+  const [expenseCategories, setExpenseCategories] = useState<Category[]>();
+  const [incomeCategories, setIncomeCategories] = useState<Category[]>();
+
+  useEffect(() => {
+    if (!categories.isPending && !categories.isError) {
+      // Using this to split the categories into two groups for easier handling
+      setExpenseCategories(categories.data.filter(c => c.isExpenseCategory == true));
+      setIncomeCategories(categories.data.filter(c => c.isExpenseCategory == false));
+
+      selectedCategory?.isExpenseCategory ? setTab("expense") : setTab("income");
+    }
+  }, [categories.data])
+
+  // Make the tabs controlled
+  const onTabChange = (value: string) => { setTab(value); }
 
   return (
     <Drawer>
@@ -29,7 +48,7 @@ export default function SelectCategory({ selectedCategory, onSelectCategory}: Se
         </div>
       </DrawerTrigger>
 
-      <DrawerContent className="apple-safe-area">
+      <DrawerContent>
         <DrawerHeader>
           <div className="flex flex-row justify-between items-center">
             <DrawerTitle>Select Category</DrawerTitle>
@@ -41,25 +60,60 @@ export default function SelectCategory({ selectedCategory, onSelectCategory}: Se
           </div>
         </DrawerHeader>
 
-        {
-          categories.isPending ? (<p className="dbg">Loading...</p>) :
-          categories.isError ? (<ErrorAlert error={categories.error} />) :
-          categories.data.length === 0 ? (<EmptyCategories />):
-          (
-            <div className="overflow-y-auto">
-              <ItemGroup className="bg-neutral-100 rounded-xl m-5 cursor-pointer">
-                {categories.data.map((category) => (
-                  <DrawerClose asChild key={category.categoryId}>
-                    <Item onClick={() => onSelectCategory(category)} className="hover:bg-neutral-200">
-                      <span>{category.icon}</span>
-                      <span>{category.name}</span>
-                    </Item>
-                  </DrawerClose>
-                ))}
-              </ItemGroup>
-            </div>
-          )
-        }
+        <div className="apple-safe-area drawer-content mx-5">
+          <Tabs value={tab} onValueChange={onTabChange}>
+            <TabsList className="w-full">
+              <TabsTrigger value="expense">Expense</TabsTrigger>
+              <TabsTrigger value="income">Income</TabsTrigger>
+            </TabsList>
+
+            {
+              categories.isPending ? (<p className="dbg">Loading...</p>) :
+              categories.isError ? (<ErrorAlert error={categories.error} />) :
+              (
+                <>
+                  <TabsContent value="expense">
+                    {expenseCategories?.length === 0 && <EmptyCategories />}
+
+                    {expenseCategories &&
+                      <div className="overflow-y-auto">
+                        <ItemGroup className="bg-neutral-100 rounded-xl my-5">
+                          {expenseCategories.map((category) => (
+                            <DrawerClose asChild key={category.categoryId}>
+                              <Item onClick={() => onSelectCategory(category)} className="hover:bg-neutral-200">
+                                <span>{category.icon}</span>
+                                <span>{category.name}</span>
+                              </Item>
+                            </DrawerClose>
+                          ))}
+                        </ItemGroup>
+                      </div>
+                    }
+                  </TabsContent>
+
+                  <TabsContent value="income">
+                    {incomeCategories?.length === 0 && <EmptyCategories />}
+
+                    {incomeCategories &&
+                      <div className="overflow-y-auto">
+                        <ItemGroup className="bg-neutral-100 rounded-xl my-5">
+                          {incomeCategories.map((category) => (
+                            <DrawerClose asChild key={category.categoryId}>
+                              <Item onClick={() => onSelectCategory(category)} className="hover:bg-neutral-200">
+                                <span>{category.icon}</span>
+                                <span>{category.name}</span>
+                              </Item>
+                            </DrawerClose>
+                          ))}
+                        </ItemGroup>
+                      </div>
+                    }
+                  </TabsContent>
+                </>
+              )
+            }
+          </Tabs>
+        </div>
       </DrawerContent>
     </Drawer>
   )

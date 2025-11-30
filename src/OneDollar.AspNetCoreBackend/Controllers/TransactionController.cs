@@ -38,11 +38,11 @@ public class TransactionController : ODataController
         try
         {
             _context.Transaction.Add(transaction);
-            var account = await _context.Account.SingleAsync(a => a.AccountId == transaction.AccountId);
 
             // Update the linked accounts balance before saving
-            // account.Balance += transaction.Amount;
-
+            var account = await _context.Account.SingleAsync(a => a.AccountId == transaction.AccountId);
+            account.Balance += transaction.Amount;
+            
             await _context.SaveChangesAsync();
 
             var t = _context.Transaction
@@ -72,6 +72,23 @@ public class TransactionController : ODataController
             var existingTransaction = await _context.Transaction.SingleOrDefaultAsync(t => t.TransactionId == id);
             if (existingTransaction == null) { return NotFound(); }
 
+            if (transaction.AccountId == existingTransaction.AccountId)
+            {
+                // Case 1: Account didn't change
+                var account = await _context.Account.SingleAsync(a => a.AccountId == existingTransaction.AccountId);
+                account.Balance -= existingTransaction.Amount;
+                account.Balance += transaction.Amount;
+            }
+            else
+            {
+                // Case 2: Account did change
+                var oldAccount = await _context.Account.SingleAsync(a => a.AccountId == existingTransaction.AccountId);
+                var newAccount = await _context.Account.SingleAsync(a => a.AccountId == transaction.AccountId);
+
+                oldAccount.Balance -= existingTransaction.Amount;
+                newAccount.Balance += transaction.Amount;
+            }
+
             _context.Entry(existingTransaction).CurrentValues.SetValues(transaction);
             await _context.SaveChangesAsync();
 
@@ -99,8 +116,12 @@ public class TransactionController : ODataController
         {
             var transaction = await _context.Transaction.SingleAsync(t => t.TransactionId == id);
             _context.Transaction.Remove(transaction);
-            await _context.SaveChangesAsync();
 
+            // Update the linked accounts balance before saving
+            var account = await _context.Account.SingleAsync(a => a.AccountId == transaction.AccountId);
+            account.Balance -= transaction.Amount;
+
+            await _context.SaveChangesAsync();
             return NoContent();
         }
         catch (Exception ex)

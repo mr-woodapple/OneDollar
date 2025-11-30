@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 
+import Balance from "@/components/home/Balance";
 import AccountSwitcher from "@/components/home/AccountSwitcher";
 import TransactionList from "@/components/home/TransactionList";
 import type { Transaction } from "@/models/Transaction";
@@ -39,11 +40,9 @@ export default function HomeView({ onTransactionClick }: HomeViewProps) {
     <div className="m-5">
       <AccountSwitcher
         onAccountChange={setSelectedAccountId}
-        selectedAccountId={selectedAccountId}
-      />
+        selectedAccountId={selectedAccountId} />
 
-      {/* TODO: Find solution for managing the state on the top level */}
-      {/* {selectedAccountId && <Balance amount={Number(currentBalance)} />} */}
+      {selectedAccountId && <Balance selectedAccountId={selectedAccountId} />}
 
       <TransactionList
         selectedAccountId={selectedAccountId}

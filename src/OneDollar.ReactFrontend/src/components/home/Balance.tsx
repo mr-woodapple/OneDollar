@@ -1,9 +1,13 @@
+import { useAccounts } from "@/api/hooks/useAccounts";
+
 interface BalanceProps {
-  amount: number;
+  selectedAccountId: number;
 }
 
-export default function Balance({ amount }: BalanceProps) {
-  const humandReadableAmount = amount.toString().replace(".", ",");
+export default function Balance({ selectedAccountId }: BalanceProps) {
+  const { accountBalance } = useAccounts();
+
+  const humandReadableAmount = accountBalance(selectedAccountId).toString().replace(".", ",");
 
   return(
     <div className="text-center my-20">

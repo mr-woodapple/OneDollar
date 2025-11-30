@@ -62,10 +62,17 @@ export function useAccounts() {
     }
   });
 
+  // Get the total balance for an account
+  const accountBalance = (accountId: number) => {
+    const account = accounts.data?.find((a) => a.accountId === accountId);
+    return account?.balance ?? 0;
+  };
+
   return {
     accounts,
     addAccount,
     updateAccount,
-    deleteAccount
+    deleteAccount,
+    accountBalance
   };
 }
