@@ -16,8 +16,6 @@ services:
       FrontendUrl: ${FrontendUrl}
     depends_on:
       - sql-server
-    ports:
-      - 7135:8080
     restart: unless-stopped
 
   sql-server:
@@ -28,8 +26,6 @@ services:
       ACCEPT_EULA: "Y"
     volumes:
       - sqlData:/var/opt/mssql
-    ports:
-      - 7136:1433
     restart: unless-stopped
     
 volumes:

@@ -22,4 +22,12 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <EditorConfigFiles Remove="C:\Users\yeahj\source\repos\OneDollar\src\OneDollar.AspNetCoreBackend\.editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="C:\Users\yeahj\source\repos\OneDollar\src\OneDollar.AspNetCoreBackend\.editorconfig" />
+  </ItemGroup>
+
 </Project>

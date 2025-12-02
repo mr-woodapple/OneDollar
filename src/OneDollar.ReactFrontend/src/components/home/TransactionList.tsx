@@ -1,6 +1,6 @@
 import { useTransactions } from "@/api/hooks/useTransactions";
 import EmptyTransactions from "../shared/empty/EmptyTransactions";
-import { ItemGroup, Item, ItemMedia, ItemContent, ItemTitle, ItemActions, ItemSeparator, ItemDescription } from "../ui/item"
+import { ItemGroup, Item, ItemMedia, ItemContent, ItemTitle, ItemActions, ItemSeparator } from "../ui/item"
 import type { Transaction } from "@/models/Transaction"
 import ErrorAlert from "../shared/alerts/ErrorAlert";
 

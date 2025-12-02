@@ -86,9 +86,11 @@ export default function EditCategories({ isOpen, onOpenChange }: EditCategoriesP
 
                               <ItemActions>
                                 {/* TODO: Implement functionality */}
-                                {/* <Button variant="ghost" size="sm">
-                            <Pencil />
-                          </Button> */}
+                                {/* 
+                                  <Button variant="ghost" size="sm">
+                                    <Pencil />
+                                  </Button> 
+                                */}
                                 <Button variant="ghost" size="sm" className="text-red-500" onClick={() => handleDelete(category.categoryId)}>
                                   <Trash />
                                 </Button>

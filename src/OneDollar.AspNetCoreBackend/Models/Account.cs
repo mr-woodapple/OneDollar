@@ -2,7 +2,7 @@
 
 public class Account
 {
-    public int AccountId { get; set; }
-    public required string Name { get; set; }
-    public float Balance { get; set; }
+	public int AccountId { get; set; }
+	public required string Name { get; set; }
+	public float Balance { get; set; }
 }

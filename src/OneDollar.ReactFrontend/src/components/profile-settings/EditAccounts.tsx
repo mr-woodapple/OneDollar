@@ -40,35 +40,37 @@ export default function EditAccounts({ isOpen, onOpenChange }: EditAccountsProps
           {
             accounts.isPending ? (<p className="dbg">Loading...</p>) :
             accounts.isError ? (<ErrorAlert error={accounts.error} />) :
-            accounts.data.length === 0 ? (<EmptyAccounts />) :
             (
               <>
                 <AddAccount />
 
-                <div className="overflow-y-auto">
-                  <ItemGroup className="bg-neutral-100 rounded-xl my-5">
-                    {accounts.data.map((account) => (
-                      <Item key={account.accountId}>
-                        <ItemMedia>
-                          <span>💳</span>
-                        </ItemMedia>
-                        <ItemContent>
-                          <span>{account.name}</span>
-                        </ItemContent>
+                {accounts.data.length === 0 && <EmptyAccounts />}
+                {accounts.data &&
+                  <div className="overflow-y-auto">
+                    <ItemGroup className="bg-neutral-100 rounded-xl my-5">
+                      {accounts.data.map((account) => (
+                        <Item key={account.accountId}>
+                          <ItemMedia>
+                            <span>💳</span>
+                          </ItemMedia>
+                          <ItemContent>
+                            <span>{account.name}</span>
+                          </ItemContent>
 
-                        <ItemActions>
-                          {/* TODO: Implement functionality */}
-                          {/* <Button variant="ghost" size="sm">
-                                <Pencil />
-                              </Button> */}
-                          <Button variant="ghost" size="sm" className="text-red-500" onClick={() => handleDelete(account.accountId)}>
-                            <Trash />
-                          </Button>
-                        </ItemActions>
-                      </Item>
-                    ))}
-                  </ItemGroup>
-                </div>
+                          <ItemActions>
+                            {/* TODO: Implement functionality */}
+                            {/* <Button variant="ghost" size="sm">
+                            <Pencil />
+                          </Button> */}
+                            <Button variant="ghost" size="sm" className="text-red-500" onClick={() => handleDelete(account.accountId)}>
+                              <Trash />
+                            </Button>
+                          </ItemActions>
+                        </Item>
+                      ))}
+                    </ItemGroup>
+                  </div>
+                }
               </>
             )
           }
