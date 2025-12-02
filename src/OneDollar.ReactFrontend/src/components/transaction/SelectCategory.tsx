@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { X } from "lucide-react"
 import { Button } from "../ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { Item, ItemActions, ItemContent, ItemGroup, ItemMedia } from "../ui/item";
+import { Item, ItemGroup } from "../ui/item";
 import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "../ui/drawer"
 
 import type { Category } from "@/models/Category"
@@ -28,7 +28,9 @@ export default function SelectCategory({ selectedCategory, onSelectCategory }: S
       setExpenseCategories(categories.data.filter(c => c.isExpenseCategory == true));
       setIncomeCategories(categories.data.filter(c => c.isExpenseCategory == false));
 
-      selectedCategory?.isExpenseCategory ? setTab("expense") : setTab("income");
+      if (selectedCategory) {
+        selectedCategory.isExpenseCategory ? setTab("expense") : setTab("income");
+      }
     }
   }, [categories.data])
 

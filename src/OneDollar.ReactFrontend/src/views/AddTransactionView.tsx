@@ -31,7 +31,7 @@ export default function AddTransactionView({ isOpen, onOpenChange, transaction }
     if (isOpen) {
       if (transaction) {
         // Edit mode: populate fields
-        setAmount(Math.abs(transaction.amount).toString().replace(".", ","));
+        setAmount(Math.abs(transaction.amount).toFixed(2).toString().replace(".", ","));
         setSelectedCategory(transaction.category);
         setSelectedAccount(transaction.account);
       } else {

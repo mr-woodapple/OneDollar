@@ -1,6 +1,6 @@
 import { useTransactions } from "@/api/hooks/useTransactions";
 import EmptyTransactions from "../shared/empty/EmptyTransactions";
-import { ItemGroup, Item, ItemMedia, ItemContent, ItemTitle, ItemActions, ItemSeparator } from "../ui/item"
+import { ItemGroup, Item, ItemMedia, ItemContent, ItemTitle, ItemActions, ItemSeparator, ItemDescription } from "../ui/item"
 import type { Transaction } from "@/models/Transaction"
 import ErrorAlert from "../shared/alerts/ErrorAlert";
 
@@ -19,6 +19,9 @@ export default function TransactionList({ selectedAccountId, onTransactionClick 
 
   // Helper function to sort the Transactions by date.
   function groupTransactionByDay(transactions: Transaction[]) {
+    // Sort transactions by date descending
+    transactions.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
     return transactions.reduce((group: { [date: string]: Transaction[] }, entry) => {
       const date = new Date(entry.timestamp).toISOString().split("T")[0];
 
@@ -40,7 +43,7 @@ export default function TransactionList({ selectedAccountId, onTransactionClick 
     };
 
     let date = new Date(dateValue);
-    return date.toLocaleDateString("de-DE", options);
+    return date.toLocaleDateString("en-GB", options);
   };
 
   return (
@@ -68,7 +71,7 @@ export default function TransactionList({ selectedAccountId, onTransactionClick 
                       </ItemContent>
 
                       <ItemActions>
-                        {entry.amount.toString().replace(".", ",")} €
+                        {entry.amount.toFixed(2).toString().replace(".", ",")} €
                       </ItemActions>
                     </Item>
                     {index !== entries.length - 1 && <ItemSeparator />}

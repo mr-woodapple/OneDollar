@@ -6,12 +6,12 @@ interface BalanceProps {
 
 export default function Balance({ selectedAccountId }: BalanceProps) {
   const { accountBalance } = useAccounts();
-
-  const humandReadableAmount = accountBalance(selectedAccountId).toString().replace(".", ",");
+  
+  const humandReadableBalance = accountBalance(selectedAccountId).toFixed(2).toString().replace(".", ",");
 
   return(
     <div className="text-center my-20">
-      <span className="text-5xl font-bold">{ humandReadableAmount } €</span>
+      <span className="text-5xl font-bold">{ humandReadableBalance } €</span>
     </div>
   )
 }
