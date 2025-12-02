@@ -1,0 +1,16 @@
+meta {
+  name: Post SyncData
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{API_URL}}/api/lunchflow/sync
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
