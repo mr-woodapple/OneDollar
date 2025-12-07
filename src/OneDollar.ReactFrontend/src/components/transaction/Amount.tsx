@@ -1,18 +1,20 @@
+import type { Transaction } from "@/models/Transaction";
 import { useEffect, useState } from "react";
 
 interface AmountProps {
   amount: string;
+  transaction?: Transaction;
   isExpenseCategory?: boolean;
 }
 
-export default function Amount({ amount, isExpenseCategory }: AmountProps) {
+export default function Amount({ amount, transaction, isExpenseCategory }: AmountProps) {
   const [prefix, setPrefix] = useState<string>();
 
   useEffect(() => {
     if (isExpenseCategory) {
       isExpenseCategory ? setPrefix("- ") : setPrefix("+ ");
-    } else if (Number(amount) != 0) {
-      Number(amount) < 0 ? setPrefix("- ") : setPrefix("+ ");
+    } else if (transaction) {
+      transaction.amount < 0 ? setPrefix("- ") : setPrefix("+ ");
     }
   }, [isExpenseCategory])
 

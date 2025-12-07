@@ -10,7 +10,7 @@ export interface Transaction {
   isPending: boolean;
   note?: string;
 
-  categoryId: number;
+  categoryId?: number;
   accountId: number;
 
   category?: Category;

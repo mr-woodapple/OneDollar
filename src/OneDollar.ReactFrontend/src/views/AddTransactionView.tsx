@@ -77,13 +77,13 @@ export default function AddTransactionView({ isOpen, onOpenChange, transaction }
   }
 
   async function handleSaveOrUpdate(isUpdate: boolean) {
-    if (selectedCategory == null || selectedAccount == null) {
-      toast.warning("Please select a category and account!")
+    if (!selectedAccount) {
+      toast.warning("Please select an account!")
       return;
     }
 
     let finalAmount = Number(amount.replace(",", ".")) || 0;
-    if (selectedCategory.isExpenseCategory) {
+    if (selectedCategory && selectedCategory.isExpenseCategory || transaction && transaction.amount < 0) {
       finalAmount = -Math.abs(finalAmount);
     } else {
       finalAmount = Math.abs(finalAmount);
@@ -92,7 +92,7 @@ export default function AddTransactionView({ isOpen, onOpenChange, transaction }
     const t: Transaction = {
       transactionId: transaction?.transactionId ?? undefined,
       timestamp: transaction?.timestamp ?? new Date,
-      categoryId: selectedCategory.categoryId!,
+      categoryId: selectedCategory?.categoryId,
       accountId: selectedAccount.accountId!,
       amount: finalAmount,
       currency: "EUR",
@@ -140,6 +140,7 @@ export default function AddTransactionView({ isOpen, onOpenChange, transaction }
         <div className="drawer-content mb-1 apple-safe-area">
           <Amount
             amount={amount}
+            transaction={transaction}
             isExpenseCategory={selectedCategory?.isExpenseCategory} />
 
           <div className="flex flex-row gap-2.5 my-2.5">
