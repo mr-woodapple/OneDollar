@@ -2,17 +2,17 @@
 
 public class LunchFlowAccountsDTO
 {
-	public IEnumerable<LunchFlowAccountDTO> Accounts { get; set; }
-	public int Total {  get; set; }
+	public required IEnumerable<LunchFlowAccount> Accounts { get; set; }
+	public required int Total {  get; set; }
 }
 
-public class LunchFlowAccountDTO
+public class LunchFlowAccount
 {
-	public int Id { get; set; }
-	public string Institution_logo { get; set; }
-	public string Institution_name { get; set; }
-	public string Name { get; set; }
-	public string Provider {  get; set; }
+	public required int Id { get; set; }
+	public required string Institution_logo { get; set; }
+	public required string Institution_name { get; set; }
+	public required string Name { get; set; }
+	public required string Provider {  get; set; }
 	public string Currency {  get; set; }
 	public string Status { get; set; }
 

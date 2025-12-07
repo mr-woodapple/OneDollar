@@ -6,6 +6,8 @@ export interface Transaction {
   timestamp: Date;
   amount: number;
   currency: string;
+  merchant?: string;
+  isPending: boolean;
   note?: string;
 
   categoryId: number;

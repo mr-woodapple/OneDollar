@@ -12,7 +12,7 @@ public class Transaction
 
 	// Foreign Keys
 	public int AccountId { get; set; }
-	public int CategoryId { get; set; }
+	public int? CategoryId { get; set; }
 
 	// Navigation Properties
 	public Account? Account { get; set; }

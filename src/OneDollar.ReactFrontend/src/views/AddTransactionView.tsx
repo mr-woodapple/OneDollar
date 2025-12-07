@@ -96,7 +96,9 @@ export default function AddTransactionView({ isOpen, onOpenChange, transaction }
       accountId: selectedAccount.accountId!,
       amount: finalAmount,
       currency: "EUR",
-      note: note
+      note: note,
+      merchant: transaction?.merchant ?? undefined,
+      isPending: transaction?.isPending ?? false
     };
 
     isUpdate
@@ -142,6 +144,7 @@ export default function AddTransactionView({ isOpen, onOpenChange, transaction }
 
           <div className="flex flex-row gap-2.5 my-2.5">
             <SelectCategory
+              amount={transaction?.amount}
               selectedCategory={selectedCategory}
               onSelectCategory={setSelectedCategory} />
             <SelectAccount

@@ -11,11 +11,12 @@ import EmptyCategories from "../shared/empty/EmptyCategories"
 import ErrorAlert from "../shared/alerts/ErrorAlert"
 
 interface SelectCategoryProps {
+  amount?: number;
   selectedCategory?: Category;
   onSelectCategory: (category: Category) => void;
 }
 
-export default function SelectCategory({ selectedCategory, onSelectCategory }: SelectCategoryProps) {
+export default function SelectCategory({ amount, selectedCategory, onSelectCategory }: SelectCategoryProps) {
   const { categories } = useCategories();
 
   const [tab, setTab] = useState("expense");
@@ -30,6 +31,8 @@ export default function SelectCategory({ selectedCategory, onSelectCategory }: S
 
       if (selectedCategory) {
         selectedCategory.isExpenseCategory ? setTab("expense") : setTab("income");
+      } else if (amount) {
+        amount < 0 ? setTab("expense") : setTab("income");
       }
     }
   }, [categories.data])

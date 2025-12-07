@@ -1,8 +1,9 @@
 import { useTransactions } from "@/api/hooks/useTransactions";
 import EmptyTransactions from "../shared/empty/EmptyTransactions";
-import { ItemGroup, Item, ItemMedia, ItemContent, ItemTitle, ItemActions, ItemSeparator } from "../ui/item"
+import { ItemGroup, Item, ItemMedia, ItemContent, ItemTitle, ItemActions, ItemSeparator, ItemDescription } from "../ui/item"
 import type { Transaction } from "@/models/Transaction"
 import ErrorAlert from "../shared/alerts/ErrorAlert";
+import NoCategory from "./NoCategory";
 
 interface TransactionListProps {
   selectedAccountId?: number | null;
@@ -63,11 +64,24 @@ export default function TransactionList({ selectedAccountId, onTransactionClick 
                   <div key={index} onClick={() => onTransactionClick?.(entry)} className="cursor-pointer">
                     <Item key={entry.transactionId} size="sm">
                       <ItemMedia>
-                        {entry.category?.icon}
+                        { entry.category 
+                          ? entry.category.icon
+                          : "?"
+                        }
                       </ItemMedia>
 
                       <ItemContent>
-                        <ItemTitle>{entry.category?.name}</ItemTitle>
+                        <span>
+                          {}
+                        </span>
+                        { entry.category 
+                          ? <ItemTitle>{entry.category?.name}</ItemTitle>
+                          : <NoCategory />
+                        }
+
+                        <ItemDescription>
+                          {entry.merchant}
+                        </ItemDescription>
                       </ItemContent>
 
                       <ItemActions>
