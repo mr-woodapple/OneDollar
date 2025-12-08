@@ -1,0 +1,24 @@
+{
+  "name": "template",
+  "variables": [
+    {
+      "name": "API_URL",
+      "value": "",
+      "type": "text",
+      "enabled": true,
+      "secret": false
+    },
+    {
+      "name": "LUNCHFLOW_API_TOKEN",
+      "value": "",
+      "type": "text",
+      "enabled": false,
+      "secret": true
+    }
+  ],
+  "info": {
+    "type": "bruno-environment",
+    "exportedAt": "2025-12-07T22:41:52.878Z",
+    "exportedUsing": "Bruno/v2.15.1"
+  }
+}

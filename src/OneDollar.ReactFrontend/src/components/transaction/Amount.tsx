@@ -1,28 +1,21 @@
-import type { Transaction } from "@/models/Transaction";
-import { useEffect, useState } from "react";
+import { Minus, Plus } from "lucide-react";
+import { Button } from "../ui/button";
 
 interface AmountProps {
   amount: string;
-  transaction?: Transaction;
-  isExpenseCategory?: boolean;
+  isExpense: boolean;
+  setIsExpense: (isExpense: boolean) => void;
 }
 
-export default function Amount({ amount, transaction, isExpenseCategory }: AmountProps) {
-  const [prefix, setPrefix] = useState<string>();
-
-  useEffect(() => {
-    if (isExpenseCategory) {
-      isExpenseCategory ? setPrefix("- ") : setPrefix("+ ");
-    } else if (transaction) {
-      transaction.amount < 0 ? setPrefix("- ") : setPrefix("+ ");
-    }
-  }, [isExpenseCategory])
-
-  // const prefix = isExpenseCategory === undefined ? "" : (isExpenseCategory ? "- " : "+ ");
-
+export default function Amount({ amount, isExpense, setIsExpense }: AmountProps) {
   return(
     <div className="text-center my-20">
-      <span className="text-5xl font-bold">{prefix}{ amount } €</span>
+      <div className="flex flex-row justify-center items-center">
+        <Button variant="ghost" size="icon-lg" className="rounded-full" onClick={() => setIsExpense(!isExpense)}>
+          {isExpense ? <Minus /> : <Plus />} 
+        </Button>  
+        <span className="ml-2 text-5xl font-bold">{ amount } €</span>
+      </div>
     </div>
   )
 }

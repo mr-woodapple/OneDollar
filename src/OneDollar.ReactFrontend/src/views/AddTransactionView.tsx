@@ -22,8 +22,10 @@ interface AddTransactionProps {
 
 export default function AddTransactionView({ isOpen, onOpenChange, transaction }: AddTransactionProps) {
   const { addTransaction, updateTransaction, deleteTransaction } = useTransactions();
+
   const [note] = useState<string>();
   const [amount, setAmount] = useState<string>("0");
+  const [isExpense, setIsExpense] = useState<boolean>(true);
   const [selectedCategory, setSelectedCategory] = useState<Category>();
   const [selectedAccount, setSelectedAccount] = useState<Account>();
 
@@ -31,6 +33,7 @@ export default function AddTransactionView({ isOpen, onOpenChange, transaction }
     if (isOpen) {
       if (transaction) {
         // Edit mode: populate fields
+        setIsExpense(transaction.amount < 0);
         setAmount(Math.abs(transaction.amount).toFixed(2).toString().replace(".", ","));
         setSelectedCategory(transaction.category);
         setSelectedAccount(transaction.account);
@@ -42,6 +45,12 @@ export default function AddTransactionView({ isOpen, onOpenChange, transaction }
       }
     }
   }, [isOpen, transaction]);
+
+  useEffect(() => {
+    if (selectedCategory) {
+      setIsExpense(selectedCategory.isExpenseCategory)
+    }
+  }, [selectedCategory])
 
   // Handle button presses from the keypad
   function handleNumpadInput(token: string) {
@@ -83,11 +92,7 @@ export default function AddTransactionView({ isOpen, onOpenChange, transaction }
     }
 
     let finalAmount = Number(amount.replace(",", ".")) || 0;
-    if (selectedCategory && selectedCategory.isExpenseCategory || transaction && transaction.amount < 0) {
-      finalAmount = -Math.abs(finalAmount);
-    } else {
-      finalAmount = Math.abs(finalAmount);
-    }
+    finalAmount = isExpense ? -Math.abs(finalAmount) : Math.abs(finalAmount);
 
     const t: Transaction = {
       transactionId: transaction?.transactionId ?? undefined,
@@ -108,6 +113,7 @@ export default function AddTransactionView({ isOpen, onOpenChange, transaction }
     if (isUpdate ? (updateTransaction.error == null) : (addTransaction.error == null)) {
       onOpenChange(false);
       setAmount("0");
+      setIsExpense(true);
       setSelectedAccount(undefined);
       setSelectedCategory(undefined);
     };
@@ -138,14 +144,14 @@ export default function AddTransactionView({ isOpen, onOpenChange, transaction }
         </DrawerHeader>
 
         <div className="drawer-content mb-1 apple-safe-area">
-          <Amount
-            amount={amount}
-            transaction={transaction}
-            isExpenseCategory={selectedCategory?.isExpenseCategory} />
+          <Amount 
+            amount={amount} 
+            isExpense={isExpense} 
+            setIsExpense={setIsExpense} />
 
           <div className="flex flex-row gap-2.5 my-2.5">
             <SelectCategory
-              amount={transaction?.amount}
+              isExpense={isExpense}
               selectedCategory={selectedCategory}
               onSelectCategory={setSelectedCategory} />
             <SelectAccount

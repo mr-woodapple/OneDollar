@@ -1,8 +1,9 @@
-import { useTransactions } from "@/api/hooks/useTransactions";
-import EmptyTransactions from "../shared/empty/EmptyTransactions";
 import { ItemGroup, Item, ItemMedia, ItemContent, ItemTitle, ItemActions, ItemSeparator, ItemDescription } from "../ui/item"
+
+import { useTransactions } from "@/api/hooks/useTransactions";
 import type { Transaction } from "@/models/Transaction"
 import ErrorAlert from "../shared/alerts/ErrorAlert";
+import EmptyTransactions from "../shared/empty/EmptyTransactions";
 import NoCategory from "./NoCategory";
 
 interface TransactionListProps {
@@ -63,25 +64,23 @@ export default function TransactionList({ selectedAccountId, onTransactionClick 
                 {Array.isArray(entries) && entries.map((entry: Transaction, index: number) => (
                   <div key={index} onClick={() => onTransactionClick?.(entry)} className="cursor-pointer">
                     <Item key={entry.transactionId} size="sm">
-                      <ItemMedia>
-                        { entry.category 
-                          ? entry.category.icon
-                          : "?"
-                        }
-                      </ItemMedia>
-
+                      { entry.category && 
+                        <ItemMedia>
+                          { entry.category.icon }
+                        </ItemMedia>
+                      }
+                      
                       <ItemContent>
-                        <span>
-                          {}
-                        </span>
                         { entry.category 
                           ? <ItemTitle>{entry.category?.name}</ItemTitle>
                           : <NoCategory />
                         }
 
-                        <ItemDescription>
-                          {entry.merchant}
-                        </ItemDescription>
+                        { entry.merchant && 
+                          <ItemDescription>
+                            {entry.merchant}
+                          </ItemDescription>
+                        }
                       </ItemContent>
 
                       <ItemActions>
