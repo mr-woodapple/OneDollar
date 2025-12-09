@@ -1,35 +1,36 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OneDollar.Api.Context;
-using OneDollar.Api.Models.Integrations;
 using OneDollar.Api.Models.DTOs;
 using OneDollar.Api.Models;
+using OneDollar.Api.Models.Provider;
 
-namespace OneDollar.Api.Controllers.Integrations;
+namespace OneDollar.Api.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class LunchFlowController : ControllerBase
+public class ProviderController : ControllerBase
 {
 	private protected OneDollarContext _context;
 	private protected HttpClient _lunchFlowHttpClient;
 
-	public LunchFlowController(OneDollarContext oneDollarContext)
+	public ProviderController(OneDollarContext oneDollarContext)
 	{
 		_context = oneDollarContext;
 
 		_lunchFlowHttpClient = new HttpClient();
-		var config = _context.LunchFlowIntegration.FirstOrDefault();
+		var config = _context.LunchFlowProvider.FirstOrDefault(); // FIXME:
 		if (config != null && !string.IsNullOrEmpty(config.LunchFlowApiKey))
 		{
 			_lunchFlowHttpClient.DefaultRequestHeaders.Add("x-api-key", config.LunchFlowApiKey);
 		}
 	}
 
+	// TODO: Can this be more generic? Like have one "PostConfig" endpoint for all providers?
 	[HttpPost(Name = "PostLunchFlowConfig")]
-	public async Task<ActionResult> PostLunchFlowConfig([FromBody] LunchFlowIntegrationModel config)
+	public async Task<ActionResult> PostLunchFlowConfig([FromBody] LunchFlowProviderModel config)
 	{
-		_context.LunchFlowIntegration.Add(config);
+		_context.LunchFlowProvider.Add(config);
 		await _context.SaveChangesAsync();
 
 		return Ok();

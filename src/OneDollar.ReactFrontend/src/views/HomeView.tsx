@@ -12,7 +12,7 @@ interface HomeViewProps {
 
 export default function HomeView({ onTransactionClick }: HomeViewProps) {
   const { accounts } = useAccounts();
-
+  
   const [selectedAccountId, setSelectedAccountId] = useState<number | null>(null);
 
   useEffect(() => {

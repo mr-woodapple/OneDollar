@@ -16,9 +16,12 @@ export default function AccountSwitcher({ onAccountChange, selectedAccountId }: 
         accounts.isPending ? (<p className="dbg">Loading...</p>) :
         accounts.isError ? (<ErrorAlert error={accounts.error} />) :
         (
-          <Select value={selectedAccountId?.toString()} onValueChange={(val) => onAccountChange(Number(val))}>
+          <Select
+            disabled={accounts.data.length === 0}
+            value={selectedAccountId?.toString()} 
+            onValueChange={(val) => onAccountChange(Number(val))}>
             <SelectTrigger className="border-0 shadow-none focus-visible:ring-0">
-              <SelectValue />
+              <SelectValue placeholder="Create an account first." />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>

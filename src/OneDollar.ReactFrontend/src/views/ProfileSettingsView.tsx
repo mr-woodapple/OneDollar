@@ -58,9 +58,16 @@ export default function ProfileSettingsView() {
             <ItemDescription>The account that is selected by default on the transaction list.</ItemDescription>
           </ItemContent>
           <ItemActions>
-            <Select value={defaultAccountId} onValueChange={(val) => onDefaultAccountChange(Number(val))}>
+            <Select 
+              disabled={accounts.data?.length === 0}
+              value={defaultAccountId} 
+              onValueChange={(val) => onDefaultAccountChange(Number(val))}>
               <SelectTrigger>
-                <SelectValue placeholder="Select account" />
+                { accounts?.data?.length === 0 
+                  ? <SelectValue placeholder="No account available!" />
+                  : <SelectValue placeholder="Select account" />
+                }
+                
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
