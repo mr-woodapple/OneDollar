@@ -4,6 +4,7 @@ using OneDollar.Api.Context;
 using OneDollar.Api.Models.DTOs;
 using OneDollar.Api.Models;
 using OneDollar.Api.Models.Provider;
+using OneDollar.Api.Enums;
 
 namespace OneDollar.Api.Controllers;
 
@@ -18,23 +19,51 @@ public class ProviderController : ControllerBase
 	{
 		_context = oneDollarContext;
 
+		// FIXME: Move to separate method & make generic
 		_lunchFlowHttpClient = new HttpClient();
-		var config = _context.LunchFlowProvider.FirstOrDefault(); // FIXME:
+		var config = _context.LunchFlowProvider.FirstOrDefault();
 		if (config != null && !string.IsNullOrEmpty(config.LunchFlowApiKey))
 		{
 			_lunchFlowHttpClient.DefaultRequestHeaders.Add("x-api-key", config.LunchFlowApiKey);
 		}
 	}
 
-	// TODO: Can this be more generic? Like have one "PostConfig" endpoint for all providers?
-	[HttpPost(Name = "PostLunchFlowConfig")]
-	public async Task<ActionResult> PostLunchFlowConfig([FromBody] LunchFlowProviderModel config)
+	[HttpPost("{provider}", Name = "PostProviderConfig")]
+	public async Task<ActionResult> PostProviderConfig([FromRoute] string provider, [FromBody] ProviderConfigDTO providerConfig)
 	{
-		_context.LunchFlowProvider.Add(config);
-		await _context.SaveChangesAsync();
+		switch (provider)
+		{
+			case nameof(ProviderEnum.LunchFlow):
+				var config = new LunchFlowProviderModel()
+				{
+					ProviderName = ProviderEnum.LunchFlow.ToString(),
+					LunchFlowApiKey = providerConfig.LunchFlowApiKey,
+					LunchFlowApiUrl = providerConfig.LunchFlowApiUrl
+				};
+				_context.LunchFlowProvider.Add(config);
+				await _context.SaveChangesAsync();
+				return Ok(config);
 
-		return Ok();
+			default:
+				return BadRequest($"No provider found for given name '{provider}'");
+		}
 	}
+
+
+	[HttpGet("{provider}", Name = "GetProviderConfig")]
+	public async Task<ActionResult> GetProviderConfig([FromRoute] string provider)
+	{
+		switch (provider)
+		{
+			case nameof(ProviderEnum.LunchFlow):
+				var config = await _context.LunchFlowProvider.FirstOrDefaultAsync();
+				return Ok(config);
+
+			default:
+				return NotFound();
+		}
+	}
+
 
 	[HttpPost("sync", Name = "PostSyncData")]
 	public async Task<ActionResult> PostSyncData()
