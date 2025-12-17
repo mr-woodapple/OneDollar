@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using OneDollar.Api.Context;
+using OneDollar.Api.Services.BackgroundServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +27,9 @@ builder.Services.AddCors(options =>
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
+// Registering background services
+builder.Services.AddHostedService<SyncProviderBackgroundService>();
 
 var app = builder.Build();
 
