@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import EditAccounts from "@/components/profile-settings/EditAccounts";
 import EditCategories from "@/components/profile-settings/EditCategories";
 import EditLunchFlowProvider from "@/components/profile-settings/EditLunchFlowProvider";
-import { Item, ItemActions, ItemContent, ItemDescription, ItemGroup, ItemSeparator, ItemTitle } from "@/components/ui/item";
+import { Item, ItemActions, ItemContent, ItemDescription, ItemFooter, ItemGroup, ItemSeparator, ItemTitle } from "@/components/ui/item";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAccounts } from "@/api/hooks/useAccounts";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import { useProviders } from "@/api/hooks/useProviders";
 
 export default function ProfileSettingsView() {
   const { accounts } = useAccounts();
-  const { lunchFlowConfig } = useProviders();
+  const { lunchFlowConfig, triggerSync } = useProviders();
 
   const [defaultAccountId, setDefaultAccountId] = useState<string | undefined>();
   const [editCategoriesDrawerState, setEditCategoriesDrawerState] = useState(false)
@@ -96,7 +96,7 @@ export default function ProfileSettingsView() {
         Providers
       </div>
       <ItemGroup className="border border-neutral-200 rounded-lg">
-        <Item className="cursor-pointer" onClick={() => setLunchFlowDrawerState(true)}>
+        <Item className="cursor-pointer">
           <ItemContent>
             <ItemTitle>LunchFlow</ItemTitle>
             <ItemDescription className="flex items-center gap-2">
@@ -108,8 +108,20 @@ export default function ProfileSettingsView() {
             </ItemDescription>
           </ItemContent>
           <ItemActions>
-            <Button variant="outline">Configure</Button>
+            <Button variant="outline" onClick={() => setLunchFlowDrawerState(true)}>Configure</Button>
           </ItemActions>
+
+          { 
+            lunchFlowConfig.data && 
+            <ItemFooter>
+              <div className="flex flex-row justify-between items-center w-full">
+                <div>Last run: {lunchFlowConfig.data.lastRunTimestamp ? new Date(lunchFlowConfig.data.lastRunTimestamp).toLocaleString("en-US") : "N/A"}</div>
+                <Button variant={"ghost"} onClick={() => triggerSync.mutate()} disabled={triggerSync.isPending}>
+                  {triggerSync.isPending ? "Syncing..." : "Sync now" }
+                </Button>
+              </div>
+            </ItemFooter>
+          }
         </Item>
       </ItemGroup>
 

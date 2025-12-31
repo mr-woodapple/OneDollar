@@ -3,10 +3,14 @@
 public class SyncProviderBackgroundService : BackgroundService
 {
 	private readonly ILogger<SyncProviderBackgroundService> _logger;
+	private readonly IServiceScopeFactory _scopeFactory;
 	private readonly TimeSpan _taskRunTime = new(0, 0, 0); // Run at 00:00:00 (midnight)
 
-	public SyncProviderBackgroundService(ILogger<SyncProviderBackgroundService> logger)
+	public SyncProviderBackgroundService(
+		IServiceScopeFactory scopeFactory,
+		ILogger<SyncProviderBackgroundService> logger)
 	{
+		_scopeFactory = scopeFactory;
 		_logger = logger;
 	}
 
@@ -27,18 +31,26 @@ public class SyncProviderBackgroundService : BackgroundService
 			var delay = nextRunTime - now;
 
 			_logger.LogInformation(
-				"Next execution scheduled for: {NextRunTime} (Delay: {Delay})",
+				"Next execution scheduled for: {NextRunTime} (Running in: {Delay})",
 				nextRunTime,
 				delay);
 
-			// 2. Wait for the scheduled time
+			// Wait for the scheduled time
 			await Task.Delay(delay, stoppingToken);
 
-			// 3. Execute the daily task
+			// Execute the daily sync
 			if (!stoppingToken.IsCancellationRequested)
 			{
-				// TODO: CAll the actual service
-				_logger.LogInformation("Daily ´task executed at: {Now}", DateTime.Now);
+				using (var scope = _scopeFactory.CreateScope())
+				{
+					_logger.LogInformation("Daily LunchFlow sync executed at: {Now}", DateTime.Now);
+
+					// Resolve the scoped service within this block
+					var syncService = scope.ServiceProvider.GetRequiredService<LunchFlowSyncService>();
+					await syncService.RunSyncAsync();
+
+					_logger.LogInformation("Daily LunchFlow finished at: {Now}", DateTime.Now);
+				}
 			}
 		}
 

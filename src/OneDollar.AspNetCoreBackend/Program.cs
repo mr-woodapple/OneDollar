@@ -1,11 +1,16 @@
 using Microsoft.EntityFrameworkCore;
 using OneDollar.Api.Context;
+using OneDollar.Api.Services;
 using OneDollar.Api.Services.BackgroundServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
+builder.Services.AddScoped<LunchFlowSyncService>();
+
+// Registering background services
+builder.Services.AddHostedService<SyncProviderBackgroundService>();
 
 // Configure database connection
 builder.Services.AddDbContext<OneDollarContext>(
@@ -27,9 +32,6 @@ builder.Services.AddCors(options =>
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-
-// Registering background services
-builder.Services.AddHostedService<SyncProviderBackgroundService>();
 
 var app = builder.Build();
 

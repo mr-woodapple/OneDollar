@@ -1,11 +1,11 @@
 meta {
-  name: Get LunchFlow Config
+  name: Sync LunchFlow
   type: http
-  seq: 2
+  seq: 3
 }
 
-get {
-  url: {{API_URL}}/api/provider/LunchFlow
+post {
+  url: {{API_URL}}/api/provider/LunchFlow/sync
   body: none
   auth: inherit
 }

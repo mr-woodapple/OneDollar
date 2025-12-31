@@ -29,8 +29,23 @@ export function useProviders() {
     },
   });
 
+  const triggerSync = useMutation({
+    mutationFn: () =>
+      fetchApi(`${LUNCHFLOW_API_ROUTE}/sync`, {
+        method: "POST",
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: providerKeys.lunchFlow() });
+      toast.success("Successfully synced data!");
+    },
+    onError: () => {
+      toast.error("Failed to sync data.");
+    },
+  }); 
+
   return {
     lunchFlowConfig,
     saveLunchFlowConfig,
+    triggerSync
   };
 }
