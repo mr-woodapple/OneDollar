@@ -4,7 +4,7 @@ services:
     build:
       context: ./src/OneDollar.ReactFrontend
     ports:
-      - 7134:80
+      - ${FE_PORT:-7134}:80
     restart: unless-stopped
 
   backend:
