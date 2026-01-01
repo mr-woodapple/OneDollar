@@ -3,6 +3,9 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { fetchApi } from "@/api/api";
 import { providerKeys, LUNCHFLOW_API_ROUTE } from "../queries/providerQueries";
+import { categoryKeys } from "../queries/categoriesQueries";
+import { accountKeys } from "../queries/accountQueries";
+import { transactionKeys } from "../queries/transactionQueries";
 import type { LunchFlowIntegration } from "@/models/LunchFlowIntegration";
 
 export function useProviders() {
@@ -36,6 +39,10 @@ export function useProviders() {
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: providerKeys.lunchFlow() });
+      queryClient.invalidateQueries({ queryKey: categoryKeys.all });
+      queryClient.invalidateQueries({ queryKey: accountKeys.all });
+      queryClient.invalidateQueries({ queryKey: transactionKeys.all });
+
       toast.success("Successfully synced data!");
     },
     onError: () => {

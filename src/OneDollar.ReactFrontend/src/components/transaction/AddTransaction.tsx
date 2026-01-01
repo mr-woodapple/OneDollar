@@ -22,7 +22,7 @@ interface AddTransactionProps {
   transaction?: Transaction;
 }
 
-export default function AddTransactionView({ isOpen, onOpenChange, transaction }: AddTransactionProps) {
+export default function AddTransaction({ isOpen, onOpenChange, transaction }: AddTransactionProps) {
   const { addTransaction, updateTransaction, deleteTransaction } = useTransactions();
   const { categories } = useCategories();
   const { accounts } = useAccounts();
@@ -179,8 +179,8 @@ export default function AddTransactionView({ isOpen, onOpenChange, transaction }
                   {updateTransaction.isPending && <Spinner />}
                   {updateTransaction.isPending ? "Updating" : "Update"}
                 </Button>
-                <Button onClick={() => handleDelete(transaction.transactionId)} className="mt-2.5 h-12 w-12 rounded-full bg-red-500">
-                  <Trash />
+                <Button onClick={() => handleDelete(transaction.transactionId)} disabled={deleteTransaction.isPending} className="mt-2.5 h-12 w-12 rounded-full bg-red-500">
+                  {deleteTransaction.isPending ? <Spinner /> : <Trash />}
                 </Button>
               </>
             }

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 import HomeView from './views/HomeView'
-import AddTransactionView from './views/AddTransactionView'
+import AddTransaction from './components/transaction/AddTransaction'
 import ProfileSettings from './views/ProfileSettingsView'
 import BottomBar from './components/shared/nav/BottomBar'
 import type { Transaction } from "@/models/Transaction"
@@ -31,7 +31,7 @@ function App() {
       <BottomBar onAddClick={handleAddClick} onShowHome={setShowHome} />
 
       {/* Add transaction drawer */}
-      <AddTransactionView 
+      <AddTransaction 
         isOpen={addTransactionDrawerState} 
         onOpenChange={setAddTransactionDrawerState}
         transaction={selectedTransaction} />
