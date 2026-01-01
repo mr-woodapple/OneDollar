@@ -1,13 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Deltas;
+using Microsoft.AspNetCore.OData.Query;
+using Microsoft.AspNetCore.OData.Routing.Controllers;
 using Microsoft.EntityFrameworkCore;
 using OneDollar.Api.Context;
 using OneDollar.Api.Models;
 
 namespace OneDollar.Api.Controllers;
 
-[ApiController]
-[Route("[controller]")]
-public class TransactionController : ControllerBase
+public class TransactionController : ODataController
 {
 	private protected OneDollarContext _context;
 
@@ -16,19 +17,16 @@ public class TransactionController : ControllerBase
 		_context = oneDollarContext;
 	}
 
-	[HttpGet(Name = "GetTransactions")]
-	public async Task<ActionResult<IEnumerable<Transaction>>> GetAllTransactions()
+	[EnableQuery]
+	public async Task<ActionResult<IEnumerable<Transaction>>> Get()
 	{
-		var t = _context.Transaction
-			.Include(t => t.Category)
-			.Include(t => t.Account)
-			.ToAsyncEnumerable();
+		var t = _context.Transaction.ToAsyncEnumerable();
 
 		return Ok(t);
 	}
 
-	[HttpPost(Name = "PostTransaction")]
-	public async Task<ActionResult<Transaction>> PostTransaction([FromBody] Transaction transaction)
+	[EnableQuery]
+	public async Task<ActionResult<Transaction>> Post([FromBody] Transaction transaction)
 	{
 		if (transaction == null) { return BadRequest(); }
 
@@ -41,13 +39,7 @@ public class TransactionController : ControllerBase
 			account.Balance += transaction.Amount;
 
 			await _context.SaveChangesAsync();
-
-			var t = _context.Transaction
-				.Include(t => t.Category)
-				.Include(t => t.Account)
-				.Single(t => t.TransactionId == transaction.TransactionId);
-
-			return Ok(t);
+			return Ok(transaction);
 		}
 		catch (Exception ex)
 		{
@@ -55,18 +47,16 @@ public class TransactionController : ControllerBase
 		}
 	}
 
-	[HttpPut("{id}", Name = "PutTransaction")]
-	public async Task<ActionResult<Transaction>> PutTransaction([FromRoute] int id, [FromBody] Transaction transaction)
+	[EnableQuery]
+	public async Task<ActionResult<Transaction>> Patch([FromRoute] int key, [FromBody] Delta<Transaction> delta)
 	{
-		if (id != transaction.TransactionId)
-		{
-			return BadRequest("The transaction ID in the URL must match the transaction ID in the body.");
-		}
+		var transaction = _context.Transaction.SingleOrDefault(t => t.TransactionId == key);
+		if (transaction == null) { return NotFound(); }
 
 		try
 		{
 			// Check if a transaction for the given id exists
-			var existingTransaction = await _context.Transaction.SingleOrDefaultAsync(t => t.TransactionId == id);
+			var existingTransaction = await _context.Transaction.SingleOrDefaultAsync(t => t.TransactionId == key);
 			if (existingTransaction == null) { return NotFound(); }
 
 			if (transaction.AccountId == existingTransaction.AccountId)
@@ -86,19 +76,10 @@ public class TransactionController : ControllerBase
 				newAccount.Balance += transaction.Amount;
 			}
 
-			_context.Entry(existingTransaction).CurrentValues.SetValues(transaction);
+			delta.Patch(transaction);
 			await _context.SaveChangesAsync();
 
-			var t = _context.Transaction
-				.Include(t => t.Category)
-				.Include(t => t.Account)
-				.Single(t => t.TransactionId == id);
-
-			return Ok(t);
-		}
-		catch (DbUpdateConcurrencyException ex)
-		{
-			return Conflict(ex);
+			return Ok(_context.Transaction.Single(t => t.TransactionId == key));
 		}
 		catch (Exception ex)
 		{
@@ -106,12 +87,11 @@ public class TransactionController : ControllerBase
 		}
 	}
 
-	[HttpDelete("{id}", Name = "DeleteTransaction")]
-	public async Task<ActionResult> DeleteTransaction([FromRoute] int id)
+	public async Task<ActionResult> Delete([FromRoute] int key)
 	{
 		try
 		{
-			var transaction = await _context.Transaction.SingleAsync(t => t.TransactionId == id);
+			var transaction = await _context.Transaction.SingleAsync(t => t.TransactionId == key);
 			_context.Transaction.Remove(transaction);
 
 			// Update the linked accounts balance before saving

@@ -1,13 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
+using Microsoft.AspNetCore.OData.Routing.Controllers;
 using OneDollar.Api.Context;
 using OneDollar.Api.Models;
 
 namespace OneDollar.Api.Controllers;
 
-
-[Route("api/[controller]")]
-[ApiController]
-public class AccountController : ControllerBase
+public class AccountController : ODataController
 {
 	private protected OneDollarContext _context;
 
@@ -16,14 +15,13 @@ public class AccountController : ControllerBase
 		_context = context;
 	}
 
-	[HttpGet(Name = "GetAccounts")]
-	public async Task<ActionResult<IEnumerable<Account>>> GetAccount()
+	[EnableQuery]
+	public async Task<ActionResult<IEnumerable<Account>>> Get()
 	{
 		return Ok(_context.Account.ToAsyncEnumerable());
 	}
 
-	[HttpPost(Name = "PostAccount")]
-	public async Task<ActionResult> PostAccount([FromBody] Account account)
+	public async Task<ActionResult> Post([FromBody] Account account)
 	{
 		if (account == null) { return BadRequest(); }
 
@@ -40,14 +38,11 @@ public class AccountController : ControllerBase
 		}
 	}
 
-	[HttpDelete("{id}", Name = "DeleteAccount")]
-	public async Task<ActionResult> DeleteAccount([FromRoute] int id)
+	public async Task<ActionResult> DeleteAccount([FromRoute] int key)
 	{
-		if (id == null) { return BadRequest(); }
-
 		try
 		{
-			var account = _context.Account.Single(c => c.AccountId == id);
+			var account = _context.Account.Single(c => c.AccountId == key);
 			_context.Account.Remove(account);
 			await _context.SaveChangesAsync();
 

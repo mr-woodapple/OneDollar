@@ -13,6 +13,8 @@ import type { Account } from "@/models/Account"
 import type { Category } from "@/models/Category"
 import type { Transaction } from "@/models/Transaction"
 import { useTransactions } from "@/api/hooks/useTransactions"
+import { useCategories } from "@/api/hooks/useCategories"
+import { useAccounts } from "@/api/hooks/useAccounts"
 
 interface AddTransactionProps {
   isOpen: boolean;
@@ -20,10 +22,14 @@ interface AddTransactionProps {
   transaction?: Transaction;
 }
 
-export default function AddTransactionView({ isOpen, onOpenChange, transaction }: AddTransactionProps) {
+export default function AddTransaction({ isOpen, onOpenChange, transaction }: AddTransactionProps) {
   const { addTransaction, updateTransaction, deleteTransaction } = useTransactions();
+  const { categories } = useCategories();
+  const { accounts } = useAccounts();
+
   const [note] = useState<string>();
   const [amount, setAmount] = useState<string>("0");
+  const [isExpense, setIsExpense] = useState<boolean>(true);
   const [selectedCategory, setSelectedCategory] = useState<Category>();
   const [selectedAccount, setSelectedAccount] = useState<Account>();
 
@@ -31,9 +37,10 @@ export default function AddTransactionView({ isOpen, onOpenChange, transaction }
     if (isOpen) {
       if (transaction) {
         // Edit mode: populate fields
+        setIsExpense(transaction.amount < 0);
         setAmount(Math.abs(transaction.amount).toFixed(2).toString().replace(".", ","));
-        setSelectedCategory(transaction.category);
-        setSelectedAccount(transaction.account);
+        setSelectedCategory(categories.data?.find((category: Category) => category.categoryId === transaction.categoryId));
+        setSelectedAccount(accounts.data?.find((account: Account) => account.accountId === transaction.accountId));
       } else {
         // Add mode: reset fields
         setAmount("0");
@@ -42,6 +49,12 @@ export default function AddTransactionView({ isOpen, onOpenChange, transaction }
       }
     }
   }, [isOpen, transaction]);
+
+  useEffect(() => {
+    if (selectedCategory) {
+      setIsExpense(selectedCategory.isExpenseCategory)
+    }
+  }, [selectedCategory])
 
   // Handle button presses from the keypad
   function handleNumpadInput(token: string) {
@@ -77,26 +90,24 @@ export default function AddTransactionView({ isOpen, onOpenChange, transaction }
   }
 
   async function handleSaveOrUpdate(isUpdate: boolean) {
-    if (selectedCategory == null || selectedAccount == null) {
-      toast.warning("Please select a category and account!")
+    if (!selectedAccount) {
+      toast.warning("Please select an account!")
       return;
     }
 
     let finalAmount = Number(amount.replace(",", ".")) || 0;
-    if (selectedCategory.isExpenseCategory) {
-      finalAmount = -Math.abs(finalAmount);
-    } else {
-      finalAmount = Math.abs(finalAmount);
-    }
+    finalAmount = isExpense ? -Math.abs(finalAmount) : Math.abs(finalAmount);
 
     const t: Transaction = {
       transactionId: transaction?.transactionId ?? undefined,
       timestamp: transaction?.timestamp ?? new Date,
-      categoryId: selectedCategory.categoryId!,
+      categoryId: selectedCategory?.categoryId,
       accountId: selectedAccount.accountId!,
       amount: finalAmount,
       currency: "EUR",
-      note: note
+      note: note,
+      merchant: transaction?.merchant ?? undefined,
+      isPending: transaction?.isPending ?? false
     };
 
     isUpdate
@@ -106,6 +117,7 @@ export default function AddTransactionView({ isOpen, onOpenChange, transaction }
     if (isUpdate ? (updateTransaction.error == null) : (addTransaction.error == null)) {
       onOpenChange(false);
       setAmount("0");
+      setIsExpense(true);
       setSelectedAccount(undefined);
       setSelectedCategory(undefined);
     };
@@ -136,12 +148,14 @@ export default function AddTransactionView({ isOpen, onOpenChange, transaction }
         </DrawerHeader>
 
         <div className="drawer-content mb-1 apple-safe-area">
-          <Amount
-            amount={amount}
-            isExpenseCategory={selectedCategory?.isExpenseCategory} />
+          <Amount 
+            amount={amount} 
+            isExpense={isExpense} 
+            setIsExpense={setIsExpense} />
 
           <div className="flex flex-row gap-2.5 my-2.5">
             <SelectCategory
+              isExpense={isExpense}
               selectedCategory={selectedCategory}
               onSelectCategory={setSelectedCategory} />
             <SelectAccount
@@ -165,8 +179,8 @@ export default function AddTransactionView({ isOpen, onOpenChange, transaction }
                   {updateTransaction.isPending && <Spinner />}
                   {updateTransaction.isPending ? "Updating" : "Update"}
                 </Button>
-                <Button onClick={() => handleDelete(transaction.transactionId)} className="mt-2.5 h-12 w-12 rounded-full bg-red-500">
-                  <Trash />
+                <Button onClick={() => handleDelete(transaction.transactionId)} disabled={deleteTransaction.isPending} className="mt-2.5 h-12 w-12 rounded-full bg-red-500">
+                  {deleteTransaction.isPending ? <Spinner /> : <Trash />}
                 </Button>
               </>
             }

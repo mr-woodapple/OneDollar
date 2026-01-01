@@ -1,0 +1,58 @@
+import { toast } from "sonner";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
+import { fetchApi } from "@/api/api";
+import { providerKeys, LUNCHFLOW_API_ROUTE } from "../queries/providerQueries";
+import { categoryKeys } from "../queries/categoriesQueries";
+import { accountKeys } from "../queries/accountQueries";
+import { transactionKeys } from "../queries/transactionQueries";
+import type { LunchFlowIntegration } from "@/models/LunchFlowIntegration";
+
+export function useProviders() {
+  const queryClient = useQueryClient();
+
+  const lunchFlowConfig = useQuery({
+    queryKey: providerKeys.lunchFlow(),
+    queryFn: () => fetchApi<LunchFlowIntegration>(LUNCHFLOW_API_ROUTE),
+    staleTime: 1000 * 60 * 5 // 5 Minutes
+  })
+
+  const saveLunchFlowConfig = useMutation({
+    mutationFn: (config: LunchFlowIntegration) =>
+      fetchApi(LUNCHFLOW_API_ROUTE, {
+        method: "POST",
+        body: JSON.stringify(config),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: providerKeys.lunchFlow() });
+      toast.success("LunchFlow configuration saved!");
+    },
+    onError: () => {
+      toast.error("Failed to save LunchFlow configuration.");
+    },
+  });
+
+  const triggerSync = useMutation({
+    mutationFn: () =>
+      fetchApi(`${LUNCHFLOW_API_ROUTE}/sync`, {
+        method: "POST",
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: providerKeys.lunchFlow() });
+      queryClient.invalidateQueries({ queryKey: categoryKeys.all });
+      queryClient.invalidateQueries({ queryKey: accountKeys.all });
+      queryClient.invalidateQueries({ queryKey: transactionKeys.all });
+
+      toast.success("Successfully synced data!");
+    },
+    onError: () => {
+      toast.error("Failed to sync data.");
+    },
+  }); 
+
+  return {
+    lunchFlowConfig,
+    saveLunchFlowConfig,
+    triggerSync
+  };
+}

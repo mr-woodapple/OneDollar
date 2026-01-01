@@ -1,0 +1,16 @@
+meta {
+  name: Sync LunchFlow
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{API_URL}}/api/provider/LunchFlow/sync
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

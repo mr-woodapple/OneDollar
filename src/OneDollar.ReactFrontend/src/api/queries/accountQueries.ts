@@ -8,7 +8,7 @@ const accountKeys = {
 };
 
 // The api route for accounts
-const ACCOUNT_API_ROUTE = "/account";
+const ACCOUNT_API_ROUTE = "/odata/account";
 
 
 export { accountKeys, ACCOUNT_API_ROUTE }

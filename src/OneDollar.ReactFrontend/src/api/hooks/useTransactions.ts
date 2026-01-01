@@ -1,7 +1,7 @@
 import { toast } from "sonner";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { fetchApi } from "@/api/api";
+import { fetchApi, type ODataResponse } from "@/api/api";
 import type { Account } from "@/models/Account";
 import type { Transaction } from "@/models/Transaction";
 import { TRANSACTION_API_ROUTE, transactionKeys } from "../queries/transactionQueries";
@@ -13,14 +13,17 @@ export function useTransactions() {
   // Fetch transactions
   const transactions = useQuery({
     queryKey: transactionKeys.lists(),
-    queryFn: () => fetchApi<Transaction[]>(TRANSACTION_API_ROUTE),
+    queryFn: async () => {
+      const response = await fetchApi<ODataResponse<Transaction[]>>(TRANSACTION_API_ROUTE);
+      return response.value;
+    },
     staleTime: 1000 * 60 * 5 // 5 Minutes
   });
 
   // create new transaction
   const addTransaction = useMutation({
     mutationFn: (newTransaction: Omit<Transaction, "id">) =>
-      fetchApi<Transaction>(TRANSACTION_API_ROUTE, {
+      fetchApi<ODataResponse<Transaction>>(TRANSACTION_API_ROUTE, {
         method: "POST",
         body: JSON.stringify(newTransaction),
       }),
@@ -54,7 +57,7 @@ export function useTransactions() {
   const updateTransaction = useMutation({
     mutationFn: ({ id, data }: { id: number; data: Transaction }) =>
       fetchApi(`${TRANSACTION_API_ROUTE}/${id}`, {
-        method: "PUT",
+        method: "PATCH",
         body: JSON.stringify(data),
       }),
     onSuccess: (_, variables) => {
@@ -109,7 +112,7 @@ export function useTransactions() {
   // Delete transaction for a given id
   const deleteTransaction = useMutation({
     mutationFn: (id: number) =>
-      fetchApi(`${TRANSACTION_API_ROUTE}/${id}`, {
+      fetchApi(`${TRANSACTION_API_ROUTE}(${id})`, {
         method: "DELETE",
       }),
     onSuccess: (_, variables) => {

@@ -11,11 +11,12 @@ import EmptyCategories from "../shared/empty/EmptyCategories"
 import ErrorAlert from "../shared/alerts/ErrorAlert"
 
 interface SelectCategoryProps {
+  isExpense: boolean;
   selectedCategory?: Category;
   onSelectCategory: (category: Category) => void;
 }
 
-export default function SelectCategory({ selectedCategory, onSelectCategory }: SelectCategoryProps) {
+export default function SelectCategory({ isExpense, selectedCategory, onSelectCategory }: SelectCategoryProps) {
   const { categories } = useCategories();
 
   const [tab, setTab] = useState("expense");
@@ -27,12 +28,12 @@ export default function SelectCategory({ selectedCategory, onSelectCategory }: S
       // Using this to split the categories into two groups for easier handling
       setExpenseCategories(categories.data.filter(c => c.isExpenseCategory == true));
       setIncomeCategories(categories.data.filter(c => c.isExpenseCategory == false));
-
-      if (selectedCategory) {
-        selectedCategory.isExpenseCategory ? setTab("expense") : setTab("income");
-      }
     }
   }, [categories.data])
+
+  useEffect(() =>{
+    setTab(isExpense ? "expense" : "income");
+  }, [isExpense])
 
   // Make the tabs controlled
   const onTabChange = (value: string) => { setTab(value); }

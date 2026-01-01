@@ -8,6 +8,6 @@ const transactionKeys = {
 };
 
 // The api route for categories
-const TRANSACTION_API_ROUTE = "/transaction";
+const TRANSACTION_API_ROUTE = "/odata/transaction";
 
 export { transactionKeys, TRANSACTION_API_ROUTE }

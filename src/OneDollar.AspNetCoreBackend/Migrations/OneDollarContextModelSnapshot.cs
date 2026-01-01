@@ -33,6 +33,9 @@ namespace one_dollar.AspNetCoreBackend.Migrations
                     b.Property<float>("Balance")
                         .HasColumnType("real");
 
+                    b.Property<int?>("ExternalAccountId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -65,6 +68,31 @@ namespace one_dollar.AspNetCoreBackend.Migrations
                     b.ToTable("Category");
                 });
 
+            modelBuilder.Entity("OneDollar.Api.Models.ProviderBaseModel", b =>
+                {
+                    b.Property<int>("ProviderId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProviderId"));
+
+                    b.Property<DateTimeOffset?>("LastRunTimestamp")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("ProviderName")
+                        .IsRequired()
+                        .HasMaxLength(21)
+                        .HasColumnType("nvarchar(21)");
+
+                    b.HasKey("ProviderId");
+
+                    b.ToTable("ProviderBaseModel");
+
+                    b.HasDiscriminator<string>("ProviderName").HasValue("ProviderBaseModel");
+
+                    b.UseTphMappingStrategy();
+                });
+
             modelBuilder.Entity("OneDollar.Api.Models.Transaction", b =>
                 {
                     b.Property<int>("TransactionId")
@@ -79,11 +107,20 @@ namespace one_dollar.AspNetCoreBackend.Migrations
                     b.Property<float>("Amount")
                         .HasColumnType("real");
 
-                    b.Property<int>("CategoryId")
+                    b.Property<int?>("CategoryId")
                         .HasColumnType("int");
 
                     b.Property<string>("Currency")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ExternalTransactionId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool?>("IsPending")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Merchant")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Note")
@@ -101,6 +138,19 @@ namespace one_dollar.AspNetCoreBackend.Migrations
                     b.ToTable("Transaction");
                 });
 
+            modelBuilder.Entity("OneDollar.Api.Models.Provider.LunchFlowProviderModel", b =>
+                {
+                    b.HasBaseType("OneDollar.Api.Models.ProviderBaseModel");
+
+                    b.Property<string>("LunchFlowApiKey")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LunchFlowApiUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasDiscriminator().HasValue("LunchFlow");
+                });
+
             modelBuilder.Entity("OneDollar.Api.Models.Transaction", b =>
                 {
                     b.HasOne("OneDollar.Api.Models.Account", "Account")
@@ -111,9 +161,7 @@ namespace one_dollar.AspNetCoreBackend.Migrations
 
                     b.HasOne("OneDollar.Api.Models.Category", "Category")
                         .WithMany()
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("CategoryId");
 
                     b.Navigation("Account");
 

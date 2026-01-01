@@ -7,12 +7,17 @@ public class Transaction
 	public float Amount { get; set; }
 	public string Currency { get; set; } = "EUR";
 	public string? Note { get; set; }
+	public string? Merchant { get; set; }
+	public bool? IsPending { get; set; }
 
 	// Foreign Keys
 	public int AccountId { get; set; }
-	public int CategoryId { get; set; }
+	public int? CategoryId { get; set; }
 
 	// Navigation Properties
 	public Account? Account { get; set; }
 	public Category? Category { get; set; }
+
+	// Used to store the id that for example LunchFlow returns for a transaction
+	public string? ExternalTransactionId { get; set; }
 }

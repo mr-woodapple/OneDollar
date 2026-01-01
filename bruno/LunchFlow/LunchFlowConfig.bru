@@ -1,0 +1,23 @@
+meta {
+  name: LunchFlowConfig
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{API_URL}}/api/provider/LunchFlow
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "lunchFlowApiKey": "your-api-key-here",
+    "lunchFlowApiUrl": "https://www.lunchflow.app/api/v1"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

@@ -1,0 +1,16 @@
+meta {
+  name: Transaction
+  type: http
+  seq: 7
+}
+
+delete {
+  url: {{API_URL}}/api/odata/transaction(2425)
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

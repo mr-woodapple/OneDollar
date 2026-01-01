@@ -1,0 +1,15 @@
+meta {
+  name: Get Categories
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{API_URL}}/api/odata/category
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+}
