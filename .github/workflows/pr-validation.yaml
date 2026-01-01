@@ -1,0 +1,58 @@
+name: Validate code during PRs
+
+env:
+  FE_LOCATION: './src/OneDollar.ReactFrontend/'
+  API_LOCATION: './src/OneDollar.AspNetCoreBackend/' 
+  DOTNET_VERSION: '10'     
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build-frontend:
+    runs-on: ubuntu-latest
+    name: Build frontend
+    defaults:
+      run:
+        working-directory: ${{ env.FE_LOCATION }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+
+      - name: Install dependecies
+        run: npm ci
+
+      - name: Run npm build
+        run: npm run build
+
+  build-backend:
+    runs-on: ubuntu-latest
+    name: Build backend
+    defaults:
+      run:
+        working-directory: ${{ env.API_LOCATION }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build -c Release --no-restore
