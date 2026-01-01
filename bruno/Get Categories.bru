@@ -1,16 +1,15 @@
 meta {
-  name: Get Transaction
+  name: Get Categories
   type: http
-  seq: 2
+  seq: 7
 }
 
 get {
-  url: {{API_URL}}/api/odata/transaction
+  url: {{API_URL}}/api/odata/category
   body: none
   auth: inherit
 }
 
 settings {
   encodeUrl: true
-  timeout: 0
 }

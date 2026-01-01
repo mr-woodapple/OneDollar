@@ -8,6 +8,6 @@ const categoryKeys = {
 };
 
 // The api route for categories
-const CATEGORY_API_ROUTE = "/category";
+const CATEGORY_API_ROUTE = "/odata/category";
 
 export { categoryKeys, CATEGORY_API_ROUTE }

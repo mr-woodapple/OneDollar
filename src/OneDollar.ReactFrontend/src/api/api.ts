@@ -1,6 +1,6 @@
 const API_BASE_URL = "/api";
 
-export async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> {
+async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
     headers: {
@@ -21,3 +21,13 @@ export async function fetchApi<T>(endpoint: string, options?: RequestInit): Prom
 
   return response.json();
 }
+
+/**
+ * Base model to use with the api when receiving data from an OData endpoint.
+ */
+interface ODataResponse<T> {
+    "@odata.context"?: string;
+    value: T;
+}
+
+export { fetchApi, type ODataResponse }

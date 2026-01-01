@@ -1,12 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Query;
+using Microsoft.AspNetCore.OData.Routing.Controllers;
 using OneDollar.Api.Context;
 using OneDollar.Api.Models;
 
 namespace OneDollar.Api.Controllers;
 
-[Route("api/[controller]")]
-[ApiController]
-public class CategoryController : ControllerBase
+public class CategoryController : ODataController
 {
 	private protected OneDollarContext _context;
 
@@ -15,14 +15,13 @@ public class CategoryController : ControllerBase
 		_context = oneDollarContext;
 	}
 
-	[HttpGet(Name = "GetCategories")]
-	public async Task<ActionResult<IEnumerable<Category>>> GetCategories()
+	[EnableQuery]
+	public async Task<ActionResult<IEnumerable<Category>>> Get()
 	{
 		return Ok(_context.Category.ToAsyncEnumerable());
 	}
 
-	[HttpPost(Name = "PostCategory")]
-	public async Task<ActionResult> PostCategory([FromBody] Category category)
+	public async Task<ActionResult> Post([FromBody] Category category)
 	{
 		if (category == null) { return BadRequest(); }
 
@@ -39,14 +38,11 @@ public class CategoryController : ControllerBase
 		}
 	}
 
-	[HttpDelete("{id}", Name = "DeleteCategory")]
-	public async Task<ActionResult> DeleteCategory([FromRoute] int id)
+	public async Task<ActionResult> Delete([FromRoute] int key)
 	{
-		if (id == null) { return BadRequest(); }
-
 		try
 		{
-			var category = _context.Category.Single(c => c.CategoryId == id);
+			var category = _context.Category.Single(c => c.CategoryId == key);
 			_context.Category.Remove(category);
 			await _context.SaveChangesAsync();
 

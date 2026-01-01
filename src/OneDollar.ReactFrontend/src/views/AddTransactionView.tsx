@@ -13,6 +13,8 @@ import type { Account } from "@/models/Account"
 import type { Category } from "@/models/Category"
 import type { Transaction } from "@/models/Transaction"
 import { useTransactions } from "@/api/hooks/useTransactions"
+import { useCategories } from "@/api/hooks/useCategories"
+import { useAccounts } from "@/api/hooks/useAccounts"
 
 interface AddTransactionProps {
   isOpen: boolean;
@@ -22,6 +24,8 @@ interface AddTransactionProps {
 
 export default function AddTransactionView({ isOpen, onOpenChange, transaction }: AddTransactionProps) {
   const { addTransaction, updateTransaction, deleteTransaction } = useTransactions();
+  const { categories } = useCategories();
+  const { accounts } = useAccounts();
 
   const [note] = useState<string>();
   const [amount, setAmount] = useState<string>("0");
@@ -35,8 +39,8 @@ export default function AddTransactionView({ isOpen, onOpenChange, transaction }
         // Edit mode: populate fields
         setIsExpense(transaction.amount < 0);
         setAmount(Math.abs(transaction.amount).toFixed(2).toString().replace(".", ","));
-        setSelectedCategory(transaction.category);
-        setSelectedAccount(transaction.account);
+        setSelectedCategory(categories.data?.find((category: Category) => category.categoryId === transaction.categoryId));
+        setSelectedAccount(accounts.data?.find((account: Account) => account.accountId === transaction.accountId));
       } else {
         // Add mode: reset fields
         setAmount("0");

@@ -115,7 +115,7 @@ export default function ProfileSettingsView() {
             lunchFlowConfig.data && 
             <ItemFooter>
               <div className="flex flex-row justify-between items-center w-full">
-                <div>Last run: {lunchFlowConfig.data.lastRunTimestamp ? new Date(lunchFlowConfig.data.lastRunTimestamp).toLocaleString("en-US") : "N/A"}</div>
+                <div>Last run: {lunchFlowConfig.data.lastRunTimestamp ? new Date(lunchFlowConfig.data.lastRunTimestamp).toLocaleString("en-GB") : "N/A"}</div>
                 <Button variant={"ghost"} onClick={() => triggerSync.mutate()} disabled={triggerSync.isPending}>
                   {triggerSync.isPending ? "Syncing..." : "Sync now" }
                 </Button>

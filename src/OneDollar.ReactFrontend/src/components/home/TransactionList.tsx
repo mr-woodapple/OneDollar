@@ -1,6 +1,8 @@
 import { ItemGroup, Item, ItemMedia, ItemContent, ItemTitle, ItemActions, ItemSeparator, ItemDescription } from "../ui/item"
 
 import { useTransactions } from "@/api/hooks/useTransactions";
+import { useCategories } from "@/api/hooks/useCategories";
+import type { Category } from "@/models/Category";
 import type { Transaction } from "@/models/Transaction"
 import ErrorAlert from "../shared/alerts/ErrorAlert";
 import EmptyTransactions from "../shared/empty/EmptyTransactions";
@@ -14,6 +16,7 @@ interface TransactionListProps {
 // Group entries by date and render group-by-group
 export default function TransactionList({ selectedAccountId, onTransactionClick }: TransactionListProps) {
   const { transactions } = useTransactions();
+  const { categories } = useCategories();
 
   const groupedEntries: { [date: string]: Transaction[] } = !transactions.isPending && !transactions.isError
     ? groupTransactionByDay(transactions.data.filter(t => !selectedAccountId || t.accountId === selectedAccountId))
@@ -61,35 +64,40 @@ export default function TransactionList({ selectedAccountId, onTransactionClick 
                 {getHumandReadableDate(timestamp)}
               </div>
               <ItemGroup className="border border-neutral-200 rounded-lg">
-                {Array.isArray(entries) && entries.map((entry: Transaction, index: number) => (
-                  <div key={index} onClick={() => onTransactionClick?.(entry)} className="cursor-pointer">
-                    <Item key={entry.transactionId} size="sm">
-                      { entry.category && 
-                        <ItemMedia>
-                          { entry.category.icon }
-                        </ItemMedia>
-                      }
-                      
-                      <ItemContent>
-                        { entry.category 
-                          ? <ItemTitle>{entry.category?.name}</ItemTitle>
-                          : <NoCategory />
-                        }
+                {Array.isArray(entries) && entries.map((entry: Transaction, index: number) => {
+                  const category = categories.data?.find((c: Category) => c.categoryId === entry.categoryId) ?? entry.category;
 
-                        { entry.merchant && 
-                          <ItemDescription>
-                            {entry.merchant}
-                          </ItemDescription>
+                  return (
+                    <div key={index} onClick={() => onTransactionClick?.(entry)} className="cursor-pointer">
+                      <Item key={entry.transactionId} size="sm">
+                        { category && 
+                          <ItemMedia>
+                            { category.icon }
+                          </ItemMedia>
                         }
-                      </ItemContent>
+                        
+                        <ItemContent>
+                          { category 
+                            ? <ItemTitle>{category.name}</ItemTitle>
+                            : <NoCategory />
+                          }
 
-                      <ItemActions>
-                        {entry.amount.toFixed(2).toString().replace(".", ",")} €
-                      </ItemActions>
-                    </Item>
-                    {index !== entries.length - 1 && <ItemSeparator />}
-                  </div>
-                ))}
+                          { entry.merchant && 
+                            <ItemDescription>
+                              {entry.merchant}
+                            </ItemDescription>
+                          }
+                        </ItemContent>
+
+                        <ItemActions>
+                          {entry.amount.toFixed(2).toString().replace(".", ",")} €
+                        </ItemActions>
+                      </Item>
+
+                      {index !== entries.length - 1 && <ItemSeparator />}
+                    </div>
+                  )
+                })}
               </ItemGroup>
             </div>
           ))
