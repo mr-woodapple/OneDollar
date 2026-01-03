@@ -102,8 +102,8 @@ export default function ProfileSettingsView() {
             <ItemDescription className="flex items-center gap-2">
               { 
                 lunchFlowConfig.data
-                ? <><div className="w-2 h-2 bg-green-600 rounded-full"></div> Configured</>
-                : <><div className="w-2 h-2 bg-neutral-400 rounded-full"></div> Not configured</>
+                ? <><span className="w-2 h-2 bg-green-600 rounded-full"></span> Configured</>
+                : <><span className="w-2 h-2 bg-neutral-400 rounded-full"></span> Not configured</>
               }
             </ItemDescription>
           </ItemContent>

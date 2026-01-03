@@ -35,7 +35,7 @@ export default function AddAccount() {
         <DrawerHeader>
           <div className="flex flex-row justify-between items-center">
             <DrawerTitle>Create Account</DrawerTitle>
-            <DrawerClose>
+            <DrawerClose asChild>
               <Button variant="ghost" size="icon">
                 <X />
               </Button>

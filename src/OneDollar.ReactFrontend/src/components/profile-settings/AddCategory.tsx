@@ -41,7 +41,7 @@ export default function AddCategory({ isExpenseCategory }: AddCategoryProps) {
             <DrawerTitle>
               {isExpenseCategory ? "Create Expense Category" : "Create Income Category"}
             </DrawerTitle>
-            <DrawerClose>
+            <DrawerClose asChild>
               <Button variant="ghost" size="icon">
                 <X />
               </Button>
