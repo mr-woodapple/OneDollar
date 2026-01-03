@@ -32,6 +32,20 @@ export function useProviders() {
     },
   });
 
+  const deleteLunchFlowConfig = useMutation({
+    mutationFn: (id: number) => 
+      fetchApi(`${LUNCHFLOW_API_ROUTE}/${id}`, {
+        method: "DELETE",
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: providerKeys.all });
+      toast.success("Config deleted.");
+    },
+    onError: () => {
+      toast.error("Failed to delete config.");
+    }
+  });
+
   const triggerSync = useMutation({
     mutationFn: () =>
       fetchApi(`${LUNCHFLOW_API_ROUTE}/sync`, {
@@ -53,6 +67,7 @@ export function useProviders() {
   return {
     lunchFlowConfig,
     saveLunchFlowConfig,
+    deleteLunchFlowConfig,
     triggerSync
   };
 }

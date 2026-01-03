@@ -43,7 +43,27 @@ public class ProviderController(OneDollarContext oneDollarContext, LunchFlowSync
 		{
 			case nameof(ProviderEnum.LunchFlow):
 				var config = await _context.LunchFlowProvider.FirstOrDefaultAsync();
+				if (config == null ) { return BadRequest(); };
+
 				return Ok(config);
+
+			default:
+				return NotFound();
+		}
+	}
+
+	[HttpDelete("{provider}/{key}", Name = "DeleteProviderConfig")]
+	public async Task<ActionResult> Delete([FromRoute] string provider, [FromRoute] int key)
+	{
+		switch (provider)
+		{
+			case nameof(ProviderEnum.LunchFlow):
+				var config = await _context.LunchFlowProvider.FirstOrDefaultAsync(c => c.ProviderId == key);
+				if (config == null)	{ return NotFound(); }
+
+				_context.LunchFlowProvider.Remove(config);
+				await _context.SaveChangesAsync();
+				return NoContent();
 
 			default:
 				return NotFound();
