@@ -14,8 +14,8 @@ interface EditLunchFlowProviderProps {
 }
 
 export default function EditLunchFlowProvider({ isOpen, onOpenChange }: EditLunchFlowProviderProps) {
-  const { lunchFlowConfig, saveLunchFlowConfig } = useProviders();
-  
+  const { lunchFlowConfig, saveLunchFlowConfig, deleteLunchFlowConfig } = useProviders();
+
   const [apiKey, setApiKey] = useState<string>("");
   const [baseUrl, setBaseUrl] = useState<string>("https://lunchflow.app/api/v1");
 
@@ -31,6 +31,17 @@ export default function EditLunchFlowProvider({ isOpen, onOpenChange }: EditLunc
       lunchFlowApiKey: apiKey,
       lunchFlowApiUrl: baseUrl
     }, {
+      onSuccess: () => {
+        onOpenChange(false);
+      }
+    });
+  }
+
+  const handleDelete = () => {
+    if (!lunchFlowConfig.data?.providerId) { return }
+
+    deleteLunchFlowConfig.mutate(
+      lunchFlowConfig.data?.providerId, {
       onSuccess: () => {
         onOpenChange(false);
       }
@@ -82,6 +93,13 @@ export default function EditLunchFlowProvider({ isOpen, onOpenChange }: EditLunc
               {saveLunchFlowConfig.isPending && <Spinner className="mr-2" />}
               {saveLunchFlowConfig.isPending ? "Saving" : "Save"}
             </Button>
+            {
+              lunchFlowConfig.data &&
+              <Button variant="outline" onClick={handleDelete} disabled={deleteLunchFlowConfig.isPending}>
+                {deleteLunchFlowConfig.isPending && <Spinner className="mr-2" />}
+                {deleteLunchFlowConfig.isPending ? "Deleting config..." : "Delete config"}
+              </Button>
+            }
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
