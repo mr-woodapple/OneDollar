@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useOutletContext } from "react-router";
 
 import Balance from "@/components/home/Balance";
 import AccountSwitcher from "@/components/home/AccountSwitcher";
@@ -6,11 +7,12 @@ import TransactionList from "@/components/home/TransactionList";
 import type { Transaction } from "@/models/Transaction";
 import { useAccounts } from "@/api/hooks/useAccounts";
 
-interface HomeViewProps {
-  onTransactionClick?: (transaction: Transaction) => void;
+interface TransactionContext {
+  onTransactionClick: (transaction: Transaction) => void;
 }
 
-export default function HomeView({ onTransactionClick }: HomeViewProps) {
+export default function HomeView() {
+  const { onTransactionClick } = useOutletContext<TransactionContext>();
   const { accounts } = useAccounts();
   
   const [selectedAccountId, setSelectedAccountId] = useState<number | null>(null);
