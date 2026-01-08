@@ -29,7 +29,7 @@ export default function SelectAccount({ selectedAccount, onSelectAccount }: Sele
         </div>
       </DrawerTrigger>
 
-      <DrawerContent className="apple-safe-area">
+      <DrawerContent className="apple-safe-area mb-1 max-h-[70vh]">
         <DrawerHeader>
           <div className="flex flex-row justify-between items-center">
             <DrawerTitle>Select Account</DrawerTitle>
@@ -41,23 +41,27 @@ export default function SelectAccount({ selectedAccount, onSelectAccount }: Sele
           </div>
         </DrawerHeader>
 
-        {
-          accounts.isPending ? (<p className="dbg">Loading...</p>) :
-          accounts.isError ? (<ErrorAlert error={accounts.error} />) :
-          accounts.data.length === 0 ? (<EmptyAccounts />) :
-          (
-            <ItemGroup className="bg-neutral-100 rounded-xl m-5 cursor-pointer">
-              {accounts.data.map((account) => (
-                <DrawerClose asChild key={account.accountId}>
-                  <Item onClick={() => onSelectAccount(account)} className="hover:bg-neutral-200">
-                    <span>💳</span>
-                    <span>{account.name}</span>
-                  </Item>
-                </DrawerClose>
-              ))}
-            </ItemGroup>
-          )
-        }
+        <div className="flex flex-col overflow-hidden">
+          <div className="overflow-y-auto">
+            {
+              accounts.isPending ? (<p className="dbg">Loading...</p>) :
+              accounts.isError ? (<ErrorAlert error={accounts.error} />) :
+              accounts.data.length === 0 ? (<EmptyAccounts />) :
+              (
+                <ItemGroup className="bg-neutral-100 rounded-xl m-5 cursor-pointer">
+                  {accounts.data.map((account) => (
+                    <DrawerClose asChild key={account.accountId}>
+                      <Item onClick={() => onSelectAccount(account)} className="hover:bg-neutral-200">
+                        <span>💳</span>
+                        <span>{account.name}</span>
+                      </Item>
+                    </DrawerClose>
+                  ))}
+                </ItemGroup>
+              )
+            }
+          </div>
+        </div>
       </DrawerContent>
     </Drawer>
   )

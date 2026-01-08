@@ -64,7 +64,7 @@ export default function SelectCategory({ isExpense, selectedCategory, onSelectCa
         </DrawerHeader>
 
         <div className="apple-safe-area drawer-content mx-5">
-          <Tabs value={tab} onValueChange={onTabChange}>
+          <Tabs value={tab} onValueChange={onTabChange} className="max-h-[70vh]">
             <TabsList className="w-full">
               <TabsTrigger value="expense">Expense</TabsTrigger>
               <TabsTrigger value="income">Income</TabsTrigger>
@@ -75,7 +75,7 @@ export default function SelectCategory({ isExpense, selectedCategory, onSelectCa
               categories.isError ? (<ErrorAlert error={categories.error} />) :
               (
                 <>
-                  <TabsContent value="expense">
+                  <TabsContent value="expense" className="flex flex-col overflow-hidden">
                     {expenseCategories?.length === 0 && <EmptyCategories />}
 
                     {expenseCategories &&
