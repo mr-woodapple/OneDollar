@@ -90,7 +90,7 @@ export default function TransactionList({ selectedAccountId, onTransactionClick 
                         </ItemContent>
 
                         <ItemActions>
-                          {entry.amount.toFixed(2).toString().replace(".", ",")} €
+                          {entry.amount.toLocaleString('en-UK', { style: 'currency', currency: 'EUR' })}
                         </ItemActions>
                       </Item>
 
