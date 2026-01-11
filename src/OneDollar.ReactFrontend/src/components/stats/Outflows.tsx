@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "../ui/chart";
 import { Item, ItemActions, ItemContent, ItemGroup, ItemMedia } from "../ui/item";
 
-import { getChartData } from "@/lib/statsHelper";
+import { getOutflowChartData } from "@/lib/statsHelper";
 import { useTransactions } from "@/api/hooks/useTransactions";
 import { useCategories } from "@/api/hooks/useCategories";
 import { useAccounts } from "@/api/hooks/useAccounts";
@@ -22,6 +22,7 @@ export default function Outflows() {
   const [selectedRange, setSelectedRange] = useState<"7d" | "30d" | "lastMonth">("30d");
   const [selectedAccountId, setSelectedAccountId] = useState<number>();
   
+  // TODO: Use useMemo for this too?
   useEffect(() => {
     // Only initialize if not already selected
     if (selectedAccountId != undefined) return;
@@ -49,7 +50,7 @@ export default function Outflows() {
   const chartData = useMemo(() => {
     if (!transactions.data || !categories.data) return undefined;
 
-    return getChartData({
+    return getOutflowChartData({
       range: selectedRange,
       accountId: selectedAccountId ?? -1,
       transactions: transactions.data,

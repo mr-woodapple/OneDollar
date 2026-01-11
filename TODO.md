@@ -11,10 +11,13 @@ A list so I don't forget what needs to be done:
 - [ ] Implement skeleton loading states for the transaction list, categories and accounts
 - [ ] Create favicon
 - [ ] Fix dates close to midnight not beeing on the correct date (probably use `DateTimeOffset` on the backend??)
-- [ ] Prevent deleting accounts / categories, that are linked in an transaction (as that is deleting the transactions as well!)
+- [x] Prevent deleting accounts / categories, that are linked in an transaction (as that is deleting the transactions as well!)
 - [x] Implement adding / subtracting from the accounts balance (-> ideally find a way to manage the hook states globally on the FE)
 - [x] Fix sorting on the transaction view
 - [ ] Implement generic bottom drawer that handles the `apple-safe-area` css tag
+- [ ] Unify the wrapper element for stats
+- [ ] Make a smart categorizing system (like if something had category x before, assign that again)
+
 
 ## PWA
 

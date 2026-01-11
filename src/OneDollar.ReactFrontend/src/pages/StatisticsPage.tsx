@@ -12,6 +12,7 @@ export default function StatisticsPage() {
       <Outflows />
 
       {/* TODO: Add Sankey diagram for general cashflow */}
+      {/* TODO: Add diagram that shows what's left for a month (like whats going in and out) */}
     </div >
   )
 }
