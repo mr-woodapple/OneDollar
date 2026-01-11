@@ -18,20 +18,19 @@ export default function AccountSwitcher({ onAccountChange, selectedAccountId }: 
         (
           <Select
             disabled={accounts.data.length === 0}
-            value={selectedAccountId?.toString()} 
-            onValueChange={(val) => onAccountChange(Number(val))}>
+            value={selectedAccountId?.toString()}
+            onValueChange={(val) => onAccountChange(Number(val))}
+          >
             <SelectTrigger className="border-0 shadow-none focus-visible:ring-0">
               <SelectValue placeholder="Create an account first." />
             </SelectTrigger>
             <SelectContent>
-              <SelectGroup>
-                {accounts.data.map((acc) => (
-                  <SelectItem className="cursor-pointer"
-                    value={acc.accountId!.toString()} key={acc.accountId}>
-                    {acc.name}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
+              {accounts.data.map((acc) => (
+                <SelectItem className="cursor-pointer"
+                  value={acc.accountId!.toString()} key={acc.accountId}>
+                  {acc.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         )

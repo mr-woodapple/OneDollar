@@ -11,7 +11,7 @@ export default function StatisticsPage() {
       </div>
       <Outflows />
 
-      {/* TODO: Add Sankey diagram */}
+      {/* TODO: Add Sankey diagram for general cashflow */}
     </div >
   )
 }

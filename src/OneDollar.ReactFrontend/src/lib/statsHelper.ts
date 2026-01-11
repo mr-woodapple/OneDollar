@@ -4,11 +4,19 @@ import type { Transaction } from "@/models/Transaction";
 
 interface GetChartDataProps {
   range: "7d" | "30d" | "lastMonth";
+  accountId: number;
   transactions: Transaction[];
   categories: Category[];
 }
 
-function getChartData({ range, transactions, categories }: GetChartDataProps): ChartDataCategory[] {
+/**
+ * Calculates the chart data to render the graph from.
+ * Matches this data to the provided account id and date range.
+ * 
+ * @param param0 
+ * @returns The chart data to render graphs from.
+ */
+function getChartData({ range, transactions, categories, accountId }: GetChartDataProps): ChartDataCategory[] {
   if (!range) throw Error("No range present, cannot determine range to load data for.");
 
   let matchingTransactions: Transaction[] = [];
@@ -19,8 +27,9 @@ function getChartData({ range, transactions, categories }: GetChartDataProps): C
       var end = Date.now() - (7 * 24 * 60 * 60 * 1000);
 
       matchingTransactions = transactions.filter((t) => {
+        const matchesAccount = accountId === -1 || t.accountId === accountId;
         const transactionDate = new Date(t.timestamp).getTime();
-        return transactionDate >= end && transactionDate <= start;
+        return matchesAccount && transactionDate >= end && transactionDate <= start;
       }) || [];
       break;
 
@@ -29,8 +38,9 @@ function getChartData({ range, transactions, categories }: GetChartDataProps): C
       var end = Date.now() - (30 * 24 * 60 * 60 * 1000);
 
       matchingTransactions = transactions.filter((t) => {
+        const matchesAccount = accountId === -1 || t.accountId === accountId;
         const transactionDate = new Date(t.timestamp).getTime();
-        return transactionDate >= end && transactionDate <= start;
+        return matchesAccount && transactionDate >= end && transactionDate <= start;
       }) || [];
       break;
     
@@ -59,7 +69,6 @@ function getChartData({ range, transactions, categories }: GetChartDataProps): C
       });
     }
   }
-
 
   return chartCategories;
 }

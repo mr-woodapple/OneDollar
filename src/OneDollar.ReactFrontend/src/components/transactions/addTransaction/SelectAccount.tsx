@@ -1,12 +1,12 @@
 import { X } from "lucide-react"
-import { Button } from "../ui/button"
-import { Item, ItemGroup } from "../ui/item"
-import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "../ui/drawer"
+import { Button } from "../../ui/button"
+import { Item, ItemGroup } from "../../ui/item"
+import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "../../ui/drawer"
 
 import type { Account } from "@/models/Account.ts"
 import { useAccounts } from "@/api/hooks/useAccounts"
-import EmptyAccounts from "../shared/empty/EmptyAccounts"
-import ErrorAlert from "../shared/alerts/ErrorAlert"
+import EmptyAccounts from "../../shared/empty/EmptyAccounts"
+import ErrorAlert from "../../shared/alerts/ErrorAlert"
 
 interface SelectAccountProps {
   selectedAccount?: Account;

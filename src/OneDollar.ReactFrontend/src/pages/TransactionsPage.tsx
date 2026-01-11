@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useOutletContext } from "react-router";
 
-import Balance from "@/components/home/Balance";
-import AccountSwitcher from "@/components/home/AccountSwitcher";
-import TransactionList from "@/components/home/TransactionList";
+import Balance from "@/components/transactions/Balance";
+import AccountSwitcher from "@/components/transactions/AccountSwitcher";
+import TransactionList from "@/components/transactions/TransactionList";
 import type { Transaction } from "@/models/Transaction";
 import { useAccounts } from "@/api/hooks/useAccounts";
 
