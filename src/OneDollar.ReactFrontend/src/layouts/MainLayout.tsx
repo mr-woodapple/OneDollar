@@ -20,14 +20,16 @@ export default function MainLayout() {
   };
 
   return (
-    <>
-      <Outlet context={{ onTransactionClick: handleTransactionClick }} />
+    <div className="flex flex-col h-dvh overflow-hidden">
+      <div className="flex-1 overflow-y-auto">
+        <Outlet context={{ onTransactionClick: handleTransactionClick }} />
+      </div>
 
       <BottomBar onAddClick={handleAddClick} />
-      <AddTransaction 
-        isOpen={addTransactionDrawerState} 
+      <AddTransaction
+        isOpen={addTransactionDrawerState}
         onOpenChange={setAddTransactionDrawerState}
         transaction={selectedTransaction} />
-    </>
+    </div>
   )
 }

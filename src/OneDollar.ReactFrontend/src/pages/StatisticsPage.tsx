@@ -6,6 +6,11 @@ export default function StatisticsPage() {
     <div className="m-5">
       <div className="text-center">Statistics</div>
 
+      {/* Overall stats section with expenses, income & selectors for date range and account ?? */}
+      <div>
+
+      </div>
+
       <div className="text-sm text-neutral-500 pb-2 ps-4 mt-5">
         Outflows
       </div>
