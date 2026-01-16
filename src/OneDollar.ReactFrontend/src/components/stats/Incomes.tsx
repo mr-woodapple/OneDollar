@@ -1,22 +1,18 @@
-import { useMemo } from "react";
+import EmptyStats from "@/components/shared/empty/EmptyStats"
 import { Label, Pie, PieChart } from "recharts"
-import { Item, ItemActions, ItemContent, ItemGroup, ItemMedia } from "../ui/item";
-import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "../ui/chart";
-
-import { getOutflowChartData } from "@/lib/statsHelper";
+import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart"
+import { useMemo } from "react";
 import { useTransactions } from "@/api/hooks/useTransactions";
 import { useCategories } from "@/api/hooks/useCategories";
-import EmptyStats from "@/components/shared/empty/EmptyStats";
+import { getIncomesChartData } from "@/lib/statsHelper";
+import { Item, ItemActions, ItemContent, ItemGroup, ItemMedia } from "../ui/item";
 
-interface OutflowsProps {
+interface IncomesProps {
   selectedRange: "7d" | "30d" | "lastMonth";
   selectedAccountId?: number;
 }
 
-/**
- * A complete component that renders a diagram for the money outflow.
- */
-export default function Outflows({ selectedRange, selectedAccountId }: OutflowsProps) {
+export default function Incomes({ selectedRange, selectedAccountId }: IncomesProps) {
   const { transactions } = useTransactions();
   const { categories } = useCategories();
 
@@ -25,7 +21,7 @@ export default function Outflows({ selectedRange, selectedAccountId }: OutflowsP
   const chartData = useMemo(() => {
     if (!transactions.data || !categories.data) return undefined;
 
-    return getOutflowChartData({
+    return getIncomesChartData({
       range: selectedRange,
       accountId: selectedAccountId ?? -1,
       transactions: transactions.data,
@@ -60,7 +56,6 @@ export default function Outflows({ selectedRange, selectedAccountId }: OutflowsP
 
   return (
     <div className="border border-neutral-200 rounded-lg p-4 space-y-10">
-
       {/* Rendering the actual chart */}
       {chartData?.length === 0 && <EmptyStats />}
       {chartData?.length != 0 &&
@@ -104,7 +99,7 @@ export default function Outflows({ selectedRange, selectedAccountId }: OutflowsP
                             y={(viewBox.cy || 0) + 50}
                             className="fill-muted-foreground text-xl"
                           >
-                            Outflows
+                            Incomes
                           </tspan>
                         </text>
                       )

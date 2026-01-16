@@ -4,6 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useAccounts } from "@/api/hooks/useAccounts";
 import Outflows from "@/components/stats/Outflows"
 import ErrorAlert from "@/components/shared/alerts/ErrorAlert";
+import Incomes from "@/components/stats/Incomes";
 
 
 export default function StatisticsPage() {
@@ -66,26 +67,26 @@ export default function StatisticsPage() {
           {
             accounts.isPending ? (<p className="dbg">Loading...</p>) :
             accounts.isError ? (<ErrorAlert error={accounts.error} />) :
-              (
-                <Select
-                  disabled={accounts.data.length === 0}
-                  value={selectedAccountId?.toString()}
-                  onValueChange={(val) => setSelectedAccountId(Number(val))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Create an account first." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="-1">All</SelectItem>
-                    {accounts.data.map((acc) => (
-                      <SelectItem className="cursor-pointer"
-                        value={acc.accountId!.toString()} key={acc.accountId}>
-                        {acc.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )
+            (
+              <Select
+                disabled={accounts.data.length === 0}
+                value={selectedAccountId?.toString()}
+                onValueChange={(val) => setSelectedAccountId(Number(val))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Create an account first." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="-1">All</SelectItem>
+                  {accounts.data.map((acc) => (
+                    <SelectItem className="cursor-pointer"
+                      value={acc.accountId!.toString()} key={acc.accountId}>
+                      {acc.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )
           }
         </div>
       </div>
@@ -93,9 +94,16 @@ export default function StatisticsPage() {
       <div className="text-sm text-neutral-500 pb-2 ps-4 mt-5">
         Outflows
       </div>
-      <Outflows 
+      <Outflows
         selectedRange={selectedRange}
-        selectedAccountId={selectedAccountId}/>
+        selectedAccountId={selectedAccountId} />
+
+      <div className="text-sm text-neutral-500 pb-2 ps-4 mt-5">
+        Incomes
+      </div>
+      <Incomes
+        selectedRange={selectedRange}
+        selectedAccountId={selectedAccountId} />
 
       {/* TODO: Add Sankey diagram for general cashflow */}
       {/* TODO: Add diagram that shows what's left for a month (like whats going in and out) */}

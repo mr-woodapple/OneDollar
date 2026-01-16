@@ -72,6 +72,62 @@ function getOutflowChartData({ range, transactions, categories, accountId }: Get
   return chartCategories;
 }
 
+function getIncomesChartData({ range, transactions, categories, accountId }: GetChartDataProps): ChartDataCategory[] {
+  if (!range) throw Error("No range present, cannot determine range to load data for.");
+
+  let matchingTransactions: Transaction[] = [];
+  let start: number;
+  let end: number;
+
+  switch (range) {
+    case "7d":
+      start = Date.now();
+      end = Date.now() - (7 * 24 * 60 * 60 * 1000);
+      break;
+
+    case "30d":
+      start = Date.now();
+      end = Date.now() - (30 * 24 * 60 * 60 * 1000);
+      break;
+
+    default:
+      console.error("No range matched, cannot determine which transactions need to be analyzed.")
+      break;
+  }
+
+  matchingTransactions = transactions.filter((t) => {
+    const matchesAccount = accountId === -1 || t.accountId === accountId;
+    const transactionDate = new Date(t.timestamp).getTime();
+    return matchesAccount && transactionDate >= end && transactionDate <= start && t.amount >= 0;
+  }) || [];
+
+  // create chartdata categories from the entries
+  let chartCategories: ChartDataCategory[] = [];
+
+  for (const t of matchingTransactions) {
+    const categoryId = t.categoryId ?? -1;
+    const existingCategory = chartCategories.find((c) => c.categoryId === categoryId);
+
+    // Add the up the amounts (as absolute values, not including negative values)
+    // to an existing or new entry, depending whether an entry for the given category exists.
+    if (existingCategory) {
+      existingCategory.categoryAmount += Math.abs(t.amount);
+    } else {
+      const matchedCategory = categories.find((c: Category) => c.categoryId === categoryId);
+
+      chartCategories.push({
+        categoryId: categoryId,
+        categoryName: matchedCategory?.name ?? "Uncategorized",
+        categoryAmount: Math.abs(t.amount),
+        categoryIcon: matchedCategory?.icon,
+        fill: getDominantColorFromEmoji(matchedCategory?.icon),
+      });
+    }
+  }
+
+  return chartCategories;
+}
+
 /**
  * Get the most dominant color from a given emoji. If no emoji is present,
  * a grey will be used as a default.
@@ -118,4 +174,4 @@ function getDominantColorFromEmoji(emoji?: string): string {
   return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
 }
 
-export { getOutflowChartData }
+export { getOutflowChartData, getIncomesChartData }
