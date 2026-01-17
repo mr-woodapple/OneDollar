@@ -9,7 +9,7 @@ import ErrorAlert from "@/components/shared/alerts/ErrorAlert";
 import Incomes from "@/components/stats/Incomes";
 
 /**
- * 
+ * The statistics page component.
  */
 export default function StatisticsPage() {
   // Variables for range and account picker
@@ -117,19 +117,19 @@ export default function StatisticsPage() {
           <div className="flex flex-row grid-cols-3 space-x-5">
             <div className="w-full flex flex-col">
               <div className="text-green-600 pb-2"><BadgePlus /></div>
-              <div>{totalIncome.toLocaleString('en-UK', { style: 'currency', currency: 'EUR' })}</div>
+              <div>{totalIncome.toLocaleString('en-GB', { style: 'currency', currency: 'EUR' })}</div>
               <div className="text-sm text-muted-foreground">{ percentIncome.toFixed(2) } %</div>
             </div>
 
             <div className="w-full flex flex-col">
               <div className="text-red-600 pb-2"><BadgeMinus /></div>
-              <div>{totalOutcome.toLocaleString('en-UK', { style: 'currency', currency: 'EUR' })}</div>
+              <div>{totalOutcome.toLocaleString('en-GB', { style: 'currency', currency: 'EUR' })}</div>
               <div className="text-sm text-muted-foreground">{ percentOutcome.toFixed(2) } %</div>
             </div>
 
             <div className="w-full flex flex-col">
               <div className="text-neutral-500 pb-2"><PiggyBank /></div>
-              <div>{difference.toLocaleString('en-UK', { style: 'currency', currency: 'EUR' })}</div>
+              <div>{difference.toLocaleString('en-GB', { style: 'currency', currency: 'EUR' })}</div>
               <div className="text-sm text-muted-foreground">{ percentDifference.toFixed(2) } %</div>
             </div>
           </div>
@@ -152,5 +152,5 @@ export default function StatisticsPage() {
 
       {/* TODO: Add Sankey diagram for general cashflow */}
     </div >
-  )
+  );
 }

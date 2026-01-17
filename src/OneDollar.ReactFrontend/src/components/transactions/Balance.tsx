@@ -7,7 +7,7 @@ interface BalanceProps {
 export default function Balance({ selectedAccountId }: BalanceProps) {
   const { accountBalance } = useAccounts();
   
-  const humandReadableBalance = accountBalance(selectedAccountId).toLocaleString('en-UK', { style: 'currency', currency: 'EUR' })
+  const humandReadableBalance = accountBalance(selectedAccountId).toLocaleString('en-GB', { style: 'currency', currency: 'EUR' })
 
   return(
     <div className="text-center my-20">

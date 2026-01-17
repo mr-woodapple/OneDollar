@@ -11,15 +11,15 @@ export default function NotFound() {
       </svg>
       <div className="text-center">
         <h1 className="text-3xl font-bold">
-          Ups, die Seite wurde nicht gefunden!
+          There's nothing to see... 
         </h1>
         <p className="mt-5 text-gray-500">
-          Möglicherweise ist der Link kaputt oder die Seite wurde verschoben.
+          The link you clicked might be broken or the site has been moved.
         </p>
       </div>
       <Button>
         <NavLink to="/">
-          Zurück zur Startseite
+          Let's go back home!
         </NavLink>
       </Button>
     </div>

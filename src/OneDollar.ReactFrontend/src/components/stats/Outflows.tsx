@@ -74,7 +74,7 @@ export default function Outflows({ chartData, totalAmount }: OutflowsProps) {
                             y={viewBox.cy}
                             className="fill-foreground text-4xl font-semibold"
                           >
-                            {totalAmount.toLocaleString('en-UK', { style: 'currency', currency: 'EUR' })}
+                            {totalAmount.toLocaleString('en-GB', { style: 'currency', currency: 'EUR' })}
                           </tspan>
                           <tspan
                             x={viewBox.cx}
@@ -111,7 +111,7 @@ export default function Outflows({ chartData, totalAmount }: OutflowsProps) {
                     </ItemContent>
 
                     <ItemActions>
-                      {c.categoryAmount.toLocaleString('en-UK', { style: 'currency', currency: 'EUR' })}
+                      {c.categoryAmount.toLocaleString('en-GB', { style: 'currency', currency: 'EUR' })}
                     </ItemActions>
                   </Item>
                 ))}

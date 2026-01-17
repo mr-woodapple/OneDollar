@@ -1,6 +1,6 @@
 import ErrorAlert from "../shared/alerts/ErrorAlert";
 import { useAccounts } from "@/api/hooks/useAccounts";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem, SelectGroup } from "@/components/ui/select";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 
 interface AccountSwitcherProps {
   onAccountChange: (accountId: number) => void;

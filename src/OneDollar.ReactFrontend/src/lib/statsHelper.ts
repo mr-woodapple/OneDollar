@@ -35,8 +35,7 @@ function getOutflowChartData({ range, transactions, categories, accountId }: Get
       break;
 
     default:
-      console.error("No range matched, cannot determine which transactions need to be analyzed.")
-      break;
+      console.error("No range matched, cannot determine which transactions need to be analyzed.");
   }
 
   matchingTransactions = transactions.filter((t) => {
@@ -91,7 +90,7 @@ function getIncomesChartData({ range, transactions, categories, accountId }: Get
       break;
 
     default:
-      console.error("No range matched, cannot determine which transactions need to be analyzed.")
+      console.error("No range matched, cannot determine which transactions need to be analyzed.");
       break;
   }
 
