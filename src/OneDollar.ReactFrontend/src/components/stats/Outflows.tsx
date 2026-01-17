@@ -3,36 +3,18 @@ import { Label, Pie, PieChart } from "recharts"
 import { Item, ItemActions, ItemContent, ItemGroup, ItemMedia } from "../ui/item";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "../ui/chart";
 
-import { getOutflowChartData } from "@/lib/statsHelper";
-import { useTransactions } from "@/api/hooks/useTransactions";
-import { useCategories } from "@/api/hooks/useCategories";
 import EmptyStats from "@/components/shared/empty/EmptyStats";
+import type { ChartDataCategory } from "@/models/ChartDataCategories";
 
 interface OutflowsProps {
-  selectedRange: "7d" | "30d" | "lastMonth";
-  selectedAccountId?: number;
+  chartData?: ChartDataCategory[];
+  totalAmount: number;
 }
 
 /**
  * A complete component that renders a diagram for the money outflow.
  */
-export default function Outflows({ selectedRange, selectedAccountId }: OutflowsProps) {
-  const { transactions } = useTransactions();
-  const { categories } = useCategories();
-
-  // The data the diagram renders from.
-  // Also sorts the data descending by the amount.
-  const chartData = useMemo(() => {
-    if (!transactions.data || !categories.data) return undefined;
-
-    return getOutflowChartData({
-      range: selectedRange,
-      accountId: selectedAccountId ?? -1,
-      transactions: transactions.data,
-      categories: categories.data
-    }).sort((a, b) => b.categoryAmount - a.categoryAmount);
-  }, [selectedRange, selectedAccountId, transactions.data, categories.data]);
-
+export default function Outflows({ chartData, totalAmount }: OutflowsProps) {
   // Config used to display the tooltips on the actual diagram.
   const chartConfig = useMemo(() => {
     const config: ChartConfig = {
@@ -53,17 +35,12 @@ export default function Outflows({ selectedRange, selectedAccountId }: OutflowsP
     return config;
   }, [chartData]);
 
-  // The total amount to be displayed in the pie chart.
-  const totalAmount = useMemo(() => {
-    return chartData?.reduce((acc, curr) => acc + curr.categoryAmount, 0) || 0;
-  }, [chartData]);
-
   return (
     <div className="border border-neutral-200 rounded-lg p-4 space-y-10">
 
       {/* Rendering the actual chart */}
-      {chartData?.length === 0 && <EmptyStats />}
-      {chartData?.length != 0 &&
+      {(!chartData || chartData.length === 0) && <EmptyStats />}
+      {chartData && chartData.length !== 0 &&
         <div className="space-y-10">
           {/* Actual chart */}
           <div className="pieChart">

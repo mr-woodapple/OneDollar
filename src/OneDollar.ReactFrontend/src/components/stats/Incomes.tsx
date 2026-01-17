@@ -2,32 +2,15 @@ import EmptyStats from "@/components/shared/empty/EmptyStats"
 import { Label, Pie, PieChart } from "recharts"
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart"
 import { useMemo } from "react";
-import { useTransactions } from "@/api/hooks/useTransactions";
-import { useCategories } from "@/api/hooks/useCategories";
-import { getIncomesChartData } from "@/lib/statsHelper";
 import { Item, ItemActions, ItemContent, ItemGroup, ItemMedia } from "../ui/item";
+import type { ChartDataCategory } from "@/models/ChartDataCategories";
 
 interface IncomesProps {
-  selectedRange: "7d" | "30d" | "lastMonth";
-  selectedAccountId?: number;
+  chartData?: ChartDataCategory[];
+  totalAmount: number;
 }
 
-export default function Incomes({ selectedRange, selectedAccountId }: IncomesProps) {
-  const { transactions } = useTransactions();
-  const { categories } = useCategories();
-
-  // The data the diagram renders from.
-  // Also sorts the data descending by the amount.
-  const chartData = useMemo(() => {
-    if (!transactions.data || !categories.data) return undefined;
-
-    return getIncomesChartData({
-      range: selectedRange,
-      accountId: selectedAccountId ?? -1,
-      transactions: transactions.data,
-      categories: categories.data
-    }).sort((a, b) => b.categoryAmount - a.categoryAmount);
-  }, [selectedRange, selectedAccountId, transactions.data, categories.data]);
+export default function Incomes({ chartData, totalAmount }: IncomesProps) {
 
   // Config used to display the tooltips on the actual diagram.
   const chartConfig = useMemo(() => {
@@ -49,16 +32,11 @@ export default function Incomes({ selectedRange, selectedAccountId }: IncomesPro
     return config;
   }, [chartData]);
 
-  // The total amount to be displayed in the pie chart.
-  const totalAmount = useMemo(() => {
-    return chartData?.reduce((acc, curr) => acc + curr.categoryAmount, 0) || 0;
-  }, [chartData]);
-
   return (
     <div className="border border-neutral-200 rounded-lg p-4 space-y-10">
       {/* Rendering the actual chart */}
-      {chartData?.length === 0 && <EmptyStats />}
-      {chartData?.length != 0 &&
+      {(!chartData || chartData.length === 0) && <EmptyStats />}
+      {chartData && chartData.length !== 0 &&
         <div className="space-y-10">
           {/* Actual chart */}
           <div className="pieChart">

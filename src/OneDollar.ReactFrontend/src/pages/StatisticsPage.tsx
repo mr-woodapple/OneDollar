@@ -1,19 +1,35 @@
 import { useEffect, useState } from "react";
+import { BadgeMinus, BadgePlus, PiggyBank } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 import { useAccounts } from "@/api/hooks/useAccounts";
+import { useStats } from "@/lib/hooks/useStats";
 import Outflows from "@/components/stats/Outflows"
 import ErrorAlert from "@/components/shared/alerts/ErrorAlert";
 import Incomes from "@/components/stats/Incomes";
 
-
+/**
+ * 
+ */
 export default function StatisticsPage() {
-  const { accounts } = useAccounts();
-
+  // Variables for range and account picker
   const [selectedRange, setSelectedRange] = useState<"7d" | "30d" | "lastMonth">("30d");
   const [selectedAccountId, setSelectedAccountId] = useState<number>();
+  
+  // Hooks
+  const { accounts } = useAccounts();
+  const { incomeChartData, outflowChartData, totalIncome, totalOutcome } = useStats(selectedRange, selectedAccountId);
 
-  // TODO: Use useMemo for this?
+  // Calculate values for the overview outflow/income/leftover graph
+  const difference = totalIncome - totalOutcome;
+  const absDifference = Math.abs(difference);
+  const visualizationTotal = totalIncome + totalOutcome + absDifference; // Normalize the bar so that all three values are represented proportionally
+
+  const percentIncome = visualizationTotal === 0 ? 0 : (totalIncome / visualizationTotal) * 100;
+  const percentOutcome = visualizationTotal === 0 ? 0 : (totalOutcome / visualizationTotal) * 100;
+  const percentDifference = visualizationTotal === 0 ? 0 : (absDifference / visualizationTotal) * 100;
+
+  // Initialize the selected account when data loads
   useEffect(() => {
     // Only initialize if not already selected
     if (selectedAccountId != undefined) return;
@@ -33,7 +49,7 @@ export default function StatisticsPage() {
         setSelectedAccountId(accounts.data[0].accountId!);
       }
     }
-  });
+  }, [accounts, selectedAccountId]);
 
   return (
     <div className="m-5">
@@ -89,24 +105,52 @@ export default function StatisticsPage() {
             )
           }
         </div>
+
+        {/* Outflow/income/leftover graph */}
+        <div className="financial-overview space-y-5">
+          <div className="bar-wrapper h-2.5 flex flex-row bg-neutral-300 rounded-sm overflow-hidden">
+            <div className="h-full bg-green-600" style={{ width: `${percentIncome}%` }}></div>
+            <div className="h-full bg-red-600" style={{ width: `${percentOutcome}%` }}></div>
+            <div style={{ width: `${percentDifference}%` }}></div>
+          </div>
+
+          <div className="flex flex-row grid-cols-3 space-x-5">
+            <div className="w-full flex flex-col">
+              <div className="text-green-600 pb-2"><BadgePlus /></div>
+              <div>{totalIncome.toLocaleString('en-UK', { style: 'currency', currency: 'EUR' })}</div>
+              <div className="text-sm text-muted-foreground">{ percentIncome.toFixed(2) } %</div>
+            </div>
+
+            <div className="w-full flex flex-col">
+              <div className="text-red-600 pb-2"><BadgeMinus /></div>
+              <div>{totalOutcome.toLocaleString('en-UK', { style: 'currency', currency: 'EUR' })}</div>
+              <div className="text-sm text-muted-foreground">{ percentOutcome.toFixed(2) } %</div>
+            </div>
+
+            <div className="w-full flex flex-col">
+              <div className="text-neutral-500 pb-2"><PiggyBank /></div>
+              <div>{difference.toLocaleString('en-UK', { style: 'currency', currency: 'EUR' })}</div>
+              <div className="text-sm text-muted-foreground">{ percentDifference.toFixed(2) } %</div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="text-sm text-neutral-500 pb-2 ps-4 mt-5">
         Outflows
       </div>
       <Outflows
-        selectedRange={selectedRange}
-        selectedAccountId={selectedAccountId} />
+        totalAmount={totalOutcome}
+        chartData={outflowChartData} />
 
       <div className="text-sm text-neutral-500 pb-2 ps-4 mt-5">
         Incomes
       </div>
       <Incomes
-        selectedRange={selectedRange}
-        selectedAccountId={selectedAccountId} />
+        totalAmount={totalIncome}
+        chartData={incomeChartData} />
 
       {/* TODO: Add Sankey diagram for general cashflow */}
-      {/* TODO: Add diagram that shows what's left for a month (like whats going in and out) */}
     </div >
   )
 }
