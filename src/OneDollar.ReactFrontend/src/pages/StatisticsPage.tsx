@@ -32,7 +32,7 @@ export default function StatisticsPage() {
   // Initialize the selected account when data loads
   useEffect(() => {
     // Only initialize if not already selected
-    if (selectedAccountId != undefined) return;
+    if (selectedAccountId !== undefined) return;
 
     // Assign the accountId to filter transactions later
     if (!accounts.isPending && !accounts.isError && accounts.data) {

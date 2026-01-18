@@ -15,33 +15,46 @@ export default function HomeView() {
   const { onTransactionClick } = useOutletContext<TransactionContext>();
   const { accounts } = useAccounts();
   
-  const [selectedAccountId, setSelectedAccountId] = useState<number | null>(null);
+  const [selectedAccountId, setSelectedAccountId] = useState<number | null>(() => {
+    const savedId = localStorage.getItem("defaultAccount");
+    return savedId ? Number(savedId) : null;
+  });
 
   useEffect(() => {
-    // Only initialize if not already selected
-    if (selectedAccountId !== null) return;
+    if (accounts.isPending || accounts.isError || !accounts.data) return;
 
-    // Assign the accountId to filter transactions later
-    if (!accounts.isPending && !accounts.isError && accounts.data) {
-      const savedId = localStorage.getItem("defaultAccount");
-      
-      if (savedId) {
-        const found = accounts.data.find(a => a.accountId === Number(savedId));
-        if (found) {
-          setSelectedAccountId(found.accountId!);
-          return;
+    // Check if current selection is valid
+    if (selectedAccountId !== null) {
+      const found = accounts.data.find(a => a.accountId === selectedAccountId);
+      if (!found) {
+        // Validation failed, reset to default
+        if (accounts.data.length > 0) {
+          const defaultId = accounts.data[0].accountId!;
+          setSelectedAccountId(defaultId);
+          localStorage.setItem("defaultAccount", defaultId.toString());
+        } else {
+          setSelectedAccountId(null);
         }
       }
+    } else {
+      // No selection, select first available
       if (accounts.data.length > 0) {
-        setSelectedAccountId(accounts.data[0].accountId!);
+        const defaultId = accounts.data[0].accountId!;
+        setSelectedAccountId(defaultId);
+        localStorage.setItem("defaultAccount", defaultId.toString());
       }
-    }    
+    }
   }, [accounts.data, accounts.isPending, accounts.isError, selectedAccountId]);
+
+  const handleAccountChange = (id: number) => {
+    setSelectedAccountId(id);
+    localStorage.setItem("defaultAccount", id.toString());
+  };
 
   return (
     <div className="m-5">
       <AccountSwitcher
-        onAccountChange={setSelectedAccountId}
+        onAccountChange={handleAccountChange}
         selectedAccountId={selectedAccountId} />
 
       {selectedAccountId && <Balance selectedAccountId={selectedAccountId} />}

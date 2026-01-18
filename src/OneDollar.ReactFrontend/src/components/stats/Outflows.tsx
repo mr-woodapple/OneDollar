@@ -94,7 +94,7 @@ export default function Outflows({ chartData, totalAmount }: OutflowsProps) {
           </div>
 
           {/* Used Categories */}
-          {chartData?.length != 0 &&
+          {chartData?.length !== 0 &&
             <div>
               <div className="flex flex-row justify-between text-sm text-neutral-500 pb-2 px-4">
                 <div>Category</div>

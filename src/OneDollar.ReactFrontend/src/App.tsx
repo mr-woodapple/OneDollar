@@ -11,8 +11,8 @@ function App() {
   return (
     <Routes>
       <Route element={<MainLayout />}>
-        <Route index path='/' element={<TransactionsPage />} />
-        <Route index path='stats' element={<StatisticsPage />} />
+        <Route index element={<TransactionsPage />} />
+        <Route path='stats' element={<StatisticsPage />} />
         <Route path='settings' element={<ProfileSettingsPage />} />
         <Route path="*" element={<PageNotFound />} />
       </Route>
