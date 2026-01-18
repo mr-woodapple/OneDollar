@@ -38,6 +38,7 @@ export function useProviders() {
         method: "DELETE",
       }),
     onSuccess: () => {
+      queryClient.resetQueries({ queryKey: providerKeys.all });
       queryClient.invalidateQueries({ queryKey: providerKeys.all });
       toast.success("Config deleted.");
     },

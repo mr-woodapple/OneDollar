@@ -83,7 +83,7 @@ export default function EditLunchFlowProvider({ isOpen, onOpenChange }: EditLunc
             <div className="space-y-2">
               <Label htmlFor="baseUrl">Base URL</Label>
               <Input
-                id="baseUrl" value={baseUrl}
+                id="baseUrl" value={baseUrl} disabled
                 onChange={(e) => setBaseUrl(e.target.value)} />
             </div>
           </div>

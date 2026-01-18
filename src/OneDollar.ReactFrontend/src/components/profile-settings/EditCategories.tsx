@@ -55,7 +55,7 @@ export default function EditCategories({ isOpen, onOpenChange }: EditCategoriesP
         </DrawerHeader>
 
         <div className="apple-safe-area drawer-content mb-1">
-          <Tabs value={tab} onValueChange={onTabChange}>
+          <Tabs value={tab} onValueChange={onTabChange} className="max-h-[70vh]">
             <TabsList className="w-full">
               <TabsTrigger value="expense">Expense</TabsTrigger>
               <TabsTrigger value="income">Income</TabsTrigger>
@@ -69,7 +69,7 @@ export default function EditCategories({ isOpen, onOpenChange }: EditCategoriesP
                       <AddCategory
                         isExpenseCategory={tab === "expense" ? true : false} />
 
-                      <TabsContent value="expense">
+                      <TabsContent value="expense" className="flex flex-col overflow-hidden">
                         {expenseCategories?.length === 0 && <EmptyCategories />}
 
                         {expenseCategories &&
@@ -102,11 +102,11 @@ export default function EditCategories({ isOpen, onOpenChange }: EditCategoriesP
                         }
                       </TabsContent>
 
-                      <TabsContent value="income">
+                      <TabsContent value="income" className="flex-1 flex flex-col overflow-hidden">
                         {incomeCategories?.length === 0 && <EmptyCategories />}
 
                         {incomeCategories &&
-                          <div className="overflow-y-auto">
+                          <div className="overflow-y-auto flex-1">
                             <ItemGroup className="bg-neutral-100 rounded-xl my-5">
                               {incomeCategories.map((category) => (
                                 <Item>

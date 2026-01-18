@@ -10,7 +10,7 @@ import { useAccounts } from "@/api/hooks/useAccounts";
 import { Button } from "@/components/ui/button";
 import { useProviders } from "@/api/hooks/useProviders";
 
-export default function ProfileSettingsView() {
+export default function ProfileSettingsPage() {
   const { accounts } = useAccounts();
   const { lunchFlowConfig, triggerSync } = useProviders();
 

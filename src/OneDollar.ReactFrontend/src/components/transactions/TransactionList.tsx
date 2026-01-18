@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { ItemGroup, Item, ItemMedia, ItemContent, ItemTitle, ItemActions, ItemSeparator, ItemDescription } from "../ui/item"
 
 import { useTransactions } from "@/api/hooks/useTransactions";
@@ -17,10 +18,19 @@ interface TransactionListProps {
 export default function TransactionList({ selectedAccountId, onTransactionClick }: TransactionListProps) {
   const { transactions } = useTransactions();
   const { categories } = useCategories();
+  
+  // Lookup map, according to ai, this makes things faster by lowering rendering complexity.
+  const categoryMap = useMemo(() => {
+    if (!categories.data) return new Map();
+    return new Map(categories.data.map((c: Category) => [c.categoryId, c]));
+  }, [categories.data]);
 
-  const groupedEntries: { [date: string]: Transaction[] } = !transactions.isPending && !transactions.isError
-    ? groupTransactionByDay(transactions.data.filter(t => !selectedAccountId || t.accountId === selectedAccountId))
-    : {};
+  // Group transactions by day
+  const groupedEntries: { [date: string]: Transaction[] } = useMemo(() => {
+    return !transactions.isPending && !transactions.isError && transactions.data
+      ? groupTransactionByDay(transactions.data.filter(t => !selectedAccountId || t.accountId === selectedAccountId))
+      : {};
+  }, [transactions.data, transactions.isPending, transactions.isError, selectedAccountId]);
 
   // Helper function to sort the Transactions by date.
   function groupTransactionByDay(transactions: Transaction[]) {
@@ -65,7 +75,7 @@ export default function TransactionList({ selectedAccountId, onTransactionClick 
               </div>
               <ItemGroup className="border border-neutral-200 rounded-lg">
                 {Array.isArray(entries) && entries.map((entry: Transaction, index: number) => {
-                  const category = categories.data?.find((c: Category) => c.categoryId === entry.categoryId) ?? entry.category;
+                  const category = categoryMap.get(entry.categoryId) ?? entry.category;
 
                   return (
                     <div key={index} onClick={() => onTransactionClick?.(entry)} className="cursor-pointer">
@@ -90,7 +100,7 @@ export default function TransactionList({ selectedAccountId, onTransactionClick 
                         </ItemContent>
 
                         <ItemActions>
-                          {entry.amount.toFixed(2).toString().replace(".", ",")} €
+                          {entry.amount.toLocaleString('en-GB', { style: 'currency', currency: 'EUR' })}
                         </ItemActions>
                       </Item>
 

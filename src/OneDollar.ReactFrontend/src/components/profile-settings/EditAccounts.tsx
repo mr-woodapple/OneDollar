@@ -36,44 +36,49 @@ export default function EditAccounts({ isOpen, onOpenChange }: EditAccountsProps
           </div>
         </DrawerHeader>
 
-        <div className="apple-safe-area drawer-content mb-1">
-          {
-            accounts.isPending ? (<p className="dbg">Loading...</p>) :
-            accounts.isError ? (<ErrorAlert error={accounts.error} />) :
-            (
-              <>
-                <AddAccount />
+        <div className="apple-safe-area mb-1">
+          <div className="max-h-[70vh] flex flex-col">
+            {
+              accounts.isPending ? (<p className="dbg">Loading...</p>) :
+              accounts.isError ? (<ErrorAlert error={accounts.error} />) :
+              (
+                <>
+                  <AddAccount />
 
-                {accounts.data.length === 0 && <EmptyAccounts />}
-                {accounts.data &&
-                  <div className="overflow-y-auto">
-                    <ItemGroup className="bg-neutral-100 rounded-xl my-5">
-                      {accounts.data.map((account) => (
-                        <Item key={account.accountId}>
-                          <ItemMedia>
-                            <span>💳</span>
-                          </ItemMedia>
-                          <ItemContent>
-                            <span>{account.name}</span>
-                          </ItemContent>
+                  {accounts.data.length === 0 && <EmptyAccounts />}
 
-                          <ItemActions>
-                            {/* TODO: Implement functionality */}
-                            {/* <Button variant="ghost" size="sm">
-                            <Pencil />
-                          </Button> */}
-                            <Button variant="ghost" size="sm" className="text-red-500" onClick={() => handleDelete(account.accountId)}>
-                              <Trash />
-                            </Button>
-                          </ItemActions>
-                        </Item>
-                      ))}
-                    </ItemGroup>
+                  <div className="flex flex-col overflow-hidden">
+                    {accounts.data &&
+                    <div className="overflow-y-auto">
+                      <ItemGroup className="bg-neutral-100 rounded-xl my-5">
+                        {accounts.data.map((account) => (
+                          <Item key={account.accountId}>
+                            <ItemMedia>
+                              <span>💳</span>
+                            </ItemMedia>
+                            <ItemContent>
+                              <span>{account.name}</span>
+                            </ItemContent>
+
+                            <ItemActions>
+                              {/* TODO: Implement functionality */}
+                              {/* <Button variant="ghost" size="sm">
+                              <Pencil />
+                            </Button> */}
+                              <Button variant="ghost" size="sm" className="text-red-500" onClick={() => handleDelete(account.accountId)}>
+                                <Trash />
+                              </Button>
+                            </ItemActions>
+                          </Item>
+                        ))}
+                      </ItemGroup>
+                    </div>
+                  }
                   </div>
-                }
-              </>
-            )
-          }
+                </>
+              )
+            }
+          </div>
         </div>
       </DrawerContent>
     </Drawer >

@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react"
 import { X } from "lucide-react"
-import { Button } from "../ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { Item, ItemGroup } from "../ui/item";
-import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "../ui/drawer"
+import { Button } from "../../ui/button"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
+import { Item, ItemGroup } from "../../ui/item";
+import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "../../ui/drawer"
 
 import type { Category } from "@/models/Category"
 import { useCategories } from "@/api/hooks/useCategories"
-import EmptyCategories from "../shared/empty/EmptyCategories"
-import ErrorAlert from "../shared/alerts/ErrorAlert"
+import EmptyCategories from "../../shared/empty/EmptyCategories"
+import ErrorAlert from "../../shared/alerts/ErrorAlert"
 
 interface SelectCategoryProps {
   isExpense: boolean;
@@ -64,7 +64,7 @@ export default function SelectCategory({ isExpense, selectedCategory, onSelectCa
         </DrawerHeader>
 
         <div className="apple-safe-area drawer-content mx-5">
-          <Tabs value={tab} onValueChange={onTabChange}>
+          <Tabs value={tab} onValueChange={onTabChange} className="max-h-[70vh]">
             <TabsList className="w-full">
               <TabsTrigger value="expense">Expense</TabsTrigger>
               <TabsTrigger value="income">Income</TabsTrigger>
@@ -75,7 +75,7 @@ export default function SelectCategory({ isExpense, selectedCategory, onSelectCa
               categories.isError ? (<ErrorAlert error={categories.error} />) :
               (
                 <>
-                  <TabsContent value="expense">
+                  <TabsContent value="expense" className="flex flex-col overflow-hidden">
                     {expenseCategories?.length === 0 && <EmptyCategories />}
 
                     {expenseCategories &&
