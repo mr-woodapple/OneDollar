@@ -67,7 +67,7 @@ public class LunchFlowSyncService
 		}
 	}
 
-	public async Task<IEnumerable<LunchFlowAccount>> SyncAccounts()
+	private async Task<IEnumerable<LunchFlowAccount>> SyncAccounts()
 	{
 		var accountsRequests = new HttpRequestMessage
 		{
@@ -87,8 +87,16 @@ public class LunchFlowSyncService
 		{
 			if (!await _context.Account.AnyAsync(a => a.ExternalAccountId == acc.Id))
 			{
+				// No account found, create new one
 				var newAcc = new Account { ExternalAccountId = acc.Id, Name = acc.Name };
 				_context.Add(newAcc);
+			}
+			else
+			{
+				// Account found, update properties (only name and status as of right now).
+				var existingAcc = await _context.Account.SingleAsync(a => a.ExternalAccountId == acc.Id);
+				existingAcc.Name = acc.Name;
+				existingAcc.Status = acc.Status;
 			}
 		}
 		await _context.SaveChangesAsync();
@@ -101,6 +109,13 @@ public class LunchFlowSyncService
 		foreach (var acc in accounts)
 		{
 			var accountToBeUpdated = await _context.Account.SingleAsync(a => a.ExternalAccountId == acc.Id);
+
+			if (accountToBeUpdated.Status == "DISCONNECTED")
+			{
+				_logger.LogError($"Failed to update balance for account '{accountToBeUpdated.Name} ({accountToBeUpdated.ExternalAccountId})' because" +
+				                 $"the account is disconnected. Please visit LunchFlow and reconnect account.");
+				continue;
+			}
 
 			var balanceRequest = new HttpRequestMessage
 			{
@@ -120,7 +135,7 @@ public class LunchFlowSyncService
 		}
 	}
 
-	public async Task SyncExpenses(IEnumerable<LunchFlowAccount> accounts)
+	private async Task SyncExpenses(IEnumerable<LunchFlowAccount> accounts)
 	{
 		foreach (var acc in accounts)
 		{
@@ -128,6 +143,13 @@ public class LunchFlowSyncService
 			// account id linked, not the external account id that would be in the DTO we iterate over here
 			var accInDb = await _context.Account.SingleAsync(a => a.ExternalAccountId == acc.Id);
 			if (accInDb == null) { continue; }
+
+			if (accInDb.Status == "DISCONNECTED")
+			{
+				_logger.LogError($"Failed to update sync expenses for account '{accInDb.Name} ({accInDb.ExternalAccountId})' " +
+				                 $"because the account is disconnected. Please visit LunchFlow and reconnect account.");
+				continue;
+			}
 
 			var transactionRequest = new HttpRequestMessage
 			{

@@ -6,7 +6,7 @@ using OneDollar.Api.Models;
 using OneDollar.Api.Services;
 using OneDollar.Api.Services.BackgroundServices;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -47,7 +47,7 @@ builder.Services.AddCors(options =>
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -62,7 +62,7 @@ app.UseAuthorization();
 app.MapControllers();
 
 // Apply migrations automatically on startup
-using (var scope = app.Services.CreateScope())
+using (IServiceScope scope = app.Services.CreateScope())
 {
 	Console.WriteLine("Applying migrations...");
 	Console.WriteLine($"Connection string used: {builder.Configuration.GetConnectionString("DatabaseConnection")}");
