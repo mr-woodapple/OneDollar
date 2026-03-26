@@ -41,14 +41,16 @@ export default function SelectCategory({ isExpense, selectedCategory, onSelectCa
   return (
     <Drawer>
       <DrawerTrigger asChild>
-        <div className="w-full h-12 grid place-items-center cursor-pointer">
-          {selectedCategory?.name
-            ? <div className="space-x-2.5">
-              <span>{selectedCategory.icon}</span>
-              <span>{selectedCategory.name}</span>
-            </div>
-            : <span className="underline underline-offset-5">Select Category</span>}
-        </div>
+          <Button variant="secondary" size="lg">
+            {
+              selectedCategory?.name
+              ? <div className="space-x-2.5">
+                <span>{selectedCategory.icon}</span>
+                <span>{selectedCategory.name}</span>
+              </div>
+              : <span>Select Category</span>
+            }
+          </Button>
       </DrawerTrigger>
 
       <DrawerContent>

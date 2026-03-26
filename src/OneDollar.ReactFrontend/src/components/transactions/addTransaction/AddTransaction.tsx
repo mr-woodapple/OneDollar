@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react"
 import { toast } from "sonner"
-import { Trash, X } from "lucide-react"
+import { CalendarClock, Euro, Minus, Plus, Store, Trash, X } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
-import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer"
+import { Drawer, DrawerClose, DrawerContent, DrawerHeader } from "@/components/ui/drawer"
 
 import NumPad from "@/components/transactions/addTransaction/NumPad"
-import Amount from "@/components/transactions/addTransaction/Amount"
 import SelectCategory from "@/components/transactions/addTransaction/SelectCategory"
 import SelectAccount from "@/components/transactions/addTransaction/SelectAccount"
 import type { Account } from "@/models/Account"
@@ -15,7 +16,7 @@ import type { Transaction } from "@/models/Transaction"
 import { useTransactions } from "@/api/hooks/useTransactions"
 import { useCategories } from "@/api/hooks/useCategories"
 import { useAccounts } from "@/api/hooks/useAccounts"
-import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 
 interface AddTransactionProps {
   isOpen: boolean;
@@ -30,6 +31,7 @@ export default function AddTransaction({ isOpen, onOpenChange, transaction }: Ad
 
   const [note, setNote] = useState<string>();
   const [amount, setAmount] = useState<string>("0");
+  const [timestamp, setTimestamp] = useState<Date>(new Date());
   const [isExpense, setIsExpense] = useState<boolean>(true);
   const [selectedCategory, setSelectedCategory] = useState<Category>();
   const [selectedAccount, setSelectedAccount] = useState<Account>();
@@ -40,6 +42,7 @@ export default function AddTransaction({ isOpen, onOpenChange, transaction }: Ad
         // Edit mode: populate fields
         setNote(transaction.note);
         setIsExpense(transaction.amount < 0);
+        setTimestamp(new Date(transaction.timestamp));
         setAmount(Math.abs(transaction.amount).toFixed(2).toString().replace(".", ","));
         setSelectedCategory(categories.data?.find((category: Category) => category.categoryId === transaction.categoryId));
         setSelectedAccount(accounts.data?.find((account: Account) => account.accountId === transaction.accountId));
@@ -140,8 +143,19 @@ export default function AddTransaction({ isOpen, onOpenChange, transaction }: Ad
       <DrawerContent className="px-5">
         <DrawerHeader>
           <div className="flex flex-row justify-between items-center">
-            {/* TODO: Replace with buttons for date, time (?) and concurrend option */}
-            <DrawerTitle>Add Transaction</DrawerTitle>
+            <div className="flex flex-row gap-2.5">
+              <Button disabled
+                size="sm" 
+                variant="secondary">
+                  <CalendarClock /> {timestamp.toLocaleString("en-GB", { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "numeric" })}
+              </Button>
+
+              <Button disabled
+                size="sm"
+                variant="secondary">
+                <Euro />
+              </Button>
+            </div>
             <DrawerClose asChild>
               <Button variant="ghost" size="icon">
                 <X />
@@ -151,21 +165,30 @@ export default function AddTransaction({ isOpen, onOpenChange, transaction }: Ad
         </DrawerHeader>
 
         <div className="drawer-content mb-1 apple-safe-area">
-          <Amount 
-            amount={amount} 
-            isExpense={isExpense} 
-            setIsExpense={setIsExpense} />
+          <div className="text-center mt-15 mb-20">
+            <Badge variant="secondary">
+              <Store /> 
+              {transaction?.merchant}
+            </Badge>
 
-          { transaction?.merchant && <span>{transaction?.merchant}</span> }
+            <div className="flex flex-row justify-center items-center mt-2.5">
+              <Button variant="ghost" className="rounded-full w-auto h-auto" onClick={() => setIsExpense(!isExpense)}>
+                {isExpense ? <Minus className="size-8 stroke-3" /> : <Plus className="size-8 stroke-3" />}     
+              </Button>  
+              <span className="ml-2 text-5xl font-bold">{ amount } €</span>
+            </div>
+          </div>
           
-
+          <Label htmlFor="input-addtransaction-note">Note</Label>
           <Input 
-            type="text"
+            className="mt-2"
+            id="input-addtransaction-note"
+            type="text" 
             placeholder="Add a note..." 
             value={note} 
             onChange={(e) => setNote(e.target.value)} />
 
-          <div className="flex flex-row gap-2.5 my-2.5">
+          <div className="grid grid-cols-2 gap-2.5 my-4">
             <SelectCategory
               isExpense={isExpense}
               selectedCategory={selectedCategory}
@@ -177,9 +200,10 @@ export default function AddTransaction({ isOpen, onOpenChange, transaction }: Ad
 
           <NumPad handleNumpadInput={handleNumpadInput} />
 
-          <div className="flex flex-row w-full gap-x-2.5">
+          <div className="flex flex-row w-full gap-x-2.5 mt-4">
             {!transaction &&
-              <Button onClick={() => handleSaveOrUpdate(false)} disabled={addTransaction.isPending} className="grow mt-2.5 h-12 rounded-full">
+              <Button
+                onClick={() => handleSaveOrUpdate(false)} disabled={addTransaction.isPending} className="grow h-12">
                 {addTransaction.isPending && <Spinner />}
                 {addTransaction.isPending ? "Creating" : "Create"}
               </Button>
@@ -187,11 +211,14 @@ export default function AddTransaction({ isOpen, onOpenChange, transaction }: Ad
 
             {transaction &&
               <>
-                <Button onClick={() => handleSaveOrUpdate(true)} disabled={updateTransaction.isPending} className="grow mt-2.5 h-12 rounded-full">
+                <Button
+                  onClick={() => handleSaveOrUpdate(true)} disabled={updateTransaction.isPending} className="grow h-12">
                   {updateTransaction.isPending && <Spinner />}
                   {updateTransaction.isPending ? "Updating" : "Update"}
                 </Button>
-                <Button onClick={() => handleDelete(transaction.transactionId)} disabled={deleteTransaction.isPending} className="mt-2.5 h-12 w-12 rounded-full bg-red-500">
+                <Button
+                  variant="destructive"
+                  onClick={() => handleDelete(transaction.transactionId)} disabled={deleteTransaction.isPending} className="h-12 w-12">
                   {deleteTransaction.isPending ? <Spinner /> : <Trash />}
                 </Button>
               </>
