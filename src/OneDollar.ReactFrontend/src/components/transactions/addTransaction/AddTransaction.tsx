@@ -15,6 +15,7 @@ import type { Transaction } from "@/models/Transaction"
 import { useTransactions } from "@/api/hooks/useTransactions"
 import { useCategories } from "@/api/hooks/useCategories"
 import { useAccounts } from "@/api/hooks/useAccounts"
+import { Input } from "@/components/ui/input"
 
 interface AddTransactionProps {
   isOpen: boolean;
@@ -27,7 +28,7 @@ export default function AddTransaction({ isOpen, onOpenChange, transaction }: Ad
   const { categories } = useCategories();
   const { accounts } = useAccounts();
 
-  const [note] = useState<string>();
+  const [note, setNote] = useState<string>();
   const [amount, setAmount] = useState<string>("0");
   const [isExpense, setIsExpense] = useState<boolean>(true);
   const [selectedCategory, setSelectedCategory] = useState<Category>();
@@ -37,12 +38,14 @@ export default function AddTransaction({ isOpen, onOpenChange, transaction }: Ad
     if (isOpen) {
       if (transaction) {
         // Edit mode: populate fields
+        setNote(transaction.note);
         setIsExpense(transaction.amount < 0);
         setAmount(Math.abs(transaction.amount).toFixed(2).toString().replace(".", ","));
         setSelectedCategory(categories.data?.find((category: Category) => category.categoryId === transaction.categoryId));
         setSelectedAccount(accounts.data?.find((account: Account) => account.accountId === transaction.accountId));
       } else {
         // Add mode: reset fields
+        setNote(undefined);
         setAmount("0");
         setSelectedCategory(undefined);
         setSelectedAccount(undefined);
@@ -152,6 +155,15 @@ export default function AddTransaction({ isOpen, onOpenChange, transaction }: Ad
             amount={amount} 
             isExpense={isExpense} 
             setIsExpense={setIsExpense} />
+
+          { transaction?.merchant && <span>{transaction?.merchant}</span> }
+          
+
+          <Input 
+            type="text"
+            placeholder="Add a note..." 
+            value={note} 
+            onChange={(e) => setNote(e.target.value)} />
 
           <div className="flex flex-row gap-2.5 my-2.5">
             <SelectCategory
