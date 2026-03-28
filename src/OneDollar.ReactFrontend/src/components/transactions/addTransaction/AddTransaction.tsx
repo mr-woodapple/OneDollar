@@ -17,6 +17,7 @@ import { useTransactions } from "@/api/hooks/useTransactions"
 import { useCategories } from "@/api/hooks/useCategories"
 import { useAccounts } from "@/api/hooks/useAccounts"
 import { Label } from "@/components/ui/label"
+import { isTimestampWithoutTimeInfo } from "@/lib/dateHelper"
 
 interface AddTransactionProps {
   isOpen: boolean;
@@ -35,6 +36,11 @@ export default function AddTransaction({ isOpen, onOpenChange, transaction }: Ad
   const [isExpense, setIsExpense] = useState<boolean>(true);
   const [selectedCategory, setSelectedCategory] = useState<Category>();
   const [selectedAccount, setSelectedAccount] = useState<Account>();
+
+  // Only show the time information if the time is not 00:00
+  const humanReadableTimestamp = isTimestampWithoutTimeInfo(timestamp) 
+    ? timestamp.toLocaleString("en-GB", { weekday: "short", month: "short", day: "numeric" })
+    : timestamp.toLocaleString("en-GB", { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "numeric" })
 
   useEffect(() => {
     if (isOpen) {
@@ -147,7 +153,7 @@ export default function AddTransaction({ isOpen, onOpenChange, transaction }: Ad
               <Button disabled
                 size="sm" 
                 variant="secondary">
-                  <CalendarClock /> {timestamp.toLocaleString("en-GB", { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "numeric" })}
+                  <CalendarClock /> {humanReadableTimestamp}
               </Button>
 
               <Button disabled
@@ -165,11 +171,13 @@ export default function AddTransaction({ isOpen, onOpenChange, transaction }: Ad
         </DrawerHeader>
 
         <div className="drawer-content mb-1 apple-safe-area">
-          <div className="text-center mt-15 mb-20">
-            <Badge variant="secondary">
-              <Store /> 
-              {transaction?.merchant}
-            </Badge>
+          <div className="text-center mt-10 mb-15">
+            { transaction?.merchant &&
+              <Badge variant="secondary">
+                <Store /> 
+                {transaction?.merchant}
+              </Badge>
+            }
 
             <div className="flex flex-row justify-center items-center mt-2.5">
               <Button variant="ghost" className="rounded-full w-auto h-auto" onClick={() => setIsExpense(!isExpense)}>
