@@ -9,11 +9,6 @@ on:
         description: "Stage to build for (for example: dev or release)"
         required: true
         type: string
-      version:
-        description: "Version tag to publish for release builds"
-        required: false
-        default: ""
-        type: string
       tag_suffix:
         description: "Optional suffix to append as a separate tag for dev builds"
         required: false
@@ -60,13 +55,8 @@ jobs:
               fi
               ;;
             release)
-              if [ -z "${{ inputs.version }}" ]; then
-                echo "Release stage requires the version input to be set."
-                exit 1
-              fi
-
-              FE_TAGS="$FE_BASE:release,$FE_BASE:${{ inputs.version }}"
-              BE_TAGS="$BE_BASE:release,$BE_BASE:${{ inputs.version }}"
+              FE_TAGS="$FE_BASE:release"
+              BE_TAGS="$BE_BASE:release"
               ;;
             *)
               echo "Unsupported stage: ${{ inputs.stage }}"
