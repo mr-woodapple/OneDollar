@@ -1,0 +1,33 @@
+# Workflow to run if the main branch is updated
+name: Pushed to main
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/**'
+
+permissions:
+  contents: read
+  packages: write
+  attestations: write
+  id-token: write
+
+jobs:
+  build-backend:
+    name: Build Backend
+    uses: ./.github/workflows/build-backend.yaml
+
+  build-frontend:
+    name: Build Frontend
+    uses: ./.github/workflows/build-frontend.yaml
+
+  publish-release-images:
+    name: Publish Docker Release Images
+    needs: [build-backend, build-frontend]
+    uses: ./.github/workflows/publish-docker.yaml
+    with:
+      stage: release
+    secrets: inherit
+    
