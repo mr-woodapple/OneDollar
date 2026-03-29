@@ -8,48 +8,22 @@ on:
 
 permissions:
   contents: read
-  pull-requests: read
   packages: write
   attestations: write
   id-token: write
 
 jobs:
-  detect-changes:
-    name: Detect Changes
-    runs-on: ubuntu-latest
-    outputs:
-      frontend_changed: ${{ steps.filter.outputs.frontend }}
-      backend_changed: ${{ steps.filter.outputs.backend }}
-    steps:
-      - name: Detect frontend/backend path changes
-        id: filter
-        uses: dorny/paths-filter@v4
-        with:
-          filters: |
-            frontend:
-              - 'src/OneDollar.ReactFrontend/**'
-            backend:
-              - 'src/OneDollar.AspNetCoreBackend/**'
-
   build-backend:
     name: Build Backend
-    needs: detect-changes
-    if: needs.detect-changes.outputs.backend_changed == 'true'
     uses: ./.github/workflows/build-backend.yaml
 
   build-frontend:
     name: Build Frontend
-    needs: detect-changes
-    if: needs.detect-changes.outputs.frontend_changed == 'true'
     uses: ./.github/workflows/build-frontend.yaml
 
   publish-dev-images:
     name: Publish Docker Dev Images
     needs: [build-backend, build-frontend]
-    if: >
-      (needs.build-backend.result == 'success' || needs.build-frontend.result == 'success') &&
-      needs.build-backend.result != 'failure' &&
-      needs.build-frontend.result != 'failure'
     uses: ./.github/workflows/publish-docker.yaml
     with:
       stage: dev
