@@ -8,17 +8,39 @@ on:
 
 permissions:
   contents: read
+  pull-requests: read
   packages: write
   attestations: write
   id-token: write
 
 jobs:
+  detect-changes:
+    name: Detect Changed Components
+    runs-on: ubuntu-latest
+    outputs:
+      frontend_changed: ${{ steps.filter.outputs.frontend }}
+      backend_changed: ${{ steps.filter.outputs.backend }}
+    steps:
+      - name: Detect frontend/backend path changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            frontend:
+              - 'src/OneDollar.ReactFrontend/**'
+            backend:
+              - 'src/OneDollar.AspNetCoreBackend/**'
+
   build-backend:
     name: Build Backend
+    needs: detect-changes
+    if: needs.detect-changes.outputs.backend_changed == 'true'
     uses: ./.github/workflows/build-backend.yaml
 
   build-frontend:
     name: Build Frontend
+    needs: detect-changes
+    if: needs.detect-changes.outputs.frontend_changed == 'true'
     uses: ./.github/workflows/build-frontend.yaml
 
   publish-dev-images:

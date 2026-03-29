@@ -5,6 +5,8 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'src/**'
 
 permissions:
   contents: read
@@ -28,3 +30,4 @@ jobs:
     with:
       stage: release
     secrets: inherit
+    
