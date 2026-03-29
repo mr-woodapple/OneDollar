@@ -158,3 +158,8 @@
 .dbg {
   border: 2px dashed red;
 }
+
+/* Used for screenreader / aria elements */
+.hidden {
+  display: none;
+}

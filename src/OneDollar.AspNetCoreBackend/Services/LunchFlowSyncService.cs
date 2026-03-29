@@ -85,18 +85,18 @@ public class LunchFlowSyncService
 		// TODO: Make this use SQL transactions
 		foreach (var acc in lunchFlowAccounts.Accounts)
 		{
-			if (!await _context.Account.AnyAsync(a => a.ExternalAccountId == acc.Id))
+			var account = await _context.Account.SingleOrDefaultAsync(a => a.ExternalAccountId == acc.Id);
+			if (account == null)
 			{
 				// No account found, create new one
-				var newAcc = new Account { ExternalAccountId = acc.Id, Name = acc.Name };
+				var newAcc = new Account { ExternalAccountId = acc.Id, Name = acc.Name, Status = acc.Status};
 				_context.Add(newAcc);
 			}
 			else
 			{
 				// Account found, update properties (only name and status as of right now).
-				var existingAcc = await _context.Account.SingleAsync(a => a.ExternalAccountId == acc.Id);
-				existingAcc.Name = acc.Name;
-				existingAcc.Status = acc.Status;
+				account.Name = acc.Name;
+				account.Status = acc.Status;
 			}
 		}
 		await _context.SaveChangesAsync();

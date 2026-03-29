@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
-import { Drawer, DrawerClose, DrawerContent, DrawerHeader } from "@/components/ui/drawer"
+import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer"
 
 import NumPad from "@/components/transactions/addTransaction/NumPad"
 import SelectCategory from "@/components/transactions/addTransaction/SelectCategory"
@@ -30,7 +30,7 @@ export default function AddTransaction({ isOpen, onOpenChange, transaction }: Ad
   const { categories } = useCategories();
   const { accounts } = useAccounts();
 
-  const [note, setNote] = useState<string>();
+  const [note, setNote] = useState<string>("");
   const [amount, setAmount] = useState<string>("0");
   const [timestamp, setTimestamp] = useState<Date>(new Date());
   const [isExpense, setIsExpense] = useState<boolean>(true);
@@ -46,7 +46,7 @@ export default function AddTransaction({ isOpen, onOpenChange, transaction }: Ad
     if (isOpen) {
       if (transaction) {
         // Edit mode: populate fields
-        setNote(transaction.note);
+        setNote(transaction.note ?? "");
         setIsExpense(transaction.amount < 0);
         setTimestamp(new Date(transaction.timestamp));
         setAmount(Math.abs(transaction.amount).toFixed(2).toString().replace(".", ","));
@@ -54,8 +54,9 @@ export default function AddTransaction({ isOpen, onOpenChange, transaction }: Ad
         setSelectedAccount(accounts.data?.find((account: Account) => account.accountId === transaction.accountId));
       } else {
         // Add mode: reset fields
-        setNote(undefined);
+        setNote("");
         setAmount("0");
+        setTimestamp(new Date);
         setSelectedCategory(undefined);
         setSelectedAccount(undefined);
       }
@@ -148,6 +149,7 @@ export default function AddTransaction({ isOpen, onOpenChange, transaction }: Ad
     <Drawer open={isOpen} onOpenChange={onOpenChange}>
       <DrawerContent className="px-5">
         <DrawerHeader>
+          <DrawerTitle className="hidden">{ transaction ? "Edit Transaction" : "Add Transaction" }</DrawerTitle>
           <div className="flex flex-row justify-between items-center">
             <div className="flex flex-row gap-2.5">
               <Button disabled
@@ -162,6 +164,7 @@ export default function AddTransaction({ isOpen, onOpenChange, transaction }: Ad
                 <Euro />
               </Button>
             </div>
+            
             <DrawerClose asChild>
               <Button variant="ghost" size="icon">
                 <X />
@@ -171,7 +174,7 @@ export default function AddTransaction({ isOpen, onOpenChange, transaction }: Ad
         </DrawerHeader>
 
         <div className="drawer-content mb-1 apple-safe-area">
-          <div className="text-center mt-10 mb-15">
+          <div className="text-center mt-10 mb-14">
             { transaction?.merchant &&
               <Badge variant="secondary">
                 <Store /> 
