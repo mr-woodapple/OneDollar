@@ -19,14 +19,14 @@ export default function SelectAccount({ selectedAccount, onSelectAccount }: Sele
   return (
     <Drawer>
       <DrawerTrigger asChild>
-        <div className="w-full h-12 grid place-items-center cursor-pointer">
-          {selectedAccount?.name
+          <Button variant="secondary" size="lg">
+            {selectedAccount?.name
             ? <div className="space-x-2.5">
-              <span>💳</span>
-              <span>{selectedAccount.name}</span>
-            </div>
-            : <span className="underline underline-offset-5">Select Account</span>}
-        </div>
+                <span>💳</span>
+                <span>{selectedAccount.name}</span>
+              </div>
+            : <span>Select Account</span>}
+          </Button>
       </DrawerTrigger>
 
       <DrawerContent className="apple-safe-area mb-1 max-h-[70vh]">

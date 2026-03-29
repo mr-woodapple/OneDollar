@@ -1,6 +1,6 @@
 import React from "react";
 import { ChevronLeft } from "lucide-react";
-import { NumPadButton } from "./NumPadButton";
+import { Button } from "@/components/ui/button";
 
 interface NumPadProps {
   handleNumpadInput: (token: string) => void;
@@ -29,12 +29,14 @@ export default function NumPad({ handleNumpadInput }: NumPadProps) {
   return (
     <div className="grid grid-cols-3 gap-2.5">
       {keys.map(({ display, token, aria }, idx) => (
-        <NumPadButton
+        <Button 
           key={idx}
-          value={display}
-          ariaLabel={aria}
-          onPress={() => handleNumpadInput(token)}
-        />
+          variant="secondary"
+          size="lg"
+          aria-label={aria}
+          onClick={() => handleNumpadInput(token)}>
+            { display }
+          </Button>
       ))}
     </div>
   );
