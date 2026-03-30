@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Trash, X } from "lucide-react";
 import { Button } from "../ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Item, ItemActions, ItemContent, ItemGroup, ItemMedia } from "../ui/item";
 import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle } from "../ui/drawer";
 
@@ -18,20 +17,13 @@ interface EditCategoriesProps {
 
 export default function EditCategories({ isOpen, onOpenChange }: EditCategoriesProps) {
   const { categories, deleteCategory } = useCategories();
-  const [tab, setTab] = useState("expense");
-  const [expenseCategories, setExpenseCategories] = useState<Category[]>();
-  const [incomeCategories, setIncomeCategories] = useState<Category[]>();
+  const [transactionCategories, setTransactionCategories] = useState<Category[]>();
 
   useEffect(() => {
     if (!categories.isPending && !categories.isError) {
-      // Using this to split the categories into two groups for easier handling
-      setExpenseCategories(categories.data.filter(c => c.isExpenseCategory == true));
-      setIncomeCategories(categories.data.filter(c => c.isExpenseCategory == false));
+      setTransactionCategories(categories.data)
     }
   }, [categories.data])
-
-  // Make the tabs controlled
-  const onTabChange = (value: string) => { setTab(value); }
 
   // Handle deleting categories
   async function handleDelete(id?: number) {
@@ -54,90 +46,47 @@ export default function EditCategories({ isOpen, onOpenChange }: EditCategoriesP
           </div>
         </DrawerHeader>
 
-        <div className="apple-safe-area drawer-content mb-1">
-          <Tabs value={tab} onValueChange={onTabChange} className="max-h-[70vh]">
-            <TabsList className="w-full">
-              <TabsTrigger value="expense">Expense</TabsTrigger>
-              <TabsTrigger value="income">Income</TabsTrigger>
-            </TabsList>
+        <div className="apple-safe-area drawer-content flex flex-col mb-1 max-h-[70vh]">
+          {
+            categories.isPending ? (<p className="dbg">Loading...</p>) :
+            categories.isError ? (<ErrorAlert error={categories.error} />) :
+            (
+              <>
+                <AddCategory />
 
-            {
-              categories.isPending ? (<p className="dbg">Loading...</p>) :
-                categories.isError ? (<ErrorAlert error={categories.error} />) :
-                  (
-                    <>
-                      <AddCategory
-                        isExpenseCategory={tab === "expense" ? true : false} />
+                {transactionCategories?.length === 0 && <EmptyCategories />}
 
-                      <TabsContent value="expense" className="flex flex-col overflow-hidden">
-                        {expenseCategories?.length === 0 && <EmptyCategories />}
+                {transactionCategories &&
+                  <div className="overflow-y-auto">
+                    <ItemGroup className="bg-neutral-100 rounded-xl my-5">
+                      {transactionCategories.map((category) => (
+                        <Item>
+                          <ItemMedia>
+                            <span>{category.icon}</span>
+                          </ItemMedia>
+                          <ItemContent>
+                            <span>{category.name}</span>
+                          </ItemContent>
 
-                        {expenseCategories &&
-                          <div className="overflow-y-auto">
-                            <ItemGroup className="bg-neutral-100 rounded-xl my-5">
-                              {expenseCategories.map((category) => (
-                                <Item>
-                                  <ItemMedia>
-                                    <span>{category.icon}</span>
-                                  </ItemMedia>
-                                  <ItemContent>
-                                    <span>{category.name}</span>
-                                  </ItemContent>
-
-                                  <ItemActions>
-                                    {/* TODO: Implement functionality */}
-                                    {/* 
-                                  <Button variant="ghost" size="sm">
-                                    <Pencil />
-                                  </Button> 
-                                */}
-                                    <Button variant="ghost" size="sm" className="text-red-500" onClick={() => handleDelete(category.categoryId)}>
-                                      <Trash />
-                                    </Button>
-                                  </ItemActions>
-                                </Item>
-                              ))}
-                            </ItemGroup>
-                          </div>
-                        }
-                      </TabsContent>
-
-                      <TabsContent value="income" className="flex-1 flex flex-col overflow-hidden">
-                        {incomeCategories?.length === 0 && <EmptyCategories />}
-
-                        {incomeCategories &&
-                          <div className="overflow-y-auto flex-1">
-                            <ItemGroup className="bg-neutral-100 rounded-xl my-5">
-                              {incomeCategories.map((category) => (
-                                <Item>
-                                  <ItemMedia>
-                                    <span>{category.icon}</span>
-                                  </ItemMedia>
-                                  <ItemContent>
-                                    <span>{category.name}</span>
-                                  </ItemContent>
-
-                                  <ItemActions>
-                                    {/* TODO: Implement functionality */}
-                                    {/* <Button variant="ghost" size="sm">
-                                    <Pencil />
-                                  </Button> 
-                                */}
-                                    <Button variant="ghost" size="sm" className="text-red-500" onClick={() => handleDelete(category.categoryId)}>
-                                      <Trash />
-                                    </Button>
-                                  </ItemActions>
-                                </Item>
-                              ))}
-                            </ItemGroup>
-                          </div>
-                        }
-                      </TabsContent>
-                    </>
-                  )
-            }
-          </Tabs>
-
+                          <ItemActions>
+                            {/* TODO: Implement functionality */}
+                            {/* 
+                              <Button variant="ghost" size="sm">
+                                <Pencil />
+                              </Button> 
+                            */}
+                            <Button variant="ghost" size="sm" className="text-red-500" onClick={() => handleDelete(category.categoryId)}>
+                              <Trash />
+                            </Button>
+                          </ItemActions>
+                        </Item>
+                      ))}
+                    </ItemGroup>
+                  </div>
+                }
+              </>
+            )
+          }
         </div>
       </DrawerContent>
     </Drawer>

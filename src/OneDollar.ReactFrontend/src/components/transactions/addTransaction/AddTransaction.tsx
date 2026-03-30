@@ -63,12 +63,6 @@ export default function AddTransaction({ isOpen, onOpenChange, transaction }: Ad
     }
   }, [isOpen, transaction]);
 
-  useEffect(() => {
-    if (selectedCategory) {
-      setIsExpense(selectedCategory.isExpenseCategory)
-    }
-  }, [selectedCategory])
-
   // Handle button presses from the keypad
   function handleNumpadInput(token: string) {
     let tempAmount = amount;
@@ -201,7 +195,6 @@ export default function AddTransaction({ isOpen, onOpenChange, transaction }: Ad
 
           <div className="grid grid-cols-2 gap-2.5 my-4">
             <SelectCategory
-              isExpense={isExpense}
               selectedCategory={selectedCategory}
               onSelectCategory={setSelectedCategory} />
             <SelectAccount

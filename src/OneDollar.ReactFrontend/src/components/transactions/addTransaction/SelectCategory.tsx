@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react"
 import { X } from "lucide-react"
 import { Button } from "../../ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
 import { Item, ItemGroup } from "../../ui/item";
 import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "../../ui/drawer"
 
@@ -11,32 +10,20 @@ import EmptyCategories from "../../shared/empty/EmptyCategories"
 import ErrorAlert from "../../shared/alerts/ErrorAlert"
 
 interface SelectCategoryProps {
-  isExpense: boolean;
   selectedCategory?: Category;
   onSelectCategory: (category: Category) => void;
 }
 
-export default function SelectCategory({ isExpense, selectedCategory, onSelectCategory }: SelectCategoryProps) {
+export default function SelectCategory({ selectedCategory, onSelectCategory }: SelectCategoryProps) {
   const { categories } = useCategories();
 
-  const [tab, setTab] = useState("expense");
-  const [expenseCategories, setExpenseCategories] = useState<Category[]>();
-  const [incomeCategories, setIncomeCategories] = useState<Category[]>();
+  const [transactionCategories, setTransactionCategories] = useState<Category[]>();
 
   useEffect(() => {
     if (!categories.isPending && !categories.isError) {
-      // Using this to split the categories into two groups for easier handling
-      setExpenseCategories(categories.data.filter(c => c.isExpenseCategory == true));
-      setIncomeCategories(categories.data.filter(c => c.isExpenseCategory == false));
+      setTransactionCategories(categories.data);
     }
-  }, [categories.data])
-
-  useEffect(() =>{
-    setTab(isExpense ? "expense" : "income");
-  }, [isExpense])
-
-  // Make the tabs controlled
-  const onTabChange = (value: string) => { setTab(value); }
+  }, [categories.data]);
 
   return (
     <Drawer>
@@ -65,59 +52,31 @@ export default function SelectCategory({ isExpense, selectedCategory, onSelectCa
           </div>
         </DrawerHeader>
 
-        <div className="apple-safe-area drawer-content mx-5">
-          <Tabs value={tab} onValueChange={onTabChange} className="max-h-[70vh]">
-            <TabsList className="w-full">
-              <TabsTrigger value="expense">Expense</TabsTrigger>
-              <TabsTrigger value="income">Income</TabsTrigger>
-            </TabsList>
+        <div className="apple-safe-area drawer-content mx-5 flex flex-col">
+          {
+            categories.isPending ? (<p className="dbg">Loading...</p>) :
+            categories.isError ? (<ErrorAlert error={categories.error} />) :
+            (
+              <>
+                {transactionCategories?.length === 0 && <EmptyCategories />}
 
-            {
-              categories.isPending ? (<p className="dbg">Loading...</p>) :
-              categories.isError ? (<ErrorAlert error={categories.error} />) :
-              (
-                <>
-                  <TabsContent value="expense" className="flex flex-col overflow-hidden">
-                    {expenseCategories?.length === 0 && <EmptyCategories />}
-
-                    {expenseCategories &&
-                      <div className="overflow-y-auto">
-                        <ItemGroup className="bg-neutral-100 rounded-xl my-5">
-                          {expenseCategories.map((category) => (
-                            <DrawerClose asChild key={category.categoryId}>
-                              <Item onClick={() => onSelectCategory(category)} className="hover:bg-neutral-200">
-                                <span>{category.icon}</span>
-                                <span>{category.name}</span>
-                              </Item>
-                            </DrawerClose>
-                          ))}
-                        </ItemGroup>
-                      </div>
-                    }
-                  </TabsContent>
-
-                  <TabsContent value="income">
-                    {incomeCategories?.length === 0 && <EmptyCategories />}
-
-                    {incomeCategories &&
-                      <div className="overflow-y-auto">
-                        <ItemGroup className="bg-neutral-100 rounded-xl my-5">
-                          {incomeCategories.map((category) => (
-                            <DrawerClose asChild key={category.categoryId}>
-                              <Item onClick={() => onSelectCategory(category)} className="hover:bg-neutral-200">
-                                <span>{category.icon}</span>
-                                <span>{category.name}</span>
-                              </Item>
-                            </DrawerClose>
-                          ))}
-                        </ItemGroup>
-                      </div>
-                    }
-                  </TabsContent>
-                </>
-              )
-            }
-          </Tabs>
+                {transactionCategories &&
+                  <div className="overflow-y-auto">
+                    <ItemGroup className="bg-neutral-100 rounded-xl my-5">
+                      {transactionCategories.map((category) => (
+                        <DrawerClose asChild key={category.categoryId}>
+                          <Item onClick={() => onSelectCategory(category)} className="hover:bg-neutral-200">
+                            <span>{category.icon}</span>
+                            <span>{category.name}</span>
+                          </Item>
+                        </DrawerClose>
+                      ))}
+                    </ItemGroup>
+                  </div>
+                }
+              </>
+            )
+          }
         </div>
       </DrawerContent>
     </Drawer>

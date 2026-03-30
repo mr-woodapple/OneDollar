@@ -3,5 +3,4 @@ export interface Category {
     categoryId?: number;
     icon: string | undefined;
     name: string | undefined;
-    isExpenseCategory: boolean;
 }
