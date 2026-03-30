@@ -6,19 +6,12 @@ using OneDollar.Api.Models;
 
 namespace OneDollar.Api.Controllers;
 
-public class AccountController : ODataController
+public class AccountController(OneDollarContext oneDollarContext) : ODataController
 {
-	private protected OneDollarContext _context;
-
-	public AccountController(OneDollarContext context)
-	{
-		_context = context;
-	}
-
 	[EnableQuery]
 	public async Task<ActionResult<IEnumerable<Account>>> Get()
 	{
-		return Ok(_context.Account.ToAsyncEnumerable());
+		return Ok(oneDollarContext.Account.ToAsyncEnumerable());
 	}
 
 	public async Task<ActionResult> Post([FromBody] Account account)
@@ -27,8 +20,8 @@ public class AccountController : ODataController
 
 		try
 		{
-			await _context.Account.AddAsync(account);
-			await _context.SaveChangesAsync();
+			await oneDollarContext.Account.AddAsync(account);
+			await oneDollarContext.SaveChangesAsync();
 
 			return Ok(account);
 		}
@@ -42,9 +35,9 @@ public class AccountController : ODataController
 	{
 		try
 		{
-			var account = _context.Account.Single(c => c.AccountId == key);
-			_context.Account.Remove(account);
-			await _context.SaveChangesAsync();
+			var account = oneDollarContext.Account.Single(c => c.AccountId == key);
+			oneDollarContext.Account.Remove(account);
+			await oneDollarContext.SaveChangesAsync();
 
 			return NoContent();
 		}

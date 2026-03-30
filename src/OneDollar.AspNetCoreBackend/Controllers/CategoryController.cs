@@ -6,19 +6,12 @@ using OneDollar.Api.Models;
 
 namespace OneDollar.Api.Controllers;
 
-public class CategoryController : ODataController
+public class CategoryController(OneDollarContext oneDollarContext) : ODataController
 {
-	private protected OneDollarContext _context;
-
-	public CategoryController(OneDollarContext oneDollarContext)
-	{
-		_context = oneDollarContext;
-	}
-
 	[EnableQuery]
 	public async Task<ActionResult<IEnumerable<Category>>> Get()
 	{
-		return Ok(_context.Category.ToAsyncEnumerable());
+		return Ok(oneDollarContext.Category.ToAsyncEnumerable());
 	}
 
 	public async Task<ActionResult> Post([FromBody] Category category)
@@ -27,8 +20,8 @@ public class CategoryController : ODataController
 
 		try
 		{
-			await _context.Category.AddAsync(category);
-			await _context.SaveChangesAsync();
+			await oneDollarContext.Category.AddAsync(category);
+			await oneDollarContext.SaveChangesAsync();
 
 			return Ok(category);
 		}
@@ -42,9 +35,9 @@ public class CategoryController : ODataController
 	{
 		try
 		{
-			var category = _context.Category.Single(c => c.CategoryId == key);
-			_context.Category.Remove(category);
-			await _context.SaveChangesAsync();
+			var category = oneDollarContext.Category.Single(c => c.CategoryId == key);
+			oneDollarContext.Category.Remove(category);
+			await oneDollarContext.SaveChangesAsync();
 
 			return NoContent();
 		}

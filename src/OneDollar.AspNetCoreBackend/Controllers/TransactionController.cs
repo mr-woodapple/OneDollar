@@ -8,19 +8,12 @@ using OneDollar.Api.Models;
 
 namespace OneDollar.Api.Controllers;
 
-public class TransactionController : ODataController
+public class TransactionController(OneDollarContext oneDollarContext) : ODataController
 {
-	private protected OneDollarContext _context;
-
-	public TransactionController(OneDollarContext oneDollarContext)
-	{
-		_context = oneDollarContext;
-	}
-
 	[EnableQuery]
 	public async Task<ActionResult<IEnumerable<Transaction>>> Get()
 	{
-		var t = _context.Transaction.ToAsyncEnumerable();
+		var t = oneDollarContext.Transaction.ToAsyncEnumerable();
 
 		return Ok(t);
 	}
@@ -32,13 +25,13 @@ public class TransactionController : ODataController
 
 		try
 		{
-			_context.Transaction.Add(transaction);
+			oneDollarContext.Transaction.Add(transaction);
 
 			// Update the linked accounts balance before saving
-			var account = await _context.Account.SingleAsync(a => a.AccountId == transaction.AccountId);
+			var account = await oneDollarContext.Account.SingleAsync(a => a.AccountId == transaction.AccountId);
 			account.Balance += transaction.Amount;
 
-			await _context.SaveChangesAsync();
+			await oneDollarContext.SaveChangesAsync();
 			return Ok(transaction);
 		}
 		catch (Exception ex)
@@ -50,36 +43,36 @@ public class TransactionController : ODataController
 	[EnableQuery]
 	public async Task<ActionResult<Transaction>> Patch([FromRoute] int key, [FromBody] Delta<Transaction> delta)
 	{
-		var transaction = _context.Transaction.SingleOrDefault(t => t.TransactionId == key);
+		var transaction = oneDollarContext.Transaction.SingleOrDefault(t => t.TransactionId == key);
 		if (transaction == null) { return NotFound(); }
 
 		try
 		{
 			// Check if a transaction for the given id exists
-			var existingTransaction = await _context.Transaction.SingleOrDefaultAsync(t => t.TransactionId == key);
+			var existingTransaction = await oneDollarContext.Transaction.SingleOrDefaultAsync(t => t.TransactionId == key);
 			if (existingTransaction == null) { return NotFound(); }
 
 			if (transaction.AccountId == existingTransaction.AccountId)
 			{
 				// Case 1: Account didn't change
-				var account = await _context.Account.SingleAsync(a => a.AccountId == existingTransaction.AccountId);
+				var account = await oneDollarContext.Account.SingleAsync(a => a.AccountId == existingTransaction.AccountId);
 				account.Balance -= existingTransaction.Amount;
 				account.Balance += transaction.Amount;
 			}
 			else
 			{
 				// Case 2: Account did change
-				var oldAccount = await _context.Account.SingleAsync(a => a.AccountId == existingTransaction.AccountId);
-				var newAccount = await _context.Account.SingleAsync(a => a.AccountId == transaction.AccountId);
+				var oldAccount = await oneDollarContext.Account.SingleAsync(a => a.AccountId == existingTransaction.AccountId);
+				var newAccount = await oneDollarContext.Account.SingleAsync(a => a.AccountId == transaction.AccountId);
 
 				oldAccount.Balance -= existingTransaction.Amount;
 				newAccount.Balance += transaction.Amount;
 			}
 
 			delta.Patch(transaction);
-			await _context.SaveChangesAsync();
+			await oneDollarContext.SaveChangesAsync();
 
-			return Ok(_context.Transaction.Single(t => t.TransactionId == key));
+			return Ok(oneDollarContext.Transaction.Single(t => t.TransactionId == key));
 		}
 		catch (Exception ex)
 		{
@@ -91,14 +84,14 @@ public class TransactionController : ODataController
 	{
 		try
 		{
-			var transaction = await _context.Transaction.SingleAsync(t => t.TransactionId == key);
-			_context.Transaction.Remove(transaction);
+			var transaction = await oneDollarContext.Transaction.SingleAsync(t => t.TransactionId == key);
+			oneDollarContext.Transaction.Remove(transaction);
 
 			// Update the linked accounts balance before saving
-			var account = await _context.Account.SingleAsync(a => a.AccountId == transaction.AccountId);
+			var account = await oneDollarContext.Account.SingleAsync(a => a.AccountId == transaction.AccountId);
 			account.Balance -= transaction.Amount;
 
-			await _context.SaveChangesAsync();
+			await oneDollarContext.SaveChangesAsync();
 			return NoContent();
 		}
 		catch (Exception ex)

@@ -60,7 +60,7 @@ export default function EditCategories({ isOpen, onOpenChange }: EditCategoriesP
                   <div className="overflow-y-auto">
                     <ItemGroup className="bg-neutral-100 rounded-xl my-5">
                       {transactionCategories.map((category) => (
-                        <Item>
+                        <Item key={category.categoryId}>
                           <ItemMedia>
                             <span>{category.icon}</span>
                           </ItemMedia>
