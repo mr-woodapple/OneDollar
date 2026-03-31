@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import EditAccounts from "@/components/profile-settings/EditAccounts";
-import EditCategories from "@/components/profile-settings/EditCategories";
+import CategoriesDrawer from "@/components/categories/CategoriesDrawer";
 import EditLunchFlowProvider from "@/components/profile-settings/EditLunchFlowProvider";
 import { Item, ItemActions, ItemContent, ItemDescription, ItemFooter, ItemGroup, ItemSeparator, ItemTitle } from "@/components/ui/item";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -139,7 +139,12 @@ export default function ProfileSettingsPage() {
       </ItemGroup>
 
       {/* Drawers */}
-      <EditCategories isOpen={editCategoriesDrawerState} onOpenChange={setEditCategoriesDrawerState} />
+      <CategoriesDrawer
+        showAddButton
+        isOpen={editCategoriesDrawerState} 
+        onOpenChange={setEditCategoriesDrawerState} />
+      
+      {/* <EditCategories isOpen={editCategoriesDrawerState} onOpenChange={setEditCategoriesDrawerState} /> */}
       <EditAccounts isOpen={editAccountsDrawerState} onOpenChange={setEditAccountsDrawerState} />
       <EditLunchFlowProvider isOpen={lunchFlowDrawerState} onOpenChange={setLunchFlowDrawerState} />
     </div>

@@ -8,7 +8,7 @@ import { Spinner } from "@/components/ui/spinner"
 import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer"
 
 import NumPad from "@/components/transactions/addTransaction/NumPad"
-import SelectCategory from "@/components/transactions/addTransaction/SelectCategory"
+import CategoriesDrawer from "@/components/categories/CategoriesDrawer"
 import SelectAccount from "@/components/transactions/addTransaction/SelectAccount"
 import type { Account } from "@/models/Account"
 import type { Category } from "@/models/Category"
@@ -36,6 +36,8 @@ export default function AddTransaction({ isOpen, onOpenChange, transaction }: Ad
   const [isExpense, setIsExpense] = useState<boolean>(true);
   const [selectedCategory, setSelectedCategory] = useState<Category>();
   const [selectedAccount, setSelectedAccount] = useState<Account>();
+
+  const [editCategoriesDrawerState, setEditCategoriesDrawerState] = useState(false)
 
   // Only show the time information if the time is not 00:00
   const humanReadableTimestamp = isTimestampWithoutTimeInfo(timestamp) 
@@ -140,96 +142,114 @@ export default function AddTransaction({ isOpen, onOpenChange, transaction }: Ad
   }
 
   return (
-    <Drawer open={isOpen} onOpenChange={onOpenChange}>
-      <DrawerContent className="px-5">
-        <DrawerHeader>
-          <DrawerTitle className="hidden">{ transaction ? "Edit Transaction" : "Add Transaction" }</DrawerTitle>
-          <div className="flex flex-row justify-between items-center">
-            <div className="flex flex-row gap-2.5">
-              <Button disabled
-                size="sm" 
-                variant="secondary">
-                  <CalendarClock /> {humanReadableTimestamp}
-              </Button>
+    <>
+      <Drawer open={isOpen} onOpenChange={onOpenChange}>
+        <DrawerContent className="px-5">
+          <DrawerHeader>
+            <DrawerTitle className="hidden">{ transaction ? "Edit Transaction" : "Add Transaction" }</DrawerTitle>
+            <div className="flex flex-row justify-between items-center">
+              <div className="flex flex-row gap-2.5">
+                <Button disabled
+                  size="sm" 
+                  variant="secondary">
+                    <CalendarClock /> {humanReadableTimestamp}
+                </Button>
 
-              <Button disabled
-                size="sm"
-                variant="secondary">
-                <Euro />
-              </Button>
+                <Button disabled
+                  size="sm"
+                  variant="secondary">
+                  <Euro />
+                </Button>
+              </div>
+              
+              <DrawerClose asChild>
+                <Button variant="ghost" size="icon">
+                  <X />
+                </Button>
+              </DrawerClose>
+            </div>
+          </DrawerHeader>
+
+          <div className="drawer-content mb-1 apple-safe-area">
+            <div className="text-center mt-10 mb-14">
+              { transaction?.merchant &&
+                <Badge variant="secondary">
+                  <Store /> 
+                  {transaction?.merchant}
+                </Badge>
+              }
+
+              <div className="flex flex-row justify-center items-center mt-2.5">
+                <Button variant="ghost" className="rounded-full w-auto h-auto" onClick={() => setIsExpense(!isExpense)}>
+                  {isExpense ? <Minus className="size-8 stroke-3" /> : <Plus className="size-8 stroke-3" />}     
+                </Button>  
+                <span className="ml-2 text-5xl font-bold">{ amount } €</span>
+              </div>
             </div>
             
-            <DrawerClose asChild>
-              <Button variant="ghost" size="icon">
-                <X />
+            <Label htmlFor="input-addtransaction-note">Note</Label>
+            <Input 
+              className="mt-2"
+              id="input-addtransaction-note"
+              type="text" 
+              placeholder="Add a note..." 
+              value={note} 
+              onChange={(e) => setNote(e.target.value)} />
+
+            <div className="grid grid-cols-2 gap-2.5 my-4">
+
+              <Button variant="secondary" size="lg" onClick={() => setEditCategoriesDrawerState(true)}>
+                {
+                  selectedCategory?.name
+                  ? <div className="space-x-2.5">
+                    <span>{selectedCategory.icon}</span>
+                    <span>{selectedCategory.name}</span>
+                  </div>
+                  : <span>Select Category</span>
+                }
               </Button>
-            </DrawerClose>
-          </div>
-        </DrawerHeader>
+              
+              <SelectAccount
+                selectedAccount={selectedAccount}
+                onSelectAccount={setSelectedAccount} />
+            </div>
 
-        <div className="drawer-content mb-1 apple-safe-area">
-          <div className="text-center mt-10 mb-14">
-            { transaction?.merchant &&
-              <Badge variant="secondary">
-                <Store /> 
-                {transaction?.merchant}
-              </Badge>
-            }
+            <NumPad handleNumpadInput={handleNumpadInput} />
 
-            <div className="flex flex-row justify-center items-center mt-2.5">
-              <Button variant="ghost" className="rounded-full w-auto h-auto" onClick={() => setIsExpense(!isExpense)}>
-                {isExpense ? <Minus className="size-8 stroke-3" /> : <Plus className="size-8 stroke-3" />}     
-              </Button>  
-              <span className="ml-2 text-5xl font-bold">{ amount } €</span>
+            <div className="flex flex-row w-full gap-x-2.5 mt-4">
+              {!transaction &&
+                <Button
+                onClick={() => handleSaveOrUpdate(false)} disabled={addTransaction.isPending} className="grow h-12">
+                  {addTransaction.isPending && <Spinner />}
+                  {addTransaction.isPending ? "Creating" : "Create"}
+                </Button>
+              }
+
+              {transaction &&
+                <>
+                  <Button
+                    onClick={() => handleSaveOrUpdate(true)} disabled={updateTransaction.isPending} className="grow h-12">
+                    {updateTransaction.isPending && <Spinner />}
+                    {updateTransaction.isPending ? "Updating" : "Update"}
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={() => handleDelete(transaction.transactionId)} disabled={deleteTransaction.isPending} className="h-12 w-12">
+                    {deleteTransaction.isPending ? <Spinner /> : <Trash />}
+                  </Button>
+                </>
+              }
             </div>
           </div>
-          
-          <Label htmlFor="input-addtransaction-note">Note</Label>
-          <Input 
-            className="mt-2"
-            id="input-addtransaction-note"
-            type="text" 
-            placeholder="Add a note..." 
-            value={note} 
-            onChange={(e) => setNote(e.target.value)} />
+        </DrawerContent>
+      </Drawer >
 
-          <div className="grid grid-cols-2 gap-2.5 my-4">
-            <SelectCategory
-              selectedCategory={selectedCategory}
-              onSelectCategory={setSelectedCategory} />
-            <SelectAccount
-              selectedAccount={selectedAccount}
-              onSelectAccount={setSelectedAccount} />
-          </div>
-
-          <NumPad handleNumpadInput={handleNumpadInput} />
-
-          <div className="flex flex-row w-full gap-x-2.5 mt-4">
-            {!transaction &&
-              <Button
-                onClick={() => handleSaveOrUpdate(false)} disabled={addTransaction.isPending} className="grow h-12">
-                {addTransaction.isPending && <Spinner />}
-                {addTransaction.isPending ? "Creating" : "Create"}
-              </Button>
-            }
-
-            {transaction &&
-              <>
-                <Button
-                  onClick={() => handleSaveOrUpdate(true)} disabled={updateTransaction.isPending} className="grow h-12">
-                  {updateTransaction.isPending && <Spinner />}
-                  {updateTransaction.isPending ? "Updating" : "Update"}
-                </Button>
-                <Button
-                  variant="destructive"
-                  onClick={() => handleDelete(transaction.transactionId)} disabled={deleteTransaction.isPending} className="h-12 w-12">
-                  {deleteTransaction.isPending ? <Spinner /> : <Trash />}
-                </Button>
-              </>
-            }
-          </div>
-        </div>
-      </DrawerContent>
-    </Drawer >
+      {/* Child drawers */}
+      <CategoriesDrawer
+        useSelectionMode
+        isOpen={editCategoriesDrawerState} 
+        onOpenChange={setEditCategoriesDrawerState} 
+        onSelectCategory={setSelectedCategory} />
+    </>
   )
 }

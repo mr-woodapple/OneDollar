@@ -5,17 +5,31 @@ import { Item, ItemActions, ItemContent, ItemGroup, ItemMedia } from "../ui/item
 import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle } from "../ui/drawer";
 
 import { useCategories } from "@/api/hooks/useCategories";
-import EmptyCategories from "../shared/empty/EmptyCategories";
-import AddCategory from "./AddCategory";
-import ErrorAlert from "../shared/alerts/ErrorAlert";
 import type { Category } from "@/models/Category";
+import ErrorAlert from "../shared/alerts/ErrorAlert";
+import AddCategory from "../profile-settings/AddCategory";
+import EmptyCategories from "../shared/empty/EmptyCategories";
 
-interface EditCategoriesProps {
-  isOpen: boolean
-  onOpenChange: (open: boolean) => void
+interface CategoriesDrawerProps {
+  useSelectionMode?: boolean;
+  showAddButton?: boolean;
+  showEditButton?: boolean;
+  showDeleteButton?: boolean;
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSelectCategory?: (category: Category) => void;
 }
 
-export default function EditCategories({ isOpen, onOpenChange }: EditCategoriesProps) {
+export default function CategoriesDrawer({ 
+  useSelectionMode,
+  showAddButton, 
+  showEditButton, 
+  showDeleteButton, 
+  isOpen, 
+  onOpenChange,
+  onSelectCategory
+}: CategoriesDrawerProps) {
+
   const { categories, deleteCategory } = useCategories();
   const [transactionCategories, setTransactionCategories] = useState<Category[]>();
 
@@ -24,6 +38,14 @@ export default function EditCategories({ isOpen, onOpenChange }: EditCategoriesP
       setTransactionCategories(categories.data)
     }
   }, [categories.data])
+
+  // Only handle selecting a category, if selectionMode is active
+  async function handleSelect(category: Category) {
+    if (useSelectionMode && onSelectCategory) {
+      onSelectCategory(category);
+      onOpenChange(false);
+    }
+  }
 
   // Handle deleting categories
   async function handleDelete(id?: number) {
@@ -37,7 +59,8 @@ export default function EditCategories({ isOpen, onOpenChange }: EditCategoriesP
       <DrawerContent className="px-5">
         <DrawerHeader>
           <div className="flex flex-row justify-between items-center">
-            <DrawerTitle>Edit Categories</DrawerTitle>
+            {/* TODO: Make heading text configurable */}
+            <DrawerTitle>Categories</DrawerTitle>
             <DrawerClose asChild>
               <Button variant="ghost" size="icon">
                 <X />
@@ -52,7 +75,7 @@ export default function EditCategories({ isOpen, onOpenChange }: EditCategoriesP
             categories.isError ? (<ErrorAlert error={categories.error} />) :
             (
               <>
-                <AddCategory />
+                {showAddButton && <AddCategory />}
 
                 {transactionCategories?.length === 0 && <EmptyCategories />}
 
@@ -60,7 +83,10 @@ export default function EditCategories({ isOpen, onOpenChange }: EditCategoriesP
                   <div className="overflow-y-auto">
                     <ItemGroup className="bg-neutral-100 rounded-xl my-5">
                       {transactionCategories.map((category) => (
-                        <Item key={category.categoryId}>
+                        <Item
+                          key={category.categoryId} 
+                          onClick={() => handleSelect(category)}
+                          className={useSelectionMode ? "cursor-pointer" : undefined}>
                           <ItemMedia>
                             <span>{category.icon}</span>
                           </ItemMedia>
@@ -75,9 +101,12 @@ export default function EditCategories({ isOpen, onOpenChange }: EditCategoriesP
                                 <Pencil />
                               </Button> 
                             */}
-                            <Button variant="ghost" size="sm" className="text-red-500" onClick={() => handleDelete(category.categoryId)}>
-                              <Trash />
-                            </Button>
+
+                            { showDeleteButton &&
+                              <Button variant="ghost" size="sm" className="text-red-500" onClick={() => handleDelete(category.categoryId)}>
+                                <Trash />
+                              </Button>
+                            }
                           </ItemActions>
                         </Item>
                       ))}
