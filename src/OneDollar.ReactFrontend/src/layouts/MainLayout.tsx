@@ -3,7 +3,7 @@ import { Outlet } from 'react-router';
 
 import type { Transaction } from '@/models/Transaction';
 import BottomBar from '@/components/shared/nav/BottomBar';
-import AddTransaction from '@/components/transactions/addTransaction/AddTransaction';
+import AddTransaction from '@/components/transactions/AddTransaction';
 
 export default function MainLayout() {
   const [addTransactionDrawerState, setAddTransactionDrawerState] = useState(false);

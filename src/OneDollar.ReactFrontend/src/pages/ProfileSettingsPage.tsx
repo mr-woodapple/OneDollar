@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Item, ItemActions, ItemContent, ItemDescription, ItemFooter, ItemGroup, ItemSeparator, ItemTitle } from "@/components/ui/item";
 
-import EditAccounts from "@/components/profile-settings/EditAccounts";
+import AccountsDrawer from "@/components/accounts/AccountsDrawer";
 import CategoriesDrawer from "@/components/categories/CategoriesDrawer";
 import EditLunchFlowProvider from "@/components/profile-settings/EditLunchFlowProvider";
-import { Item, ItemActions, ItemContent, ItemDescription, ItemFooter, ItemGroup, ItemSeparator, ItemTitle } from "@/components/ui/item";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAccounts } from "@/api/hooks/useAccounts";
-import { Button } from "@/components/ui/button";
 import { useProviders } from "@/api/hooks/useProviders";
 
 export default function ProfileSettingsPage() {
@@ -73,8 +73,8 @@ export default function ProfileSettingsPage() {
                   ? <SelectValue placeholder="No account available!" />
                   : <SelectValue placeholder="Select account" />
                 }
-
               </SelectTrigger>
+
               <SelectContent>
                 <SelectGroup>
                   {/* TODO: Implement properly without the question mark syntax */}
@@ -143,9 +143,10 @@ export default function ProfileSettingsPage() {
         showAddButton
         isOpen={editCategoriesDrawerState} 
         onOpenChange={setEditCategoriesDrawerState} />
-      
-      {/* <EditCategories isOpen={editCategoriesDrawerState} onOpenChange={setEditCategoriesDrawerState} /> */}
-      <EditAccounts isOpen={editAccountsDrawerState} onOpenChange={setEditAccountsDrawerState} />
+      <AccountsDrawer
+        showAddButton
+        isOpen={editAccountsDrawerState}
+        onOpenChange={setEditAccountsDrawerState} />
       <EditLunchFlowProvider isOpen={lunchFlowDrawerState} onOpenChange={setLunchFlowDrawerState} />
     </div>
   )

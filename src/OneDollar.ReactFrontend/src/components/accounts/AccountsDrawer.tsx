@@ -4,69 +4,69 @@ import { Button } from "../ui/button";
 import { Item, ItemActions, ItemContent, ItemGroup, ItemMedia } from "../ui/item";
 import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle } from "../ui/drawer";
 
-import { useCategories } from "@/api/hooks/useCategories";
-import type { Category } from "@/models/Category";
+import type { Account } from "@/models/Account";
+import AddAccount from "./AddAccount";
+import { useAccounts } from "@/api/hooks/useAccounts";
 import ErrorAlert from "../shared/alerts/ErrorAlert";
-import AddCategory from "./AddCategory";
-import EmptyCategories from "../shared/empty/EmptyCategories";
+import EmptyAccounts from "../shared/empty/EmptyAccounts";
 
-interface CategoriesDrawerProps {
+interface TransactionDrawerProps {
   useSelectionMode?: boolean;
   showAddButton?: boolean;
   showEditButton?: boolean;
   showDeleteButton?: boolean;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  onSelectCategory?: (category: Category) => void;
+  onSelectAccount?: (account: Account) => void;
 }
 
 /**
- * Drawer component for categories. Needs to be opened or closed from outside 
+ * Drawer component for accounts. Needs to be opened or closed from outside 
  * by controlling the "isOpen" state of this component.
- * Can be used for managing and/or just selecting categories (for example when editing a transaction).
+ * Can be used for managing and/or just selecting accounts (for example when editing a transaction).
  * 
- * @param useSelectionMode If true, a category can be selected (and after selecting the drawer closes).
- * @param showAddButton If true, a full-width "add category" button is shown above the categories list.
- * @param showEditButton If true, an edit button is shown for each category.
- * @param showDeleteButton If true, a delete button is shown for each category.
+ * @param useSelectionMode If true, a account can be selected (and after selecting the drawer closes).
+ * @param showAddButton If true, a full-width "add account" button is shown above the accounts list.
+ * @param showEditButton If true, an edit button is shown for each account.
+ * @param showDeleteButton If true, a delete button is shown for each account.
  * @param isOpen If true, the drawer is visible.
  * @param onOpenChange Called if the open state of the drawer should be changed.
- * @param onSelectCategory Called if the selected category changes.
- * @returns Drawer component to select, list, edit and delete categories.
+ * @param onSelectAccount Called if the selected account changes.
+ * @returns Drawer component to select, list, edit and delete accounts.
  */
-export default function CategoriesDrawer({ 
+export default function AccountsDrawer({
   useSelectionMode,
-  showAddButton, 
-  showEditButton, 
-  showDeleteButton, 
-  isOpen, 
+  showAddButton,
+  showEditButton,
+  showDeleteButton,
+  isOpen,
   onOpenChange,
-  onSelectCategory
-}: CategoriesDrawerProps) {
+  onSelectAccount
+}: TransactionDrawerProps) {
 
-  const { categories, deleteCategory } = useCategories();
-  const [transactionCategories, setTransactionCategories] = useState<Category[]>();
+  const { accounts, deleteAccount } = useAccounts();
+  const [transactionAccounts, setTransactionAccounts] = useState<Account[]>();
 
   // TODO: Is this actually required? Or can this block be omitted?
   useEffect(() => {
-    if (!categories.isPending && !categories.isError) {
-      setTransactionCategories(categories.data)
+    if (!accounts.isPending && !accounts.isError) {
+      setTransactionAccounts(accounts.data)
     }
-  }, [categories.data])
+  }, [accounts.data])
 
-  // Only handle selecting a category, if selectionMode is active
-  async function handleSelect(category: Category) {
-    if (useSelectionMode && onSelectCategory) {
-      onSelectCategory(category);
+  // Only handle selecting a account, if selectionMode is active
+  async function handleSelect(account: Account) {
+    if (useSelectionMode && onSelectAccount) {
+      onSelectAccount(account);
       onOpenChange(false);
     }
   }
 
-  // Handle deleting categories
-  async function handleDelete(id?: number) {
-    if (id == null) { return; }
+  // Handle deleting accounts
+  async function handleDelete(accountId?: number) {
+    if (accountId == null) { return; }
 
-    await deleteCategory.mutateAsync(id);
+    await deleteAccount.mutateAsync(accountId);
   }
 
   return (
@@ -75,7 +75,7 @@ export default function CategoriesDrawer({
         <DrawerHeader>
           <div className="flex flex-row justify-between items-center">
             {/* TODO: Make heading text configurable */}
-            <DrawerTitle>Categories</DrawerTitle>
+            <DrawerTitle>Accounts</DrawerTitle>
             <DrawerClose asChild>
               <Button variant="ghost" size="icon">
                 <X />
@@ -86,26 +86,26 @@ export default function CategoriesDrawer({
 
         <div className="apple-safe-area drawer-content flex flex-col mb-1 max-h-[70vh]">
           {
-            categories.isPending ? (<p className="dbg">Loading...</p>) :
-            categories.isError ? (<ErrorAlert error={categories.error} />) :
+            accounts.isPending ? (<p className="dbg">Loading...</p>) :
+            accounts.isError ? (<ErrorAlert error={accounts.error} />) :
             (
               <>
-                { showAddButton && <AddCategory /> }
+                { showAddButton && <AddAccount />}
 
-                { transactionCategories?.length === 0 && <EmptyCategories /> }
+                { transactionAccounts?.length === 0 && <EmptyAccounts />}
 
-                { transactionCategories &&
+                { transactionAccounts &&
                   <div className="overflow-y-auto">
                     <ItemGroup className="bg-neutral-100 rounded-xl my-5">
-                      {transactionCategories.map((category) => (
-                        <Item key={category.categoryId} 
-                              onClick={() => handleSelect(category)}
+                      {accounts.data.map((account) => (
+                        <Item key={account.accountId}
+                              onClick={() => handleSelect(account)}
                               className={useSelectionMode ? "cursor-pointer" : undefined}>
                           <ItemMedia>
-                            <span>{category.icon}</span>
+                            <span>💳</span>
                           </ItemMedia>
                           <ItemContent>
-                            <span>{category.name}</span>
+                            <span>{account.name}</span>
                           </ItemContent>
 
                           <ItemActions>
@@ -117,7 +117,7 @@ export default function CategoriesDrawer({
                             */}
 
                             { showDeleteButton &&
-                              <Button variant="ghost" size="sm" className="text-red-500" onClick={() => handleDelete(category.categoryId)}>
+                              <Button variant="ghost" size="sm" className="text-red-500" onClick={() => handleDelete(account.accountId)}>
                                 <Trash />
                               </Button>
                             }
@@ -132,6 +132,6 @@ export default function CategoriesDrawer({
           }
         </div>
       </DrawerContent>
-    </Drawer>
+    </Drawer >
   )
 }

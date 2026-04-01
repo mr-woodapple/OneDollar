@@ -2,22 +2,22 @@ import { useState, useEffect } from "react"
 import { toast } from "sonner"
 import { CalendarClock, Euro, Minus, Plus, Store, Trash, X } from "lucide-react"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
 import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer"
 
-import NumPad from "@/components/transactions/addTransaction/NumPad"
+import NumPad from "@/components/transactions/NumPad"
 import CategoriesDrawer from "@/components/categories/CategoriesDrawer"
-import SelectAccount from "@/components/transactions/addTransaction/SelectAccount"
-import type { Account } from "@/models/Account"
-import type { Category } from "@/models/Category"
-import type { Transaction } from "@/models/Transaction"
+import AccountsDrawer from "@/components/accounts/AccountsDrawer"
 import { useTransactions } from "@/api/hooks/useTransactions"
 import { useCategories } from "@/api/hooks/useCategories"
 import { useAccounts } from "@/api/hooks/useAccounts"
-import { Label } from "@/components/ui/label"
 import { isTimestampWithoutTimeInfo } from "@/lib/dateHelper"
+import type { Account } from "@/models/Account"
+import type { Category } from "@/models/Category"
+import type { Transaction } from "@/models/Transaction"
 
 interface AddTransactionProps {
   isOpen: boolean;
@@ -26,9 +26,9 @@ interface AddTransactionProps {
 }
 
 export default function AddTransaction({ isOpen, onOpenChange, transaction }: AddTransactionProps) {
-  const { addTransaction, updateTransaction, deleteTransaction } = useTransactions();
-  const { categories } = useCategories();
   const { accounts } = useAccounts();
+  const { categories } = useCategories();
+  const { addTransaction, updateTransaction, deleteTransaction } = useTransactions();
 
   const [note, setNote] = useState<string>("");
   const [amount, setAmount] = useState<string>("0");
@@ -37,7 +37,8 @@ export default function AddTransaction({ isOpen, onOpenChange, transaction }: Ad
   const [selectedCategory, setSelectedCategory] = useState<Category>();
   const [selectedAccount, setSelectedAccount] = useState<Account>();
 
-  const [editCategoriesDrawerState, setEditCategoriesDrawerState] = useState(false)
+  const [categoriesDrawerState, setCategoriesDrawerState] = useState(false)
+  const [accountsDrawerState, setAccountsDrawerState] = useState(false)
 
   // Only show the time information if the time is not 00:00
   const humanReadableTimestamp = isTimestampWithoutTimeInfo(timestamp) 
@@ -198,20 +199,28 @@ export default function AddTransaction({ isOpen, onOpenChange, transaction }: Ad
 
             <div className="grid grid-cols-2 gap-2.5 my-4">
 
-              <Button variant="secondary" size="lg" onClick={() => setEditCategoriesDrawerState(true)}>
+              <Button variant="secondary" size="lg" onClick={() => setCategoriesDrawerState(true)}>
                 {
                   selectedCategory?.name
                   ? <div className="space-x-2.5">
-                    <span>{selectedCategory.icon}</span>
-                    <span>{selectedCategory.name}</span>
-                  </div>
+                      <span>{selectedCategory.icon}</span>
+                      <span>{selectedCategory.name}</span>
+                    </div>
                   : <span>Select Category</span>
                 }
               </Button>
-              
-              <SelectAccount
-                selectedAccount={selectedAccount}
-                onSelectAccount={setSelectedAccount} />
+
+
+              <Button variant="secondary" size="lg" onClick={() => setAccountsDrawerState(true)}>
+                {
+                  selectedAccount?.name
+                  ? <div className="space-x-2.5">
+                      <span>💳</span>
+                      <span>{selectedAccount.name}</span>
+                    </div>
+                  : <span>Select Account</span>
+                }
+              </Button>
             </div>
 
             <NumPad handleNumpadInput={handleNumpadInput} />
@@ -247,9 +256,14 @@ export default function AddTransaction({ isOpen, onOpenChange, transaction }: Ad
       {/* Child drawers */}
       <CategoriesDrawer
         useSelectionMode
-        isOpen={editCategoriesDrawerState} 
-        onOpenChange={setEditCategoriesDrawerState} 
+        isOpen={categoriesDrawerState} 
+        onOpenChange={setCategoriesDrawerState} 
         onSelectCategory={setSelectedCategory} />
+      <AccountsDrawer 
+        useSelectionMode
+        isOpen={accountsDrawerState} 
+        onOpenChange={setAccountsDrawerState} 
+        onSelectAccount={setSelectedAccount} />
     </>
   )
 }

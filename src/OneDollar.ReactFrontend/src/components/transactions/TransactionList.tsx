@@ -7,7 +7,6 @@ import type { Category } from "@/models/Category";
 import type { Transaction } from "@/models/Transaction"
 import ErrorAlert from "../shared/alerts/ErrorAlert";
 import EmptyTransactions from "../shared/empty/EmptyTransactions";
-import NoCategory from "./NoCategory";
 
 interface TransactionListProps {
   selectedAccountId?: number | null;
@@ -89,7 +88,9 @@ export default function TransactionList({ selectedAccountId, onTransactionClick 
                         <ItemContent>
                           { category 
                             ? <ItemTitle>{category.name}</ItemTitle>
-                            : <NoCategory />
+                            : <div>
+                                <span className="rounded-full bg-neutral-200 py-1 px-2 text-xs text-neutral-700">No category selected.</span>
+                              </div>
                           }
 
                           { entry.merchant && 

@@ -4,7 +4,7 @@
 A list so I don't forget what needs to be done:
 
 - [x] Unify the drawer for "Select Category" (from one for selecting and one for editing the categories)
-- [ ] Unify the drawer for "Select Account" (from one for selecting and one for editing the categories)
+- [x] Unify the drawer for "Select Account" (from one for selecting and one for editing the categories)
 - [ ] Implement editing categories in `profileSettings/EditCategories.tsx`
 - [ ] Implement editing accounts in `profileSettings/EditAccounts.tsx`
 - [x] Make the account switcher work in `views/HomeView.tsx`  
