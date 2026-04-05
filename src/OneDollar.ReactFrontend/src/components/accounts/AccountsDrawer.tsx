@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Trash, X } from "lucide-react";
 import { Button } from "../ui/button";
 import { Item, ItemActions, ItemContent, ItemGroup, ItemMedia } from "../ui/item";
@@ -9,6 +9,7 @@ import AddAccount from "./AddAccount";
 import { useAccounts } from "@/api/hooks/useAccounts";
 import ErrorAlert from "../shared/alerts/ErrorAlert";
 import EmptyAccounts from "../shared/empty/EmptyAccounts";
+import GenericDialog, { type GenericDialogHandle } from "../shared/GenericDialog";
 
 interface TransactionDrawerProps {
   useSelectionMode?: boolean;
@@ -46,6 +47,7 @@ export default function AccountsDrawer({
 
   const { accounts, deleteAccount } = useAccounts();
   const [transactionAccounts, setTransactionAccounts] = useState<Account[]>();
+  const deleteDialogRef = useRef<GenericDialogHandle>(null);
 
   // TODO: Is this actually required? Or can this block be omitted?
   useEffect(() => {
@@ -66,72 +68,86 @@ export default function AccountsDrawer({
   async function handleDelete(accountId?: number) {
     if (accountId == null) { return; }
 
+    const confirmed = await deleteDialogRef.current?.openDialog();
+    if (!confirmed) { return; }
+
     await deleteAccount.mutateAsync(accountId);
   }
 
   return (
-    <Drawer open={isOpen} onOpenChange={onOpenChange}>
-      <DrawerContent className="px-5">
-        <DrawerHeader>
-          <div className="flex flex-row justify-between items-center">
-            {/* TODO: Make heading text configurable */}
-            <DrawerTitle>Accounts</DrawerTitle>
-            <DrawerClose asChild>
-              <Button variant="ghost" size="icon">
-                <X />
-              </Button>
-            </DrawerClose>
+    <>
+      <Drawer open={isOpen} onOpenChange={onOpenChange}>
+        <DrawerContent className="px-5">
+          <DrawerHeader>
+            <div className="flex flex-row justify-between items-center">
+              {/* TODO: Make heading text configurable */}
+              <DrawerTitle>Accounts</DrawerTitle>
+              <DrawerClose asChild>
+                <Button variant="ghost" size="icon">
+                  <X />
+                </Button>
+              </DrawerClose>
+            </div>
+          </DrawerHeader>
+
+          <div className="apple-safe-area drawer-content flex flex-col mb-1 max-h-[70vh]">
+            {
+              accounts.isPending ? (<p className="dbg">Loading...</p>) :
+              accounts.isError ? (<ErrorAlert error={accounts.error} />) :
+              (
+                <>
+                  { showAddButton && <AddAccount />}
+
+                  { transactionAccounts?.length === 0 && <EmptyAccounts />}
+
+                  { transactionAccounts &&
+                    <div className="overflow-y-auto">
+                      <ItemGroup className="bg-neutral-100 rounded-xl my-5">
+                        {accounts.data.map((account) => (
+                          <Item 
+                            key={account.accountId}
+                            onClick={() => handleSelect(account)}
+                            className={useSelectionMode ? "cursor-pointer" : undefined}>
+                            <ItemMedia>
+                              <span>💳</span>
+                            </ItemMedia>
+                            <ItemContent>
+                              <span>{account.name}</span>
+                            </ItemContent>
+
+                            <ItemActions>
+                              {/* TODO: Implement functionality */}
+                              {/* 
+                                <Button variant="ghost" size="sm">
+                                  <Pencil />
+                                </Button> 
+                              */}
+
+                              { showDeleteButton &&
+                                <Button variant="ghost" size="sm" className="text-red-500" onClick={() => handleDelete(account.accountId)}>
+                                  <Trash />
+                                </Button>
+                              }
+                            </ItemActions>
+                          </Item>
+                        ))}
+                      </ItemGroup>
+                    </div>
+                  }
+                </>
+              )
+            }
           </div>
-        </DrawerHeader>
+        </DrawerContent>
+      </Drawer>
 
-        <div className="apple-safe-area drawer-content flex flex-col mb-1 max-h-[70vh]">
-          {
-            accounts.isPending ? (<p className="dbg">Loading...</p>) :
-            accounts.isError ? (<ErrorAlert error={accounts.error} />) :
-            (
-              <>
-                { showAddButton && <AddAccount />}
-
-                { transactionAccounts?.length === 0 && <EmptyAccounts />}
-
-                { transactionAccounts &&
-                  <div className="overflow-y-auto">
-                    <ItemGroup className="bg-neutral-100 rounded-xl my-5">
-                      {accounts.data.map((account) => (
-                        <Item key={account.accountId}
-                              onClick={() => handleSelect(account)}
-                              className={useSelectionMode ? "cursor-pointer" : undefined}>
-                          <ItemMedia>
-                            <span>💳</span>
-                          </ItemMedia>
-                          <ItemContent>
-                            <span>{account.name}</span>
-                          </ItemContent>
-
-                          <ItemActions>
-                            {/* TODO: Implement functionality */}
-                            {/* 
-                              <Button variant="ghost" size="sm">
-                                <Pencil />
-                              </Button> 
-                            */}
-
-                            { showDeleteButton &&
-                              <Button variant="ghost" size="sm" className="text-red-500" onClick={() => handleDelete(account.accountId)}>
-                                <Trash />
-                              </Button>
-                            }
-                          </ItemActions>
-                        </Item>
-                      ))}
-                    </ItemGroup>
-                  </div>
-                }
-              </>
-            )
-          }
-        </div>
-      </DrawerContent>
-    </Drawer >
+      <GenericDialog 
+        ref={deleteDialogRef}
+        title="Delete account" 
+        content="This action cannot be undone. The selected account will be permanently deleted."
+        buttonCancel="Cancel"
+        buttonConfirm="Delete"
+        buttonConfirmDestructive />
+    </>
   )
 }

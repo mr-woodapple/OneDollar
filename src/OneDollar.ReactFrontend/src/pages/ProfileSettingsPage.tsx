@@ -141,10 +141,12 @@ export default function ProfileSettingsPage() {
       {/* Drawers */}
       <CategoriesDrawer
         showAddButton
+        showDeleteButton
         isOpen={editCategoriesDrawerState} 
         onOpenChange={setEditCategoriesDrawerState} />
       <AccountsDrawer
         showAddButton
+        showDeleteButton
         isOpen={editAccountsDrawerState}
         onOpenChange={setEditAccountsDrawerState} />
       <EditLunchFlowProvider isOpen={lunchFlowDrawerState} onOpenChange={setLunchFlowDrawerState} />
