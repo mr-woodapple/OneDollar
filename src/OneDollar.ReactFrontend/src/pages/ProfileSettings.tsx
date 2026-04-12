@@ -10,7 +10,7 @@ import EditLunchFlowProvider from "@/components/profile-settings/EditLunchFlowPr
 import { useAccounts } from "@/api/hooks/useAccounts";
 import { useProviders } from "@/api/hooks/useProviders";
 
-export default function ProfileSettingsPage() {
+export default function ProfileSettings() {
   const { accounts } = useAccounts();
   const { lunchFlowConfig, triggerSync } = useProviders();
 
@@ -100,10 +100,10 @@ export default function ProfileSettingsPage() {
           <ItemContent>
             <ItemTitle>LunchFlow</ItemTitle>
             <ItemDescription className="flex items-center gap-2">
-              { 
+              {
                 lunchFlowConfig.data
-                ? <><span className="w-2 h-2 bg-green-600 rounded-full"></span> Configured</>
-                : <><span className="w-2 h-2 bg-neutral-400 rounded-full"></span> Not configured</>
+                  ? <><span className="w-2 h-2 bg-green-600 rounded-full"></span> Configured</>
+                  : <><span className="w-2 h-2 bg-neutral-400 rounded-full"></span> Not configured</>
               }
             </ItemDescription>
           </ItemContent>
@@ -111,13 +111,13 @@ export default function ProfileSettingsPage() {
             <Button variant="outline" onClick={() => setLunchFlowDrawerState(true)}>Configure</Button>
           </ItemActions>
 
-          { 
-            lunchFlowConfig.data && 
+          {
+            lunchFlowConfig.data &&
             <ItemFooter>
               <div className="flex flex-row justify-between items-center w-full">
                 <div>Last run: {lunchFlowConfig.data.lastRunTimestamp ? new Date(lunchFlowConfig.data.lastRunTimestamp).toLocaleString("en-GB") : "N/A"}</div>
                 <Button variant={"ghost"} onClick={() => triggerSync.mutate()} disabled={triggerSync.isPending}>
-                  {triggerSync.isPending ? "Syncing..." : "Sync now" }
+                  {triggerSync.isPending ? "Syncing..." : "Sync now"}
                 </Button>
               </div>
             </ItemFooter>
@@ -141,8 +141,9 @@ export default function ProfileSettingsPage() {
       {/* Drawers */}
       <CategoriesDrawer
         showAddButton
+        showEditButton
         showDeleteButton
-        isOpen={editCategoriesDrawerState} 
+        isOpen={editCategoriesDrawerState}
         onOpenChange={setEditCategoriesDrawerState} />
       <AccountsDrawer
         showAddButton

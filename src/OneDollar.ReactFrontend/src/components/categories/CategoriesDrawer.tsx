@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Trash, X } from "lucide-react";
+import { Pen, Trash, X } from "lucide-react";
 import { Button } from "../ui/button";
 import { Item, ItemActions, ItemContent, ItemGroup, ItemMedia } from "../ui/item";
 import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle } from "../ui/drawer";
@@ -7,9 +7,9 @@ import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle } from ".
 import { useCategories } from "@/api/hooks/useCategories";
 import type { Category } from "@/models/Category";
 import ErrorAlert from "../shared/alerts/ErrorAlert";
-import AddCategory from "./AddCategory";
 import EmptyCategories from "../shared/empty/EmptyCategories";
 import GenericDialog, { type GenericDialogHandle } from "../shared/GenericDialog";
+import EditCategory from "./EditCategory";
 
 interface CategoriesDrawerProps {
   useSelectionMode?: boolean;
@@ -44,8 +44,11 @@ export default function CategoriesDrawer({
   onOpenChange,
   onSelectCategory
 }: CategoriesDrawerProps) {
-
   const { categories, deleteCategory } = useCategories();
+
+  const [isAddCategory, setIsAddCategory] = useState(true);
+  const [editCategoryDrawerState, setEditCategoryDrawerState] = useState(false)
+  const [selectedCategory, setSelectedCategory] = useState<Category | undefined>(undefined);
   const [transactionCategories, setTransactionCategories] = useState<Category[]>();
   const deleteDialogRef = useRef<GenericDialogHandle>(null);
 
@@ -96,7 +99,15 @@ export default function CategoriesDrawer({
               categories.isError ? (<ErrorAlert error={categories.error} />) :
               (
                 <>
-                  { showAddButton && <AddCategory /> }
+                  { showAddButton && 
+                    <Button onClick={() => {
+                      setEditCategoryDrawerState(true);
+                      setIsAddCategory(true);
+                      setSelectedCategory(undefined);
+                    }}>
+                      Add Category
+                    </Button>
+                  }
 
                   { transactionCategories?.length === 0 && <EmptyCategories /> }
 
@@ -115,19 +126,27 @@ export default function CategoriesDrawer({
                             </ItemContent>
 
                             <ItemActions>
-                              {/* TODO: Implement functionality */}
-                              {/* 
-                                <Button variant="ghost" size="sm">
-                                  <Pencil />
-                                </Button> 
-                              */}
+                              { showEditButton &&
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setEditCategoryDrawerState(true);
+                                    setIsAddCategory(false);
+                                    setSelectedCategory(category);
+                                  }}>
+                                  <Pen />
+                                </Button>
+                              }
 
                               { showDeleteButton &&
                                 <Button
                                   variant="ghost"
                                   size="sm"
                                   className="text-red-500"
-                                  onClick={() => handleDelete(category.categoryId)}>
+                                  onClick={() => {
+                                    handleDelete(category.categoryId);
+                                  }}>
                                   <Trash />
                                 </Button>
                               }
@@ -151,6 +170,12 @@ export default function CategoriesDrawer({
         buttonCancel="Cancel"
         buttonConfirm="Delete" 
         buttonConfirmDestructive />
+
+      <EditCategory
+        category={selectedCategory}
+        isAddMode={isAddCategory}
+        isOpen={editCategoryDrawerState}
+        onOpenChange={setEditCategoryDrawerState} />
     </>
   )
 }

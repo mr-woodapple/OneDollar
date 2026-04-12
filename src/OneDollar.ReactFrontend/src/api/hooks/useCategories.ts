@@ -35,20 +35,20 @@ export function useCategories() {
   })
 
   // Update category for given id
-  // const updateCategory = useMutation({
-  //   mutationFn: ({ id, data }: { id: number; data: Category }) =>
-  //     fetchApi(`${CATEGORY_API_ROUTE}(${id})`, {
-  //       method: "PATCH",
-  //       body: JSON.stringify(data),
-  //     }),
-  //   onSuccess: () => {
-  //     queryClient.invalidateQueries({ queryKey: categoryKeys.all });
-  //     toast.success("Updated category! 🎉");
-  //   },
-  //   onError: () => {
-  //     toast.error("Failed to update category!");
-  //   }
-  // });
+  const updateCategory = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: Category }) =>
+      fetchApi(`${CATEGORY_API_ROUTE}(${id})`, {
+        method: "PATCH",
+        body: JSON.stringify(data),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: categoryKeys.all });
+      toast.success("Updated category! 🎉");
+    },
+    onError: () => {
+      toast.error("Failed to update category!");
+    }
+  });
 
   // Delete category for given id
   const deleteCategory = useMutation({
@@ -68,7 +68,7 @@ export function useCategories() {
   return {
     categories,
     addCategory,
-    // updateCategory,
+    updateCategory,
     deleteCategory,
   };
 }

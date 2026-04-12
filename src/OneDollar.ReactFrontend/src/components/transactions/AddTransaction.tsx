@@ -20,12 +20,12 @@ import type { Category } from "@/models/Category"
 import type { Transaction } from "@/models/Transaction"
 
 interface AddTransactionProps {
+  transaction?: Transaction;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  transaction?: Transaction;
 }
 
-export default function AddTransaction({ isOpen, onOpenChange, transaction }: AddTransactionProps) {
+export default function AddTransaction({ transaction, isOpen, onOpenChange }: AddTransactionProps) {
   const { accounts } = useAccounts();
   const { categories } = useCategories();
   const { addTransaction, updateTransaction, deleteTransaction } = useTransactions();
@@ -46,23 +46,23 @@ export default function AddTransaction({ isOpen, onOpenChange, transaction }: Ad
     : timestamp.toLocaleString("en-GB", { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "numeric" })
 
   useEffect(() => {
-    if (isOpen) {
-      if (transaction) {
-        // Edit mode: populate fields
-        setNote(transaction.note ?? "");
-        setIsExpense(transaction.amount < 0);
-        setTimestamp(new Date(transaction.timestamp));
-        setAmount(Math.abs(transaction.amount).toFixed(2).toString().replace(".", ","));
-        setSelectedCategory(categories.data?.find((category: Category) => category.categoryId === transaction.categoryId));
-        setSelectedAccount(accounts.data?.find((account: Account) => account.accountId === transaction.accountId));
-      } else {
-        // Add mode: reset fields
-        setNote("");
-        setAmount("0");
-        setTimestamp(new Date);
-        setSelectedCategory(undefined);
-        setSelectedAccount(undefined);
-      }
+    if (!isOpen) { return; }
+
+    if (transaction) {
+      // Edit mode: populate fields
+      setNote(transaction.note ?? "");
+      setIsExpense(transaction.amount < 0);
+      setTimestamp(new Date(transaction.timestamp));
+      setAmount(Math.abs(transaction.amount).toFixed(2).toString().replace(".", ","));
+      setSelectedCategory(categories.data?.find((category: Category) => category.categoryId === transaction.categoryId));
+      setSelectedAccount(accounts.data?.find((account: Account) => account.accountId === transaction.accountId));
+    } else {
+      // Add mode: reset fields
+      setNote("");
+      setAmount("0");
+      setTimestamp(new Date);
+      setSelectedCategory(undefined);
+      setSelectedAccount(undefined);
     }
   }, [isOpen, transaction]);
 
