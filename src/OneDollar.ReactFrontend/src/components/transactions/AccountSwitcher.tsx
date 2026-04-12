@@ -1,6 +1,6 @@
 import ErrorAlert from "../shared/alerts/ErrorAlert";
 import { useAccounts } from "@/api/hooks/useAccounts";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem, SelectSeparator } from "@/components/ui/select";
 
 interface AccountSwitcherProps {
   onAccountChange: (accountId: number) => void;
@@ -26,8 +26,10 @@ export default function AccountSwitcher({ onAccountChange, selectedAccountId }: 
             </SelectTrigger>
             <SelectContent>
               {accounts.data.map((acc) => (
-                <SelectItem className="cursor-pointer"
-                  value={acc.accountId!.toString()} key={acc.accountId}>
+                <SelectItem 
+                  className="cursor-pointer"
+                  value={acc.accountId!.toString()} key={acc.accountId}
+                >
                   {acc.name}
                 </SelectItem>
               ))}

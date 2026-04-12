@@ -11,7 +11,7 @@ public class AccountController(OneDollarContext oneDollarContext) : ODataControl
 	[EnableQuery]
 	public async Task<ActionResult<IEnumerable<Account>>> Get()
 	{
-		return Ok(oneDollarContext.Account.ToAsyncEnumerable());
+		return Ok(oneDollarContext.Account.ToAsyncEnumerable().Where(a => !a.Deleted));
 	}
 
 	public async Task<ActionResult> Post([FromBody] Account account)
@@ -36,6 +36,10 @@ public class AccountController(OneDollarContext oneDollarContext) : ODataControl
 		try
 		{
 			var account = oneDollarContext.Account.Single(c => c.AccountId == key);
+
+			if (oneDollarContext.Transaction.Any(t => t.AccountId == account.AccountId))
+				return Conflict("The account is still used, please remove all transactions from it first.");
+
 			oneDollarContext.Account.Remove(account);
 			await oneDollarContext.SaveChangesAsync();
 

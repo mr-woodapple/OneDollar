@@ -3,7 +3,7 @@
 /// <summary>
 /// Represents a category with an identifier, name, and optional icon.
 /// </summary>
-public class Category
+public class Category : OneDollarBase
 {
 	public int CategoryId { get; set; }
 	public string? Icon { get; set; }

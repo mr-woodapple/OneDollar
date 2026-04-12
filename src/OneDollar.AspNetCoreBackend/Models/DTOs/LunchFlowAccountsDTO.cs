@@ -1,4 +1,7 @@
-﻿namespace OneDollar.Api.Models.DTOs;
+﻿using System.Text.Json.Serialization;
+using OneDollar.Api.Enums;
+
+namespace OneDollar.Api.Models.DTOs;
 
 public class LunchFlowAccountsDTO
 {
@@ -13,7 +16,9 @@ public class LunchFlowAccount
 	public required string Institution_name { get; set; }
 	public required string Name { get; set; }
 	public required string Provider {  get; set; }
-	public string Currency {  get; set; }
-	public string Status { get; set; }
+	public required string Currency {  get; set; }
+
+	[JsonConverter(typeof(JsonStringEnumConverter))]
+	public AccountStates Status { get; set; }
 
 }

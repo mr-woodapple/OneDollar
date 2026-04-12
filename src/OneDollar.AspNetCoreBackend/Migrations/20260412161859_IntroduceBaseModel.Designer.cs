@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OneDollar.Api.Context;
 
@@ -11,9 +12,11 @@ using OneDollar.Api.Context;
 namespace one_dollar.AspNetCoreBackend.Migrations
 {
     [DbContext(typeof(OneDollarContext))]
-    partial class OneDollarContextModelSnapshot : ModelSnapshot
+    [Migration("20260412161859_IntroduceBaseModel")]
+    partial class IntroduceBaseModel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -101,7 +104,7 @@ namespace one_dollar.AspNetCoreBackend.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProviderId"));
 
-                    b.Property<DateTimeOffset?>("LastSyncTimestamp")
+                    b.Property<DateTimeOffset?>("LastRunTimestamp")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("ProviderName")

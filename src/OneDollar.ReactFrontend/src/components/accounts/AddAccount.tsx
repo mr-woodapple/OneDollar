@@ -16,7 +16,11 @@ export default function AddAccount() {
   const [accountBalance, setAccountBalance] = useState<number>();
 
   async function handleCreate() {
-    const account: Account =  { name: accountName || "", balance: accountBalance || 0 };
+    const account: Account = {
+      name: accountName || "",
+      balance: accountBalance || 0,
+      status: "ACTIVE" // Default for manually creating accounts
+    };
     await addAccount.mutateAsync(account)
 
     if (addAccount.error == null) { setOpen(false) };

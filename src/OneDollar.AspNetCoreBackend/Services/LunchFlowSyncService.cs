@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OneDollar.Api.Context;
+using OneDollar.Api.Enums;
 using OneDollar.Api.Models;
 using OneDollar.Api.Models.DTOs;
 using OneDollar.Api.Models.Provider;
@@ -53,7 +54,7 @@ public class LunchFlowSyncService
 			await SyncExpenses(accounts);
 
 			// Update sync timestamp
-			_provider.LastRunTimestamp = DateTime.Now;
+			_provider.LastSyncTimestamp = DateTime.Now;
 			await _context.SaveChangesAsync();
 		}
 		catch (Exception ex)
@@ -110,7 +111,7 @@ public class LunchFlowSyncService
 		{
 			var accountToBeUpdated = await _context.Account.SingleAsync(a => a.ExternalAccountId == acc.Id);
 
-			if (accountToBeUpdated.Status == "DISCONNECTED")
+			if (accountToBeUpdated.Status == AccountStates.DISCONNECTED)
 			{
 				_logger.LogError($"Failed to update balance for account '{accountToBeUpdated.Name} ({accountToBeUpdated.ExternalAccountId})' because" +
 				                 $"the account is disconnected. Please visit LunchFlow and reconnect account.");
@@ -144,7 +145,7 @@ public class LunchFlowSyncService
 			var accInDb = await _context.Account.SingleAsync(a => a.ExternalAccountId == acc.Id);
 			if (accInDb == null) { continue; }
 
-			if (accInDb.Status == "DISCONNECTED")
+			if (accInDb.Status == AccountStates.DISCONNECTED)
 			{
 				_logger.LogError($"Failed to update sync expenses for account '{accInDb.Name} ({accInDb.ExternalAccountId})' " +
 				                 $"because the account is disconnected. Please visit LunchFlow and reconnect account.");
