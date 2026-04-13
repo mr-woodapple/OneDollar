@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OData.Deltas;
 using Microsoft.AspNetCore.OData.Query;
 using Microsoft.AspNetCore.OData.Routing.Controllers;
 using OneDollar.Api.Context;
@@ -24,6 +25,31 @@ public class AccountController(OneDollarContext oneDollarContext) : ODataControl
 			await oneDollarContext.SaveChangesAsync();
 
 			return Ok(account);
+		}
+		catch (Exception ex)
+		{
+			return Problem(ex.Message);
+		}
+	}
+
+	/// <summary>
+	/// Handles (partially) updating an existing account.
+	/// </summary>
+	/// <param name="key">Id of the account to update.</param>
+	/// <param name="delta">The partial content to update the account with.</param>
+	/// <returns>The updated account.</returns>
+	[EnableQuery]
+	public async Task<ActionResult> Patch([FromRoute] int key, [FromBody] Delta<Account> delta)
+	{
+		var account = oneDollarContext.Account.SingleOrDefault(a => a.AccountId == key);
+		if (account == null) { return NotFound(); }
+
+		try
+		{
+			delta.Patch(account);
+			await oneDollarContext.SaveChangesAsync();
+
+			return Ok(oneDollarContext.Account.Single(a => a.AccountId == key));
 		}
 		catch (Exception ex)
 		{

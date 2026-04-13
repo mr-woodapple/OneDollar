@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { Trash, X } from "lucide-react";
+import { Pen, Trash, X } from "lucide-react";
 import { Button } from "../ui/button";
 import { Item, ItemActions, ItemContent, ItemGroup, ItemMedia } from "../ui/item";
 import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle } from "../ui/drawer";
 
 import type { Account } from "@/models/Account";
-import AddAccount from "./AddAccount";
 import { useAccounts } from "@/api/hooks/useAccounts";
+import EditAccount from "./EditAccount";
 import ErrorAlert from "../shared/alerts/ErrorAlert";
 import EmptyAccounts from "../shared/empty/EmptyAccounts";
 import GenericDialog, { type GenericDialogHandle } from "../shared/GenericDialog";
@@ -44,8 +44,11 @@ export default function AccountsDrawer({
   onOpenChange,
   onSelectAccount
 }: TransactionDrawerProps) {
-
   const { accounts, deleteAccount } = useAccounts();
+
+  const [isAddAccount, setIsAddAccount] = useState(true);
+  const [editAccountDrawerState, setEditAccountDrawerState] = useState(false)
+  const [selectedAccount, setSelectedAccount] = useState<Account | undefined>(undefined);
   const [transactionAccounts, setTransactionAccounts] = useState<Account[]>();
   const deleteDialogRef = useRef<GenericDialogHandle>(null);
 
@@ -96,7 +99,15 @@ export default function AccountsDrawer({
               accounts.isError ? (<ErrorAlert error={accounts.error} />) :
               (
                 <>
-                  { showAddButton && <AddAccount />}
+                  { showAddButton && 
+                    <Button onClick={() => {
+                      setEditAccountDrawerState(true);
+                      setIsAddAccount(true);
+                      setSelectedAccount(undefined);
+                    }}>
+                      Add Account
+                    </Button>
+                  }
 
                   { transactionAccounts?.length === 0 && <EmptyAccounts />}
 
@@ -116,12 +127,18 @@ export default function AccountsDrawer({
                             </ItemContent>
 
                             <ItemActions>
-                              {/* TODO: Implement functionality */}
-                              {/* 
-                                <Button variant="ghost" size="sm">
-                                  <Pencil />
-                                </Button> 
-                              */}
+                              { showEditButton &&
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => {
+                                    setEditAccountDrawerState(true);
+                                    setIsAddAccount(false);
+                                    setSelectedAccount(account);
+                                  }}>
+                                  <Pen />
+                                </Button>
+                              }
 
                               { showDeleteButton &&
                                 <Button variant="ghost" size="sm" className="text-red-500" onClick={() => handleDelete(account.accountId)}>
@@ -148,6 +165,13 @@ export default function AccountsDrawer({
         buttonCancel="Cancel"
         buttonConfirm="Delete"
         buttonConfirmDestructive />
+
+      <EditAccount
+        account={selectedAccount}
+        isAddMode={isAddAccount}
+        isOpen={editAccountDrawerState}
+        onOpenChange={setEditAccountDrawerState}
+      />
     </>
   )
 }

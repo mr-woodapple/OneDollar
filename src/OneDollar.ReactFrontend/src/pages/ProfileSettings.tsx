@@ -145,8 +145,10 @@ export default function ProfileSettings() {
         showDeleteButton
         isOpen={editCategoriesDrawerState}
         onOpenChange={setEditCategoriesDrawerState} />
+
       <AccountsDrawer
         showAddButton
+        showEditButton
         showDeleteButton
         isOpen={editAccountsDrawerState}
         onOpenChange={setEditAccountsDrawerState} />

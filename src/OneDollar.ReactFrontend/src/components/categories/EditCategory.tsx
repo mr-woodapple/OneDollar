@@ -10,14 +10,14 @@ import type { Category } from "@/models/Category";
 import { useCategories } from "@/api/hooks/useCategories";
 
 
-interface EditCategoryProperties {
+interface EditCategoryProps {
   category?: Category;
   isAddMode: boolean;
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export default function EditCategory({ category, isAddMode, isOpen, onOpenChange }: EditCategoryProperties) {
+export default function EditCategory({ category, isAddMode, isOpen, onOpenChange }: EditCategoryProps) {
   const { addCategory, updateCategory } = useCategories();
 
   const [categoryTitle, setCategoryTitle] = useState<string>("");
