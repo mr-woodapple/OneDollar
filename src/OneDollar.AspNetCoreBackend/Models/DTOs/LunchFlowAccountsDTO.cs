@@ -3,22 +3,21 @@ using OneDollar.Api.Enums;
 
 namespace OneDollar.Api.Models.DTOs;
 
-public class LunchFlowAccountsDTO
-{
-	public required IEnumerable<LunchFlowAccount> Accounts { get; set; }
-	public required int Total {  get; set; }
-}
+public record struct LunchFlowAccountsDTO
+(
+	IEnumerable<LunchFlowAccount> Accounts,
+	int Total
+);
 
-public class LunchFlowAccount
-{
-	public required int Id { get; set; }
-	public required string Institution_logo { get; set; }
-	public required string Institution_name { get; set; }
-	public required string Name { get; set; }
-	public required string Provider {  get; set; }
-	public required string Currency {  get; set; }
+public record struct LunchFlowAccount
+(
+	int Id,
+	string Institution_logo,
+	string Institution_name,
+	string Name,
+	string Provider,
+	string Currency,
 
-	[JsonConverter(typeof(JsonStringEnumConverter))]
-	public AccountStates Status { get; set; }
-
-}
+	[property: JsonConverter(typeof(JsonStringEnumConverter))]
+	AccountStates Status
+);

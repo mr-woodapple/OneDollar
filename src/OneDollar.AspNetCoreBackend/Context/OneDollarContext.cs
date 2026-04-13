@@ -68,7 +68,6 @@ public class OneDollarContext(DbContextOptions<OneDollarContext> options) : DbCo
 				
 				default:
 					break;
-
 			}
 		}
 
