@@ -43,33 +43,32 @@ public class TransactionController(OneDollarContext oneDollarContext) : ODataCon
 	[EnableQuery]
 	public async Task<ActionResult<Transaction>> Patch([FromRoute] int key, [FromBody] Delta<Transaction> delta)
 	{
-		var transaction = oneDollarContext.Transaction.SingleOrDefault(t => t.TransactionId == key);
+		var transaction = await oneDollarContext.Transaction.SingleOrDefaultAsync(t => t.TransactionId == key);
 		if (transaction == null) { return NotFound(); }
 
 		try
 		{
-			// Check if a transaction for the given id exists
-			var existingTransaction = await oneDollarContext.Transaction.SingleOrDefaultAsync(t => t.TransactionId == key);
-			if (existingTransaction == null) { return NotFound(); }
+			var originalAccountId = transaction.AccountId;
+			var originalAmount = transaction.Amount;
 
-			if (transaction.AccountId == existingTransaction.AccountId)
+			delta.Patch(transaction);
+
+			if (transaction.AccountId == originalAccountId)
 			{
 				// Case 1: Account didn't change
-				var account = await oneDollarContext.Account.SingleAsync(a => a.AccountId == existingTransaction.AccountId);
-				account.Balance -= existingTransaction.Amount;
-				account.Balance += transaction.Amount;
+				var account = await oneDollarContext.Account.SingleAsync(a => a.AccountId == originalAccountId);
+				account.Balance += transaction.Amount - originalAmount;
 			}
 			else
 			{
 				// Case 2: Account did change
-				var oldAccount = await oneDollarContext.Account.SingleAsync(a => a.AccountId == existingTransaction.AccountId);
+				var oldAccount = await oneDollarContext.Account.SingleAsync(a => a.AccountId == originalAccountId);
 				var newAccount = await oneDollarContext.Account.SingleAsync(a => a.AccountId == transaction.AccountId);
 
-				oldAccount.Balance -= existingTransaction.Amount;
+				oldAccount.Balance -= originalAmount;
 				newAccount.Balance += transaction.Amount;
 			}
 
-			delta.Patch(transaction);
 			await oneDollarContext.SaveChangesAsync();
 
 			return Ok(oneDollarContext.Transaction.Single(t => t.TransactionId == key));

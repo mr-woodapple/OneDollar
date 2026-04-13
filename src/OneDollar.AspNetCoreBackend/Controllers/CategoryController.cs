@@ -61,7 +61,11 @@ public class CategoryController(OneDollarContext oneDollarContext) : ODataContro
 	{
 		try
 		{
-			var category = oneDollarContext.Category.Single(c => c.CategoryId == key);
+			var category = oneDollarContext.Category.SingleOrDefault(c => c.CategoryId == key);
+
+			if (category == null)
+				return NotFound();
+
 			oneDollarContext.Category.Remove(category);
 			await oneDollarContext.SaveChangesAsync();
 

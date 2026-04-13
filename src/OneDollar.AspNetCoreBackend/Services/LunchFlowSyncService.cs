@@ -60,7 +60,7 @@ public class LunchFlowSyncService
 			await SyncExpenses(accounts);
 
 			// Update sync timestamp
-			_provider.LastSyncTimestamp = DateTime.Now;
+			_provider.LastSyncTimestamp = DateTime.UtcNow;
 			await _context.SaveChangesAsync();
 		}
 		catch (Exception ex)

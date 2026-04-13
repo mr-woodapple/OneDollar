@@ -11,7 +11,7 @@ import ErrorAlert from "../shared/alerts/ErrorAlert";
 import EmptyAccounts from "../shared/empty/EmptyAccounts";
 import GenericDialog, { type GenericDialogHandle } from "../shared/GenericDialog";
 
-interface TransactionDrawerProps {
+interface AccountsDrawerProps {
   useSelectionMode?: boolean;
   showAddButton?: boolean;
   showEditButton?: boolean;
@@ -43,7 +43,7 @@ export default function AccountsDrawer({
   isOpen,
   onOpenChange,
   onSelectAccount
-}: TransactionDrawerProps) {
+}: AccountsDrawerProps) {
   const { accounts, deleteAccount } = useAccounts();
 
   const [isAddAccount, setIsAddAccount] = useState(true);
@@ -52,7 +52,6 @@ export default function AccountsDrawer({
   const [transactionAccounts, setTransactionAccounts] = useState<Account[]>();
   const deleteDialogRef = useRef<GenericDialogHandle>(null);
 
-  // TODO: Is this actually required? Or can this block be omitted?
   useEffect(() => {
     if (!accounts.isPending && !accounts.isError) {
       setTransactionAccounts(accounts.data)

@@ -61,7 +61,10 @@ public class AccountController(OneDollarContext oneDollarContext) : ODataControl
 	{
 		try
 		{
-			var account = oneDollarContext.Account.Single(c => c.AccountId == key);
+			var account = oneDollarContext.Account.SingleOrDefault(c => c.AccountId == key);
+
+			if (account == null) 
+				return NotFound();
 
 			if (oneDollarContext.Transaction.Any(t => t.AccountId == account.AccountId))
 				return Conflict("The account is still used, please remove all transactions from it first.");
