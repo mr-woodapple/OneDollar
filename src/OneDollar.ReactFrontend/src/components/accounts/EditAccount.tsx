@@ -1,40 +1,63 @@
-import { useState } from "react";
-import { Plus, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { X } from "lucide-react";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
 import { Spinner } from "../ui/spinner";
-import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "../ui/drawer";
+import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle } from "../ui/drawer";
 
 import type { Account } from "@/models/Account";
 import { useAccounts } from "@/api/hooks/useAccounts";
 
-export default function AddAccount() {
-  const { addAccount } = useAccounts();
-  const [open, setOpen] = useState<boolean>(false);
+interface EditAccountProps {
+  account?: Account;
+  isAddMode: boolean;
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export default function EditAccount({ account, isAddMode, isOpen, onOpenChange }: EditAccountProps) {
+  const { addAccount, updateAccount } = useAccounts();
   const [accountName, setAccountName] = useState<string>();
   const [accountBalance, setAccountBalance] = useState<number>();
 
-  async function handleCreate() {
-    const account: Account =  { name: accountName || "", balance: accountBalance || 0 };
-    await addAccount.mutateAsync(account)
+  useEffect(() => {
+    if (!isOpen) { return; }
 
-    if (addAccount.error == null) { setOpen(false) };
+    if (isAddMode) {
+      setAccountName("");
+      setAccountBalance(0);
+      return;
+    }
+
+    setAccountName(account?.name ?? "");
+    setAccountBalance(account?.balance ?? 0);
+  }, [isOpen, isAddMode, account])
+
+  async function handleSave() {
+    const a: Account = {
+      name: accountName || "",
+      balance: accountBalance || 0,
+      status: account?.status ?? "ACTIVE"
+    };
+
+    account 
+      ? await updateAccount.mutateAsync({ id: account!.accountId!, data: a})
+      : await addAccount.mutateAsync(a)
+
+    if (account ? updateAccount.error == null : addAccount.error == null) { 
+      onOpenChange(false); 
+    };
   }
 
   return (
-    <Drawer open={open} onOpenChange={setOpen}>
-      <DrawerTrigger className="w-full">
-        <div className="flex flex-row justify-center mt-2 p-2 border-2 border-dashed border-neutral-300 rounded-lg cursor-pointer">
-          <span><Plus className="text-neutral-500 me-2" /></span>
-          <span className="font-medium text-neutral-500">Add Account</span>
-        </div>
-      </DrawerTrigger>
-
+    <Drawer open={isOpen} onOpenChange={onOpenChange}>
       <DrawerContent className="apple-safe-area">
         <DrawerHeader>
           <div className="flex flex-row justify-between items-center">
-            <DrawerTitle>Create Account</DrawerTitle>
+            <DrawerTitle>
+              { isAddMode ? "Create account" : "Update account" }
+            </DrawerTitle>
             <DrawerClose asChild>
               <Button variant="ghost" size="icon">
                 <X />
@@ -62,9 +85,9 @@ export default function AddAccount() {
         </div>
 
         <DrawerFooter className="mt-10">
-          <Button onClick={() => handleCreate()} disabled={addAccount.isPending}>
+          <Button onClick={() => handleSave()} disabled={addAccount.isPending}>
             {addAccount.isPending && <Spinner />}
-            {addAccount.isPending ? "Creating" : "Create"}
+            {addAccount.isPending ? (isAddMode ? "Creating" : "Updating") : (isAddMode ? "Create" : "Update")}
           </Button>
         </DrawerFooter>
       </DrawerContent>

@@ -35,20 +35,20 @@ export function useAccounts() {
   });
 
   // Update account for given id
-  // const updateAccount = useMutation({
-  //   mutationFn: ({ id, data }: { id: number; data: Account }) =>
-  //     fetchApi(`${ACCOUNT_API_ROUTE}(${id})`, {
-  //       method: "PATCH",
-  //       body: JSON.stringify(data),
-  //     }),
-  //   onSuccess: () => {
-  //     queryClient.invalidateQueries({ queryKey: accountKeys.all });
-  //     toast.success("Updated account! 🎉");
-  //   },
-  //   onError: () => {
-  //     toast.error("Failed to update account!");
-  //   }
-  // });
+  const updateAccount = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: Account }) =>
+      fetchApi(`${ACCOUNT_API_ROUTE}(${id})`, {
+        method: "PATCH",
+        body: JSON.stringify(data),
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: accountKeys.all });
+      toast.success("Updated account! 🎉");
+    },
+    onError: () => {
+      toast.error("Failed to update account!");
+    }
+  });
 
   // Delete account for given id
   const deleteAccount = useMutation({
@@ -74,7 +74,7 @@ export function useAccounts() {
   return {
     accounts,
     addAccount,
-    // updateAccount,
+    updateAccount,
     deleteAccount,
     accountBalance
   };

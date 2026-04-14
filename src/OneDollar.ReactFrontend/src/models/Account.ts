@@ -2,5 +2,6 @@
 export interface Account {
     accountId?: number;
     name: string;
-    balance: Number;
+    balance: number;
+    status?: string;
 }

@@ -12,9 +12,6 @@ namespace OneDollar.Api.Controllers;
 [Route("[controller]")]
 public class ProviderController(OneDollarContext oneDollarContext, LunchFlowSyncService lunchFlowSyncService) : ControllerBase
 {
-	private protected OneDollarContext _context = oneDollarContext;
-	private readonly LunchFlowSyncService _lunchFlowSyncService = lunchFlowSyncService;
-
 	[HttpPost("{provider}", Name = "PostProviderConfig")]
 	public async Task<ActionResult> PostProviderConfig([FromRoute] string provider, [FromBody] ProviderConfigDTO providerConfig)
 	{
@@ -27,8 +24,8 @@ public class ProviderController(OneDollarContext oneDollarContext, LunchFlowSync
 					LunchFlowApiKey = providerConfig.LunchFlowApiKey,
 					LunchFlowApiUrl = providerConfig.LunchFlowApiUrl
 				};
-				_context.LunchFlowProvider.Add(config);
-				await _context.SaveChangesAsync();
+				oneDollarContext.LunchFlowProvider.Add(config);
+				await oneDollarContext.SaveChangesAsync();
 				return Ok(config);
 
 			default:
@@ -42,7 +39,7 @@ public class ProviderController(OneDollarContext oneDollarContext, LunchFlowSync
 		switch (provider)
 		{
 			case nameof(ProviderEnum.LunchFlow):
-				var config = await _context.LunchFlowProvider.FirstOrDefaultAsync();
+				var config = await oneDollarContext.LunchFlowProvider.FirstOrDefaultAsync();
 				if (config == null ) { return BadRequest(); };
 
 				return Ok(config);
@@ -58,11 +55,11 @@ public class ProviderController(OneDollarContext oneDollarContext, LunchFlowSync
 		switch (provider)
 		{
 			case nameof(ProviderEnum.LunchFlow):
-				var config = await _context.LunchFlowProvider.FirstOrDefaultAsync(c => c.ProviderId == key);
+				var config = await oneDollarContext.LunchFlowProvider.FirstOrDefaultAsync(c => c.ProviderId == key);
 				if (config == null)	{ return NotFound(); }
 
-				_context.LunchFlowProvider.Remove(config);
-				await _context.SaveChangesAsync();
+				oneDollarContext.LunchFlowProvider.Remove(config);
+				await oneDollarContext.SaveChangesAsync();
 				return NoContent();
 
 			default:
@@ -78,7 +75,7 @@ public class ProviderController(OneDollarContext oneDollarContext, LunchFlowSync
 			case nameof(ProviderEnum.LunchFlow):
 				try
 				{
-					await _lunchFlowSyncService.RunSyncAsync();
+					await lunchFlowSyncService.RunSyncAsync();
 					return NoContent();
 				}
 				catch (Exception ex)

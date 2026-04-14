@@ -1,19 +1,23 @@
-﻿namespace OneDollar.Api.Models.DTOs;
+﻿using System.Text.Json.Serialization;
+using OneDollar.Api.Enums;
 
-public class LunchFlowAccountsDTO
-{
-	public required IEnumerable<LunchFlowAccount> Accounts { get; set; }
-	public required int Total {  get; set; }
-}
+namespace OneDollar.Api.Models.DTOs;
 
-public class LunchFlowAccount
-{
-	public required int Id { get; set; }
-	public required string Institution_logo { get; set; }
-	public required string Institution_name { get; set; }
-	public required string Name { get; set; }
-	public required string Provider {  get; set; }
-	public string Currency {  get; set; }
-	public string Status { get; set; }
+public record struct LunchFlowAccountsDTO
+(
+	IEnumerable<LunchFlowAccount> Accounts,
+	int Total
+);
 
-}
+public record struct LunchFlowAccount
+(
+	int Id,
+	string Institution_logo,
+	string Institution_name,
+	string Name,
+	string Provider,
+	string Currency,
+
+	[property: JsonConverter(typeof(JsonStringEnumConverter))]
+	AccountStates Status
+);

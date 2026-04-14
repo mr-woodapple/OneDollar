@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OneDollar.Api.Context;
 
@@ -11,9 +12,11 @@ using OneDollar.Api.Context;
 namespace one_dollar.AspNetCoreBackend.Migrations
 {
     [DbContext(typeof(OneDollarContext))]
-    partial class OneDollarContextModelSnapshot : ModelSnapshot
+    [Migration("20260330193018_MakeCategoryExpenseAgnostic")]
+    partial class MakeCategoryExpenseAgnostic
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -33,20 +36,8 @@ namespace one_dollar.AspNetCoreBackend.Migrations
                     b.Property<float>("Balance")
                         .HasColumnType("real");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<bool>("Deleted")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
-
                     b.Property<int?>("ExternalAccountId")
                         .HasColumnType("int");
-
-                    b.Property<DateTimeOffset?>("ModifiedAt")
-                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -69,20 +60,8 @@ namespace one_dollar.AspNetCoreBackend.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CategoryId"));
 
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<bool>("Deleted")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
-
                     b.Property<string>("Icon")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTimeOffset?>("ModifiedAt")
-                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -101,7 +80,7 @@ namespace one_dollar.AspNetCoreBackend.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProviderId"));
 
-                    b.Property<DateTimeOffset?>("LastSyncTimestamp")
+                    b.Property<DateTimeOffset?>("LastRunTimestamp")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("ProviderName")
@@ -135,18 +114,9 @@ namespace one_dollar.AspNetCoreBackend.Migrations
                     b.Property<int?>("CategoryId")
                         .HasColumnType("int");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
-
                     b.Property<string>("Currency")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("Deleted")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("ExternalTransactionId")
                         .HasColumnType("nvarchar(max)");
@@ -156,9 +126,6 @@ namespace one_dollar.AspNetCoreBackend.Migrations
 
                     b.Property<string>("Merchant")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTimeOffset?>("ModifiedAt")
-                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Note")
                         .HasColumnType("nvarchar(max)");

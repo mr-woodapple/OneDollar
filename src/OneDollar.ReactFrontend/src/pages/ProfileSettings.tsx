@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-
-import EditAccounts from "@/components/profile-settings/EditAccounts";
-import EditCategories from "@/components/profile-settings/EditCategories";
-import EditLunchFlowProvider from "@/components/profile-settings/EditLunchFlowProvider";
-import { Item, ItemActions, ItemContent, ItemDescription, ItemFooter, ItemGroup, ItemSeparator, ItemTitle } from "@/components/ui/item";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useAccounts } from "@/api/hooks/useAccounts";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Item, ItemActions, ItemContent, ItemDescription, ItemFooter, ItemGroup, ItemSeparator, ItemTitle } from "@/components/ui/item";
+
+import AccountsDrawer from "@/components/accounts/AccountsDrawer";
+import CategoriesDrawer from "@/components/categories/CategoriesDrawer";
+import EditLunchFlowProvider from "@/components/profile-settings/EditLunchFlowProvider";
+import { useAccounts } from "@/api/hooks/useAccounts";
 import { useProviders } from "@/api/hooks/useProviders";
 
-export default function ProfileSettingsPage() {
+export default function ProfileSettings() {
   const { accounts } = useAccounts();
   const { lunchFlowConfig, triggerSync } = useProviders();
 
@@ -73,8 +73,8 @@ export default function ProfileSettingsPage() {
                   ? <SelectValue placeholder="No account available!" />
                   : <SelectValue placeholder="Select account" />
                 }
-
               </SelectTrigger>
+
               <SelectContent>
                 <SelectGroup>
                   {/* TODO: Implement properly without the question mark syntax */}
@@ -100,10 +100,10 @@ export default function ProfileSettingsPage() {
           <ItemContent>
             <ItemTitle>LunchFlow</ItemTitle>
             <ItemDescription className="flex items-center gap-2">
-              { 
+              {
                 lunchFlowConfig.data
-                ? <><span className="w-2 h-2 bg-green-600 rounded-full"></span> Configured</>
-                : <><span className="w-2 h-2 bg-neutral-400 rounded-full"></span> Not configured</>
+                  ? <><span className="w-2 h-2 bg-green-600 rounded-full"></span> Configured</>
+                  : <><span className="w-2 h-2 bg-neutral-400 rounded-full"></span> Not configured</>
               }
             </ItemDescription>
           </ItemContent>
@@ -111,13 +111,13 @@ export default function ProfileSettingsPage() {
             <Button variant="outline" onClick={() => setLunchFlowDrawerState(true)}>Configure</Button>
           </ItemActions>
 
-          { 
-            lunchFlowConfig.data && 
+          {
+            lunchFlowConfig.data &&
             <ItemFooter>
               <div className="flex flex-row justify-between items-center w-full">
-                <div>Last run: {lunchFlowConfig.data.lastRunTimestamp ? new Date(lunchFlowConfig.data.lastRunTimestamp).toLocaleString("en-GB") : "N/A"}</div>
+                <div>Last run: {lunchFlowConfig.data.lastSyncTimestamp ? new Date(lunchFlowConfig.data.lastSyncTimestamp).toLocaleString("en-GB") : "N/A"}</div>
                 <Button variant={"ghost"} onClick={() => triggerSync.mutate()} disabled={triggerSync.isPending}>
-                  {triggerSync.isPending ? "Syncing..." : "Sync now" }
+                  {triggerSync.isPending ? "Syncing..." : "Sync now"}
                 </Button>
               </div>
             </ItemFooter>
@@ -139,8 +139,19 @@ export default function ProfileSettingsPage() {
       </ItemGroup>
 
       {/* Drawers */}
-      <EditCategories isOpen={editCategoriesDrawerState} onOpenChange={setEditCategoriesDrawerState} />
-      <EditAccounts isOpen={editAccountsDrawerState} onOpenChange={setEditAccountsDrawerState} />
+      <CategoriesDrawer
+        showAddButton
+        showEditButton
+        showDeleteButton
+        isOpen={editCategoriesDrawerState}
+        onOpenChange={setEditCategoriesDrawerState} />
+
+      <AccountsDrawer
+        showAddButton
+        showEditButton
+        showDeleteButton
+        isOpen={editAccountsDrawerState}
+        onOpenChange={setEditAccountsDrawerState} />
       <EditLunchFlowProvider isOpen={lunchFlowDrawerState} onOpenChange={setLunchFlowDrawerState} />
     </div>
   )

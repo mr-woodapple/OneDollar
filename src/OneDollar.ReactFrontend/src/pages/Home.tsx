@@ -11,7 +11,7 @@ interface TransactionContext {
   onTransactionClick: (transaction: Transaction) => void;
 }
 
-export default function HomeView() {
+export default function Home() {
   const { onTransactionClick } = useOutletContext<TransactionContext>();
   const { accounts } = useAccounts();
   

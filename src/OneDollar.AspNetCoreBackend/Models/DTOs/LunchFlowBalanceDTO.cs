@@ -1,12 +1,12 @@
 ﻿namespace OneDollar.Api.Models.DTOs;
 
-public class LunchFlowBalanceDTO
-{
-	public required LunchFlowBalance Balance { get; set; }
-}
+public record struct LunchFlowBalanceDTO
+(
+	LunchFlowBalance Balance
+);
 
-public class LunchFlowBalance
-{
-	public required float Amount { get; set; }
-	public required string Currency { get; set; }
-}
+public record struct LunchFlowBalance
+(
+	float Amount,
+	string Currency
+);

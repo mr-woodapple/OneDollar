@@ -11,7 +11,7 @@ import Incomes from "@/components/stats/Incomes";
 /**
  * The statistics page component.
  */
-export default function StatisticsPage() {
+export default function Statistics() {
   // Variables for range and account picker
   const [selectedRange, setSelectedRange] = useState<"7d" | "30d" | "lastMonth">("30d");
   const [selectedAccountId, setSelectedAccountId] = useState<number>();
