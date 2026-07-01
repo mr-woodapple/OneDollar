@@ -15,7 +15,8 @@ export function useAccounts() {
       const response = await fetchApi<ODataResponse<Account[]>>(ACCOUNT_API_ROUTE);
       return response.value;
     },
-    staleTime: 1000 * 60 * 5 // 5 Minutes
+    staleTime: 1000 * 60 * 5, // 5 Minutes
+    select: (data) => data.sort((a, b) => a.name.localeCompare(b.name)) // Sort alphabetically by name
   });
 
   // Create account
