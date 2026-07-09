@@ -51,7 +51,7 @@ export default function EditLunchFlowProvider({ isOpen, onOpenChange }: EditLunc
   return (
     <>
       <Drawer open={isOpen} onOpenChange={onOpenChange}>
-        <DrawerContent className="apple-safe-area">
+        <DrawerContent className="apple-safe-area max-w-screen-sm mx-auto">
           <DrawerHeader>
             <div className="flex flex-row justify-between items-center">
               <DrawerTitle>Configure LunchFlow</DrawerTitle>

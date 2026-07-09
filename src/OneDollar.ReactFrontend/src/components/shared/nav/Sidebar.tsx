@@ -3,16 +3,14 @@ import { ChartSpline, House, Plus, UserCog } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
-type BottomBarProps = {
+type SidebarProps = {
   onAddClick?: () => void;
 }
 
-export default function BottomBar({ onAddClick }: BottomBarProps) {
-
+export default function Sidebar({ onAddClick }: SidebarProps) {
   return (
-    <div className="apple-safe-area z-50 w-full bg-white border-t border-gray-200">
-      <div className="h-16 grid grid-cols-4 items-center justify-items-center">
-
+    <div className="flex flex-col h-dvh justify-center border-r p-5">
+      <div className="flex flex-col gap-5">
         <NavLink to="/">
           {({ isActive }) => <BottomBarButton isActive={isActive} iconName="House" />}
         </NavLink>
@@ -30,10 +28,8 @@ export default function BottomBar({ onAddClick }: BottomBarProps) {
         </Button>
       </div>
     </div>
-  )
+  );
 }
-
-
 type BottomBarButtonProps = {
   isActive?: boolean
   iconName?: "House" | "ChartSpline" | "UserCog"

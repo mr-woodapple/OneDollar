@@ -52,7 +52,7 @@ export default function EditAccount({ account, isAddMode, isOpen, onOpenChange }
 
   return (
     <Drawer open={isOpen} onOpenChange={onOpenChange}>
-      <DrawerContent className="apple-safe-area">
+      <DrawerContent className="apple-safe-area max-w-screen-sm mx-auto">
         <DrawerHeader>
           <div className="flex flex-row justify-between items-center">
             <DrawerTitle>
