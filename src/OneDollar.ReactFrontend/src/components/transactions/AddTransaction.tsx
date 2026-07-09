@@ -145,7 +145,7 @@ export default function AddTransaction({ transaction, isOpen, onOpenChange }: Ad
   return (
     <>
       <Drawer open={isOpen} onOpenChange={onOpenChange}>
-        <DrawerContent className="px-5">
+        <DrawerContent className="px-5 max-w-screen-sm mx-auto">
           <DrawerHeader>
             <DrawerTitle className="hidden">{ transaction ? "Edit Transaction" : "Add Transaction" }</DrawerTitle>
             <div className="flex flex-row justify-between items-center">

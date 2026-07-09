@@ -80,7 +80,7 @@ export default function CategoriesDrawer({
   return (
     <>
       <Drawer open={isOpen} onOpenChange={onOpenChange}>
-        <DrawerContent className="px-5">
+        <DrawerContent className="px-5 max-w-screen-sm mx-auto">
           <DrawerHeader>
             <div className="flex flex-row justify-between items-center">
               {/* TODO: Make heading text configurable */}
