@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { CalendarClock, Euro, Minus, Plus, Store, Trash, X } from "lucide-react"
+import { CalendarClock, Check, Euro, Minus, Plus, Store, Trash, X } from "lucide-react"
 import { toast } from "sonner"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -14,9 +14,11 @@ import AccountsDrawer from "@/components/accounts/AccountsDrawer"
 import { useTransactions } from "@/api/hooks/useTransactions"
 import { useCategories } from "@/api/hooks/useCategories"
 import { useAccounts } from "@/api/hooks/useAccounts"
+import { useTags } from "@/api/hooks/useTags"
 import { isTimestampWithoutTimeInfo } from "@/lib/dateHelper"
 import type { Account } from "@/models/Account"
 import type { Category } from "@/models/Category"
+import type { Tag } from "@/models/Tag"
 import type { Transaction } from "@/models/Transaction"
 
 interface AddTransactionProps {
@@ -28,6 +30,7 @@ interface AddTransactionProps {
 export default function AddTransaction({ transaction, isOpen, onOpenChange }: AddTransactionProps) {
   const { accounts } = useAccounts();
   const { categories } = useCategories();
+  const { tags } = useTags();
   const { addTransaction, updateTransaction, deleteTransaction } = useTransactions();
 
   const [note, setNote] = useState<string>("");
@@ -36,6 +39,7 @@ export default function AddTransaction({ transaction, isOpen, onOpenChange }: Ad
   const [isExpense, setIsExpense] = useState<boolean>(true);
   const [selectedCategory, setSelectedCategory] = useState<Category>();
   const [selectedAccount, setSelectedAccount] = useState<Account>();
+  const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
 
   const [categoriesDrawerState, setCategoriesDrawerState] = useState(false)
   const [accountsDrawerState, setAccountsDrawerState] = useState(false)
@@ -56,6 +60,7 @@ export default function AddTransaction({ transaction, isOpen, onOpenChange }: Ad
       setAmount(Math.abs(transaction.amount).toFixed(2).toString().replace(".", ","));
       setSelectedCategory(categories.data?.find((category: Category) => category.categoryId === transaction.categoryId));
       setSelectedAccount(accounts.data?.find((account: Account) => account.accountId === transaction.accountId));
+      setSelectedTags(transaction.tags ?? []);
     } else {
       // Add mode: reset fields
       setNote("");
@@ -63,6 +68,7 @@ export default function AddTransaction({ transaction, isOpen, onOpenChange }: Ad
       setTimestamp(new Date);
       setSelectedCategory(undefined);
       setSelectedAccount(undefined);
+      setSelectedTags([]);
     }
   }, [isOpen, transaction]);
 
@@ -117,7 +123,8 @@ export default function AddTransaction({ transaction, isOpen, onOpenChange }: Ad
       currency: "EUR",
       note: note,
       merchant: transaction?.merchant ?? undefined,
-      isPending: transaction?.isPending ?? false
+      isPending: transaction?.isPending ?? false,
+      tags: selectedTags.map((tag) => ({ tagId: tag.tagId, name: tag.name, color: tag.color }))
     };
 
     isUpdate
@@ -130,6 +137,7 @@ export default function AddTransaction({ transaction, isOpen, onOpenChange }: Ad
       setIsExpense(true);
       setSelectedAccount(undefined);
       setSelectedCategory(undefined);
+      setSelectedTags([]);
     };
   }
 
@@ -140,6 +148,14 @@ export default function AddTransaction({ transaction, isOpen, onOpenChange }: Ad
     if (deleteTransaction.error == null) {
       onOpenChange(false);
     };
+  }
+
+  // Toggle a tag in the current selection
+  function toggleTag(tag: Tag) {
+    setSelectedTags((current) =>
+      current.some((t) => t.tagId === tag.tagId)
+        ? current.filter((t) => t.tagId !== tag.tagId)
+        : [...current, tag]);
   }
 
   return (
@@ -188,6 +204,29 @@ export default function AddTransaction({ transaction, isOpen, onOpenChange }: Ad
               </div>
             </div>
             
+            { tags.data && tags.data.length > 0 &&
+              <div className="flex flex-row gap-2 overflow-x-auto mb-4 pb-1 -mx-5 px-5">
+                {tags.data.map((tag) => {
+                  const isActive = selectedTags.some((t) => t.tagId === tag.tagId);
+                  const color = tag.color ?? "#a3a3a3";
+
+                  return (
+                    <Badge
+                      key={tag.tagId}
+                      variant="outline"
+                      onClick={() => toggleTag(tag)}
+                      style={isActive
+                        ? { backgroundColor: color, color: "#ffffff" }
+                        : { backgroundColor: `${color}40`, color: color }}
+                      className="shrink-0 cursor-pointer border-transparent transition-colors duration-200">
+                      {isActive && <Check className="mr-1" />}
+                      {tag.name}
+                    </Badge>
+                  );
+                })}
+              </div>
+            }
+
             <Label htmlFor="input-addtransaction-note">Note</Label>
             <Input 
               className="mt-2"

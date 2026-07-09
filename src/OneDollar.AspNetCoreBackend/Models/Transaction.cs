@@ -20,6 +20,8 @@ public class Transaction : OneDollarBase
 	public int? CategoryId { get; set; }
 	public Category? Category { get; set; }
 
+	public ICollection<Tag>? Tags { get; set; }
+
 
 	// Used to store the id that for example LunchFlow returns for a transaction
 	public string? ExternalTransactionId { get; set; }

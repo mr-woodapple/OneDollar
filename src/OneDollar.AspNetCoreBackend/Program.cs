@@ -24,6 +24,7 @@ var modelBuilder = new ODataConventionModelBuilder().EnableLowerCamelCase();
 modelBuilder.EntitySet<Transaction>("Transaction");
 modelBuilder.EntitySet<Account>("Account");
 modelBuilder.EntitySet<Category>("Category");
+modelBuilder.EntitySet<Tag>("Tag");
 
 builder.Services.AddControllers().AddOData(
 	options => options.Select().Filter().OrderBy().Expand().Count().SetMaxTop(null).AddRouteComponents(

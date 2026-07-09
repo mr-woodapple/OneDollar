@@ -5,6 +5,7 @@ import { useTransactions } from "@/api/hooks/useTransactions";
 import { useCategories } from "@/api/hooks/useCategories";
 import type { Category } from "@/models/Category";
 import type { Transaction } from "@/models/Transaction"
+import { Badge } from "../ui/badge";
 import ErrorAlert from "../shared/alerts/ErrorAlert";
 import EmptyTransactions from "../shared/empty/EmptyTransactions";
 
@@ -97,6 +98,19 @@ export default function TransactionList({ selectedAccountId, onTransactionClick 
                             <ItemDescription>
                               {entry.merchant}
                             </ItemDescription>
+                          }
+
+                          { entry.tags && entry.tags.length > 0 &&
+                            <div className="flex flex-row flex-wrap gap-1 mt-1">
+                              {entry.tags.map((tag) => (
+                                <Badge
+                                  key={tag.tagId}
+                                  style={{ backgroundColor: tag.color ?? "#a3a3a3" }}
+                                  className="text-white text-[10px] px-1.5 py-0">
+                                  {tag.name}
+                                </Badge>
+                              ))}
+                            </div>
                           }
                         </ItemContent>
 

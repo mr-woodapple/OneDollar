@@ -14,7 +14,7 @@ export function useTransactions() {
   const transactions = useQuery({
     queryKey: transactionKeys.lists(),
     queryFn: async () => {
-      const response = await fetchApi<ODataResponse<Transaction[]>>(TRANSACTION_API_ROUTE);
+      const response = await fetchApi<ODataResponse<Transaction[]>>(`${TRANSACTION_API_ROUTE}?$expand=tags`);
       return response.value;
     },
     staleTime: 1000 * 60 * 5 // 5 Minutes
