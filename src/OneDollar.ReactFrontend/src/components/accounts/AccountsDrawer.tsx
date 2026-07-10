@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { Pen, Trash, X } from "lucide-react";
-import { Button } from "../ui/button";
-import { Item, ItemActions, ItemContent, ItemGroup, ItemMedia } from "../ui/item";
-import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle } from "../ui/drawer";
 
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Item, ItemActions, ItemContent, ItemGroup, ItemMedia } from "@/components/ui/item";
+import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import type { Account } from "@/models/Account";
 import { useAccounts } from "@/api/hooks/useAccounts";
 import EditAccount from "./EditAccount";
@@ -82,7 +83,6 @@ export default function AccountsDrawer({
         <DrawerContent className="px-5 max-w-screen-sm mx-auto">
           <DrawerHeader>
             <div className="flex flex-row justify-between items-center">
-              {/* TODO: Make heading text configurable */}
               <DrawerTitle>Accounts</DrawerTitle>
               <DrawerClose asChild>
                 <Button variant="ghost" size="icon">
@@ -94,7 +94,7 @@ export default function AccountsDrawer({
 
           <div className="apple-safe-area drawer-content flex flex-col mb-1 max-h-[70vh]">
             {
-              accounts.isPending ? (<p className="dbg">Loading...</p>) :
+              accounts.isPending ? (<AccountsListSkeleton />) :
               accounts.isError ? (<ErrorAlert error={accounts.error} />) :
               (
                 <>
@@ -173,4 +173,18 @@ export default function AccountsDrawer({
       />
     </>
   )
+}
+
+/**
+ * Simple component to render a skeleton list.
+ * @returns A skeleton, represeting the list loading.
+ */
+function AccountsListSkeleton() {
+   return (
+    <div className="flex flex-col gap-2 my-5">
+      {[...Array(5)].map((_, i) => (
+        <Skeleton key={i} className="h-8 w-full" />
+      ))}
+    </div>
+  );
 }

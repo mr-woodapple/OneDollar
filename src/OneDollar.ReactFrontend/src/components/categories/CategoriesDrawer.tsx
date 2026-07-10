@@ -10,6 +10,7 @@ import ErrorAlert from "../shared/alerts/ErrorAlert";
 import EmptyCategories from "../shared/empty/EmptyCategories";
 import GenericDialog, { type GenericDialogHandle } from "../shared/GenericDialog";
 import EditCategory from "./EditCategory";
+import { Skeleton } from "../ui/skeleton";
 
 interface CategoriesDrawerProps {
   useSelectionMode?: boolean;
@@ -83,7 +84,6 @@ export default function CategoriesDrawer({
         <DrawerContent className="px-5 max-w-screen-sm mx-auto">
           <DrawerHeader>
             <div className="flex flex-row justify-between items-center">
-              {/* TODO: Make heading text configurable */}
               <DrawerTitle>Categories</DrawerTitle>
               <DrawerClose asChild>
                 <Button variant="ghost" size="icon">
@@ -95,7 +95,7 @@ export default function CategoriesDrawer({
 
           <div className="apple-safe-area drawer-content flex flex-col mb-1 max-h-[70vh]">
             {
-              categories.isPending ? (<p className="dbg">Loading...</p>) :
+              categories.isPending ? (<CategoriesListSkeleton />) :
               categories.isError ? (<ErrorAlert error={categories.error} />) :
               (
                 <>
@@ -178,4 +178,18 @@ export default function CategoriesDrawer({
         onOpenChange={setEditCategoryDrawerState} />
     </>
   )
+}
+
+/**
+ * Simple component to render a skeleton list.
+ * @returns A skeleton, represeting the list loading.
+ */
+function CategoriesListSkeleton() {
+   return (
+    <div className="flex flex-col gap-2 my-5">
+      {[...Array(5)].map((_, i) => (
+        <Skeleton key={i} className="h-8 w-full" />
+      ))}
+    </div>
+  );
 }

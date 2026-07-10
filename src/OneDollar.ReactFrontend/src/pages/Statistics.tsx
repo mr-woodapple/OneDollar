@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { BadgeMinus, BadgePlus, PiggyBank } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 import { useAccounts } from "@/api/hooks/useAccounts";
 import { useStats } from "@/lib/hooks/useStats";
+import { Skeleton } from "@/components/ui/skeleton";
+import Incomes from "@/components/stats/Incomes";
 import Outflows from "@/components/stats/Outflows"
 import ErrorAlert from "@/components/shared/alerts/ErrorAlert";
-import Incomes from "@/components/stats/Incomes";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 /**
  * The statistics page component.
@@ -81,7 +82,7 @@ export default function Statistics() {
 
           {/* Account selector */}
           {
-            accounts.isPending ? (<p className="dbg">Loading...</p>) :
+            accounts.isPending ? (<Skeleton className="h-9 w-40" />) :
             accounts.isError ? (<ErrorAlert error={accounts.error} />) :
             (
               <Select
