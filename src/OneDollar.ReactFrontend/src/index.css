@@ -1,3 +1,4 @@
+@import "@silk-hq/components/unlayered-styles.css" layer(silk);
 @import "tailwindcss";
 @import "tw-animate-css";
 

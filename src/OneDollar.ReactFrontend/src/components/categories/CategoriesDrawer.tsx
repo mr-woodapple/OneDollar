@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { Pen, Trash, X } from "lucide-react";
+import { Pen, Trash } from "lucide-react";
 import { Button } from "../ui/button";
 import { Item, ItemActions, ItemContent, ItemGroup, ItemMedia } from "../ui/item";
-import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle } from "../ui/drawer";
+import { Drawer, DrawerContent, DrawerHeading } from "../shared/GenericDrawer";
 
 import { useCategories } from "@/api/hooks/useCategories";
 import type { Category } from "@/models/Category";
@@ -81,19 +81,11 @@ export default function CategoriesDrawer({
   return (
     <>
       <Drawer open={isOpen} onOpenChange={onOpenChange}>
-        <DrawerContent className="px-5 max-w-screen-sm mx-auto">
-          <DrawerHeader>
-            <div className="flex flex-row justify-between items-center">
-              <DrawerTitle>Categories</DrawerTitle>
-              <DrawerClose asChild>
-                <Button variant="ghost" size="icon">
-                  <X />
-                </Button>
-              </DrawerClose>
-            </div>
-          </DrawerHeader>
-
-          <div className="apple-safe-area drawer-content flex flex-col mb-1 max-h-[70vh]">
+        <DrawerContent>
+          <DrawerHeading>
+            <h2 className="font-semibold">Categories</h2>
+          </DrawerHeading>
+          <div className="drawer-content mb-1 flex max-h-[70vh] flex-col px-5">
             {
               categories.isPending ? (<CategoriesListSkeleton />) :
               categories.isError ? (<ErrorAlert error={categories.error} />) :

@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { Pen, Trash, X } from "lucide-react";
+import { Pen, Trash } from "lucide-react";
+import { Button } from "../ui/button";
+import { Item, ItemActions, ItemContent, ItemGroup, ItemMedia } from "../ui/item";
+import { Drawer, DrawerContent, DrawerHeading } from "../shared/GenericDrawer";
 
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -80,19 +83,11 @@ export default function AccountsDrawer({
   return (
     <>
       <Drawer open={isOpen} onOpenChange={onOpenChange}>
-        <DrawerContent className="px-5 max-w-screen-sm mx-auto">
-          <DrawerHeader>
-            <div className="flex flex-row justify-between items-center">
-              <DrawerTitle>Accounts</DrawerTitle>
-              <DrawerClose asChild>
-                <Button variant="ghost" size="icon">
-                  <X />
-                </Button>
-              </DrawerClose>
-            </div>
-          </DrawerHeader>
-
-          <div className="apple-safe-area drawer-content flex flex-col mb-1 max-h-[70vh]">
+        <DrawerContent>
+          <DrawerHeading>
+            <h2 className="font-semibold">Accounts</h2>
+          </DrawerHeading>
+          <div className="drawer-content mb-1 flex max-h-[70vh] flex-col px-5">
             {
               accounts.isPending ? (<AccountsListSkeleton />) :
               accounts.isError ? (<ErrorAlert error={accounts.error} />) :

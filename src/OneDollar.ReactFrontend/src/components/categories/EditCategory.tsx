@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
-import { X } from "lucide-react";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
 import { Spinner } from "../ui/spinner";
-import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle } from "../ui/drawer";
+import { Drawer, DrawerContent, DrawerHeading } from "../shared/GenericDrawer";
 
 import type { Category } from "@/models/Category";
 import { useCategories } from "@/api/hooks/useCategories";
@@ -54,20 +53,10 @@ export default function EditCategory({ category, isAddMode, isOpen, onOpenChange
 
   return (
     <Drawer open={isOpen} onOpenChange={onOpenChange}>
-      <DrawerContent className="apple-safe-area max-w-screen-sm mx-auto">
-        <DrawerHeader>
-          <div className="flex flex-row justify-between items-center">
-            <DrawerTitle>
-              { isAddMode ? "Create category" : "Update category" }
-            </DrawerTitle>
-            <DrawerClose asChild>
-              <Button variant="ghost" size="icon">
-                <X />
-              </Button>
-            </DrawerClose>
-          </div>
-        </DrawerHeader>
-
+      <DrawerContent>
+        <DrawerHeading>
+          <h2 className="font-semibold">{isAddMode ? "Create category" : "Update category"}</h2>
+        </DrawerHeading>
         <div className="px-5 space-y-5">
           <div className="space-y-2">
             <Label htmlFor="categoryIcon">Category Icon</Label>
@@ -86,12 +75,12 @@ export default function EditCategory({ category, isAddMode, isOpen, onOpenChange
           </div>
         </div>
 
-        <DrawerFooter className="mt-10">
+        <div className="mt-10 flex flex-col gap-2 p-4">
           <Button onClick={() => handleSave()} disabled={addCategory.isPending}>
             {addCategory.isPending && <Spinner />}
             {addCategory.isPending ? (isAddMode ? "Creating" : "Updating") : (isAddMode ? "Create" : "Update")}
           </Button>
-        </DrawerFooter>
+        </div>
       </DrawerContent>
     </Drawer>
   )

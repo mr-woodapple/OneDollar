@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react"
-import { X } from "lucide-react"
 
 import { Button } from "../ui/button"
-import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle } from "../ui/drawer"
+import { Drawer, DrawerContent, DrawerHeading } from "../shared/GenericDrawer"
 import { Label } from "../ui/label"
 import { Input } from "../ui/input"
 import { Spinner } from "../ui/spinner"
@@ -51,18 +50,10 @@ export default function EditLunchFlowProvider({ isOpen, onOpenChange }: EditLunc
   return (
     <>
       <Drawer open={isOpen} onOpenChange={onOpenChange}>
-        <DrawerContent className="apple-safe-area max-w-screen-sm mx-auto">
-          <DrawerHeader>
-            <div className="flex flex-row justify-between items-center">
-              <DrawerTitle>Configure LunchFlow</DrawerTitle>
-              <DrawerClose asChild>
-                <Button variant="ghost" size="icon">
-                  <X />
-                </Button>
-              </DrawerClose>
-            </div>
-          </DrawerHeader>
-
+        <DrawerContent>
+          <DrawerHeading>
+            <h2 className="font-semibold">Configure LunchFlow</h2>
+          </DrawerHeading>
           <div className="px-5 space-y-5">
             <div className="space-y-2 text-sm bg-neutral-100 p-5 rounded">
               <h4 className="font-medium underline">Setup instructions:</h4>
@@ -88,7 +79,7 @@ export default function EditLunchFlowProvider({ isOpen, onOpenChange }: EditLunc
             </div>
           </div>
 
-          <DrawerFooter className="mt-5">
+          <div className="mt-5 flex flex-col gap-2 p-4">
             <Button onClick={handleSave} disabled={saveLunchFlowConfig.isPending}>
               {saveLunchFlowConfig.isPending && <Spinner className="mr-2" />}
               {saveLunchFlowConfig.isPending ? "Saving" : "Save"}
@@ -100,7 +91,7 @@ export default function EditLunchFlowProvider({ isOpen, onOpenChange }: EditLunc
                 {deleteLunchFlowConfig.isPending ? "Deleting config..." : "Delete config"}
               </Button>
             }
-          </DrawerFooter>
+          </div>
         </DrawerContent>
       </Drawer>
     </>
