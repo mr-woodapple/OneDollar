@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { Check, Pen, Trash, X } from "lucide-react";
+import { Check, Pen, Trash } from "lucide-react";
 import { Button } from "../ui/button";
 import { Item, ItemActions, ItemContent, ItemGroup, ItemMedia } from "../ui/item";
-import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader, DrawerTitle } from "../ui/drawer";
+import { Drawer, DrawerContent, DrawerHeading } from "../shared/GenericDrawer";
 
 import { useTags } from "@/api/hooks/useTags";
 import type { Tag } from "@/models/Tag";
@@ -96,19 +96,12 @@ export default function TagsDrawer({
   return (
     <>
       <Drawer open={isOpen} onOpenChange={onOpenChange}>
-        <DrawerContent className="px-5 max-w-screen-sm mx-auto">
-          <DrawerHeader>
-            <div className="flex flex-row justify-between items-center">
-              <DrawerTitle>Tags</DrawerTitle>
-              <DrawerClose asChild>
-                <Button variant="ghost" size="icon">
-                  <X />
-                </Button>
-              </DrawerClose>
-            </div>
-          </DrawerHeader>
+        <DrawerContent>
+          <DrawerHeading>
+            <h2 className="font-semibold">Tags</h2>
+          </DrawerHeading>
 
-          <div className="apple-safe-area drawer-content flex flex-col mb-1 max-h-[70vh]">
+          <div className="drawer-content mb-1 flex max-h-[70vh] flex-col px-5">
             {
               tags.isPending ? (<p className="dbg">Loading...</p>) :
               tags.isError ? (<ErrorAlert error={tags.error} />) :
@@ -185,9 +178,9 @@ export default function TagsDrawer({
           </div>
 
           { useSelectionMode &&
-            <DrawerFooter>
+            <div className="mt-auto flex flex-col gap-2 p-4">
               <Button onClick={handleConfirm}>Done</Button>
-            </DrawerFooter>
+            </div>
           }
         </DrawerContent>
       </Drawer>

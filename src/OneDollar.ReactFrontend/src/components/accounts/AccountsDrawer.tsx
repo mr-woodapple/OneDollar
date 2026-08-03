@@ -1,13 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { Pen, Trash } from "lucide-react";
-import { Button } from "../ui/button";
-import { Item, ItemActions, ItemContent, ItemGroup, ItemMedia } from "../ui/item";
-import { Drawer, DrawerContent, DrawerHeading } from "../shared/GenericDrawer";
-
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Item, ItemActions, ItemContent, ItemGroup, ItemMedia } from "@/components/ui/item";
-import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
+import { Drawer, DrawerContent, DrawerHeading } from "@/components/shared/GenericDrawer";
 import type { Account } from "@/models/Account";
 import { useAccounts } from "@/api/hooks/useAccounts";
 import EditAccount from "./EditAccount";

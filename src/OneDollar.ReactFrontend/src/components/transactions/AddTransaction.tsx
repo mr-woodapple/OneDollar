@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { CalendarClock, Euro, Minus, Plus, Store, Trash } from "lucide-react"
+import { CalendarClock, Check, Euro, Minus, Plus, Store, Trash } from "lucide-react"
 import { toast } from "sonner"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
