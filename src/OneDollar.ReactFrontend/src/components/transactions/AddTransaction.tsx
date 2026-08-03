@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react"
-import { CalendarClock, Euro, Minus, Plus, Store, Trash, X } from "lucide-react"
+import { CalendarClock, Euro, Minus, Plus, Store, Trash } from "lucide-react"
 import { toast } from "sonner"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
-import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer"
+import { Drawer, DrawerContent, DrawerHeading } from "@/components/shared/GenericDrawer"
 
 import NumPad from "@/components/transactions/NumPad"
 import CategoriesDrawer from "@/components/categories/CategoriesDrawer"
@@ -145,33 +145,18 @@ export default function AddTransaction({ transaction, isOpen, onOpenChange }: Ad
   return (
     <>
       <Drawer open={isOpen} onOpenChange={onOpenChange}>
-        <DrawerContent className="px-5 max-w-screen-sm mx-auto">
-          <DrawerHeader>
-            <DrawerTitle className="hidden">{ transaction ? "Edit Transaction" : "Add Transaction" }</DrawerTitle>
-            <div className="flex flex-row justify-between items-center">
-              <div className="flex flex-row gap-2.5">
-                <Button disabled
-                  size="sm" 
-                  variant="secondary">
-                    <CalendarClock /> {humanReadableTimestamp}
-                </Button>
-
-                <Button disabled
-                  size="sm"
-                  variant="secondary">
-                  <Euro />
-                </Button>
-              </div>
-              
-              <DrawerClose asChild>
-                <Button variant="ghost" size="icon">
-                  <X />
-                </Button>
-              </DrawerClose>
+        <DrawerContent>
+          <DrawerHeading>
+            <div className="flex flex-row gap-2.5">
+              <Button disabled size="sm" variant="secondary">
+                <CalendarClock /> {humanReadableTimestamp}
+              </Button>
+              <Button disabled size="sm" variant="secondary">
+                <Euro />
+              </Button>
             </div>
-          </DrawerHeader>
-
-          <div className="drawer-content mb-1 apple-safe-area">
+          </DrawerHeading>
+          <div className="drawer-content mb-1 px-5">
             <div className="text-center mt-10 mb-14">
               { transaction?.merchant &&
                 <Badge variant="secondary">
@@ -251,7 +236,7 @@ export default function AddTransaction({ transaction, isOpen, onOpenChange }: Ad
             </div>
           </div>
         </DrawerContent>
-      </Drawer >
+      </Drawer>
 
       {/* Child drawers */}
       <CategoriesDrawer
