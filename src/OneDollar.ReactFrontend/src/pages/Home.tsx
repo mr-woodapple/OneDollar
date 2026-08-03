@@ -27,11 +27,10 @@ export default function Home() {
     if (selectedAccountId !== null) {
       const found = accounts.data.find(a => a.accountId === selectedAccountId);
       if (!found) {
-        // Validation failed, reset to default
+        // The current selection is no longer available, so fall back locally.
         if (accounts.data.length > 0) {
-          const defaultId = accounts.data[0].accountId!;
-          setSelectedAccountId(defaultId);
-          localStorage.setItem("defaultAccount", defaultId.toString());
+          const fallbackId = accounts.data[0].accountId!;
+          setSelectedAccountId(fallbackId);
         } else {
           setSelectedAccountId(null);
         }
@@ -39,16 +38,14 @@ export default function Home() {
     } else {
       // No selection, select first available
       if (accounts.data.length > 0) {
-        const defaultId = accounts.data[0].accountId!;
-        setSelectedAccountId(defaultId);
-        localStorage.setItem("defaultAccount", defaultId.toString());
+        const fallbackId = accounts.data[0].accountId!;
+        setSelectedAccountId(fallbackId);
       }
     }
   }, [accounts.data, accounts.isPending, accounts.isError, selectedAccountId]);
 
   const handleAccountChange = (id: number) => {
     setSelectedAccountId(id);
-    localStorage.setItem("defaultAccount", id.toString());
   };
 
   return (
