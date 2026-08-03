@@ -11,6 +11,7 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddScoped<LunchFlowSyncService>();
+builder.Services.AddHealthChecks();
 
 // Registering background services
 builder.Services.AddHostedService<SyncProviderBackgroundService>();
@@ -60,6 +61,7 @@ if (app.Environment.IsDevelopment())
 app.UsePathBase(new PathString("/api"));
 app.UseHttpsRedirection();
 app.UseAuthorization();
+app.MapHealthChecks("/health");
 app.MapControllers();
 
 // Apply migrations automatically on startup
