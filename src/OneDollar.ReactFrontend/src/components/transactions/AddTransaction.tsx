@@ -276,22 +276,34 @@ export default function AddTransaction({ transaction, isOpen, onOpenChange }: Ad
             <div className="grid grid-cols-2 gap-2.5 my-4">
 
               {isTransfer
-                ? <Button variant="secondary" size="lg" onClick={() => setAccountsDrawerState(true)}>
+                ? <Button
+                    variant="secondary"
+                    size="lg"
+                    className="min-w-0 overflow-hidden"
+                    onClick={() => setAccountsDrawerState(true)}>
                     {
                       selectedAccount?.name
-                      ? <div className="space-x-2.5">
-                          <span>From</span>
-                          <span>{selectedAccount.name}</span>
+                      ? <div className="flex min-w-0 items-center gap-2.5">
+                          <span className="shrink-0">From</span>
+                          <span className="truncate" title={selectedAccount.name}>
+                            {selectedAccount.name}
+                          </span>
                         </div>
                       : <span>Select Source</span>
                     }
                   </Button>
-                : <Button variant="secondary" size="lg" onClick={() => setCategoriesDrawerState(true)}>
+                : <Button
+                    variant="secondary"
+                    size="lg"
+                    className="min-w-0 overflow-hidden"
+                    onClick={() => setCategoriesDrawerState(true)}>
                     {
                       selectedCategory?.name
-                      ? <div className="space-x-2.5">
-                          <span>{selectedCategory.icon}</span>
-                          <span>{selectedCategory.name}</span>
+                      ? <div className="flex min-w-0 items-center gap-2.5">
+                          <span className="shrink-0">{selectedCategory.icon}</span>
+                          <span className="truncate" title={selectedCategory.name}>
+                            {selectedCategory.name}
+                          </span>
                         </div>
                       : <span>Select Category</span>
                     }
@@ -300,22 +312,34 @@ export default function AddTransaction({ transaction, isOpen, onOpenChange }: Ad
 
 
               {isTransfer
-                ? <Button variant="secondary" size="lg" onClick={() => setDestinationAccountsDrawerState(true)}>
+                ? <Button
+                    variant="secondary"
+                    size="lg"
+                    className="min-w-0 overflow-hidden"
+                    onClick={() => setDestinationAccountsDrawerState(true)}>
                     {
                       selectedDestinationAccount?.name
-                      ? <div className="space-x-2.5">
-                          <span>To</span>
-                          <span>{selectedDestinationAccount.name}</span>
+                      ? <div className="flex min-w-0 items-center gap-2.5">
+                          <span className="shrink-0">To</span>
+                          <span className="truncate" title={selectedDestinationAccount.name}>
+                            {selectedDestinationAccount.name}
+                          </span>
                         </div>
                       : <span>Select Destination</span>
                     }
                   </Button>
-                : <Button variant="secondary" size="lg" onClick={() => setAccountsDrawerState(true)}>
+                : <Button
+                    variant="secondary"
+                    size="lg"
+                    className="min-w-0 overflow-hidden"
+                    onClick={() => setAccountsDrawerState(true)}>
                     {
                       selectedAccount?.name
-                      ? <div className="space-x-2.5">
-                          <span>💳</span>
-                          <span>{selectedAccount.name}</span>
+                      ? <div className="flex min-w-0 items-center gap-2.5">
+                          <span className="shrink-0">💳</span>
+                          <span className="truncate" title={selectedAccount.name}>
+                            {selectedAccount.name}
+                          </span>
                         </div>
                       : <span>Select Account</span>
                     }
