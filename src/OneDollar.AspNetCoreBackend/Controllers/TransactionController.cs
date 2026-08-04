@@ -11,11 +11,9 @@ namespace OneDollar.Api.Controllers;
 public class TransactionController(OneDollarContext oneDollarContext) : ODataController
 {
 	[EnableQuery]
-	public async Task<ActionResult<IEnumerable<Transaction>>> Get()
+	public ActionResult<IEnumerable<Transaction>> Get()
 	{
-		var t = oneDollarContext.Transaction.ToAsyncEnumerable();
-
-		return Ok(t);
+		return Ok(oneDollarContext.Transaction);
 	}
 
 	[EnableQuery]
@@ -25,6 +23,9 @@ public class TransactionController(OneDollarContext oneDollarContext) : ODataCon
 
 		try
 		{
+			// Resolve tags to existing entities to avoid creating duplicates
+			transaction.Tags = await ResolveTagsAsync(transaction.Tags);
+
 			oneDollarContext.Transaction.Add(transaction);
 
 			// Update the linked accounts balance before saving
@@ -43,7 +44,9 @@ public class TransactionController(OneDollarContext oneDollarContext) : ODataCon
 	[EnableQuery]
 	public async Task<ActionResult<Transaction>> Patch([FromRoute] int key, [FromBody] Delta<Transaction> delta)
 	{
-		var transaction = await oneDollarContext.Transaction.SingleOrDefaultAsync(t => t.TransactionId == key);
+		var transaction = await oneDollarContext.Transaction
+			.Include(t => t.Tags)
+			.SingleOrDefaultAsync(t => t.TransactionId == key);
 		if (transaction == null) { return NotFound(); }
 
 		try
@@ -51,7 +54,21 @@ public class TransactionController(OneDollarContext oneDollarContext) : ODataCon
 			var originalAccountId = transaction.AccountId;
 			var originalAmount = transaction.Amount;
 
+			// Capture incoming tags before patching so we can replace the
+			// navigation collection with existing entities.
+			ICollection<Tag>? incomingTags = null;
+			var tagsChanged = delta.TryGetPropertyValue("Tags", out var tagsValue);
+			if (tagsChanged && tagsValue is IEnumerable<Tag> tags)
+			{
+				incomingTags = tags.ToList();
+			}
+
 			delta.Patch(transaction);
+
+			if (tagsChanged)
+			{
+				transaction.Tags = await ResolveTagsAsync(incomingTags);
+			}
 
 			if (transaction.AccountId == originalAccountId)
 			{
@@ -97,5 +114,20 @@ public class TransactionController(OneDollarContext oneDollarContext) : ODataCon
 		{
 			return Problem(ex.Message);
 		}
+	}
+
+	/// <summary>
+	/// Resolves the supplied tags to tracked entities that already exist in the
+	/// database, matching by their id. This prevents duplicate tags from being
+	/// created when linking existing tags to a transaction.
+	/// </summary>
+	/// <param name="tags">The tags supplied in the request payload.</param>
+	/// <returns>The existing tag entities, or an empty collection.</returns>
+	private async Task<ICollection<Tag>> ResolveTagsAsync(ICollection<Tag>? tags)
+	{
+		if (tags == null || tags.Count == 0) { return new List<Tag>(); }
+
+		var ids = tags.Select(t => t.TagId).ToList();
+		return await oneDollarContext.Tag.Where(t => ids.Contains(t.TagId)).ToListAsync();
 	}
 }

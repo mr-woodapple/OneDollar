@@ -1,5 +1,18 @@
 const API_BASE_URL = "/api";
 
+async function checkApiHealth(): Promise<true> {
+  const response = await fetch(`${API_BASE_URL}/health`, {
+    cache: "no-store",
+    signal: AbortSignal.timeout(5000),
+  });
+
+  if (!response.ok) {
+    throw new Error(response.statusText);
+  }
+
+  return true;
+}
+
 async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
@@ -30,4 +43,4 @@ interface ODataResponse<T> {
     value: T;
 }
 
-export { fetchApi, type ODataResponse }
+export { checkApiHealth, fetchApi, type ODataResponse }

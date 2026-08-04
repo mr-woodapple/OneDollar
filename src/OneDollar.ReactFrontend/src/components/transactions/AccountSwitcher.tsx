@@ -1,6 +1,7 @@
 import ErrorAlert from "../shared/alerts/ErrorAlert";
 import { useAccounts } from "@/api/hooks/useAccounts";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface AccountSwitcherProps {
   onAccountChange: (accountId: number) => void;
@@ -13,7 +14,7 @@ export default function AccountSwitcher({ onAccountChange, selectedAccountId }: 
   return (
     <div className="header flex justify-center">
       {
-        accounts.isPending ? (<p className="dbg">Loading...</p>) :
+        accounts.isPending ? (<Skeleton className="h-8 w-42" />) :
         accounts.isError ? (<ErrorAlert error={accounts.error} />) :
         (
           <Select

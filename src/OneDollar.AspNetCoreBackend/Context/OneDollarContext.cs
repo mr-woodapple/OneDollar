@@ -10,6 +10,7 @@ public class OneDollarContext(DbContextOptions<OneDollarContext> options) : DbCo
 	public DbSet<Transaction> Transaction { get; set; } = default!;
 	public DbSet<Category> Category { get; set; } = default!;
 	public DbSet<Account> Account { get; set; } = default!;
+	public DbSet<Tag> Tag { get; set; } = default!;
 	public DbSet<LunchFlowProviderModel> LunchFlowProvider { get; set; } = default!;
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -28,7 +29,14 @@ public class OneDollarContext(DbContextOptions<OneDollarContext> options) : DbCo
 
 		modelBuilder.Entity<Category>().HasQueryFilter(c => !c.Deleted);
 
+		modelBuilder.Entity<Tag>().HasQueryFilter(t => !t.Deleted);
+
 		modelBuilder.Entity<Transaction>().HasQueryFilter(t => !t.Deleted);
+
+		modelBuilder.Entity<Transaction>()
+			.HasMany(t => t.Tags)
+			.WithMany(t => t.Transactions)
+			.UsingEntity(j => j.ToTable("TransactionTag"));
 	}
 
 	/// <summary>

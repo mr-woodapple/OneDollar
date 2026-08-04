@@ -11,6 +11,7 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddScoped<LunchFlowSyncService>();
+builder.Services.AddHealthChecks();
 
 // Registering background services
 builder.Services.AddHostedService<SyncProviderBackgroundService>();
@@ -24,6 +25,7 @@ var modelBuilder = new ODataConventionModelBuilder().EnableLowerCamelCase();
 modelBuilder.EntitySet<Transaction>("Transaction");
 modelBuilder.EntitySet<Account>("Account");
 modelBuilder.EntitySet<Category>("Category");
+modelBuilder.EntitySet<Tag>("Tag");
 
 builder.Services.AddControllers().AddOData(
 	options => options.Select().Filter().OrderBy().Expand().Count().SetMaxTop(null).AddRouteComponents(
@@ -59,6 +61,7 @@ if (app.Environment.IsDevelopment())
 app.UsePathBase(new PathString("/api"));
 app.UseHttpsRedirection();
 app.UseAuthorization();
+app.MapHealthChecks("/health");
 app.MapControllers();
 
 // Apply migrations automatically on startup

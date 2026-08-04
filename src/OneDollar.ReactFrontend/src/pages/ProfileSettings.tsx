@@ -6,6 +6,7 @@ import { Item, ItemActions, ItemContent, ItemDescription, ItemFooter, ItemGroup,
 
 import AccountsDrawer from "@/components/accounts/AccountsDrawer";
 import CategoriesDrawer from "@/components/categories/CategoriesDrawer";
+import TagsDrawer from "@/components/tags/TagsDrawer";
 import EditLunchFlowProvider from "@/components/profile-settings/EditLunchFlowProvider";
 import { useAccounts } from "@/api/hooks/useAccounts";
 import { useProviders } from "@/api/hooks/useProviders";
@@ -17,6 +18,7 @@ export default function ProfileSettings() {
   const [defaultAccountId, setDefaultAccountId] = useState<string | undefined>();
   const [editCategoriesDrawerState, setEditCategoriesDrawerState] = useState(false)
   const [editAccountsDrawerState, setEditAccountsDrawerState] = useState(false)
+  const [editTagsDrawerState, setEditTagsDrawerState] = useState(false)
   const [lunchFlowDrawerState, setLunchFlowDrawerState] = useState(false)
 
   useEffect(() => {
@@ -53,6 +55,14 @@ export default function ProfileSettings() {
         <Item className="cursor-pointer">
           <ItemContent className="cursor-pointer" onClick={() => setEditAccountsDrawerState(true)}>
             <ItemTitle>Accounts</ItemTitle>
+          </ItemContent>
+        </Item>
+
+        <ItemSeparator />
+
+        <Item className="cursor-pointer">
+          <ItemContent className="cursor-pointer" onClick={() => setEditTagsDrawerState(true)}>
+            <ItemTitle>Tags</ItemTitle>
           </ItemContent>
         </Item>
 
@@ -152,6 +162,12 @@ export default function ProfileSettings() {
         showDeleteButton
         isOpen={editAccountsDrawerState}
         onOpenChange={setEditAccountsDrawerState} />
+      <TagsDrawer
+        showAddButton
+        showEditButton
+        showDeleteButton
+        isOpen={editTagsDrawerState}
+        onOpenChange={setEditTagsDrawerState} />
       <EditLunchFlowProvider isOpen={lunchFlowDrawerState} onOpenChange={setLunchFlowDrawerState} />
     </div>
   )

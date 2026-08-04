@@ -1,5 +1,6 @@
 import type { Account } from "./Account";
 import type { Category } from "./Category";
+import type { Tag } from "./Tag";
 
 export interface Transaction {
   transactionId?: number;
@@ -15,4 +16,6 @@ export interface Transaction {
 
   category?: Category;
   account?: Account;
+
+  tags?: Tag[];
 }

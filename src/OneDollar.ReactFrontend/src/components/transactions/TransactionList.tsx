@@ -5,8 +5,10 @@ import { useTransactions } from "@/api/hooks/useTransactions";
 import { useCategories } from "@/api/hooks/useCategories";
 import type { Category } from "@/models/Category";
 import type { Transaction } from "@/models/Transaction"
+import { Badge } from "../ui/badge";
 import ErrorAlert from "../shared/alerts/ErrorAlert";
 import EmptyTransactions from "../shared/empty/EmptyTransactions";
+import { Skeleton } from "../ui/skeleton";
 
 interface TransactionListProps {
   selectedAccountId?: number | null;
@@ -63,7 +65,7 @@ export default function TransactionList({ selectedAccountId, onTransactionClick 
   return (
     <>
       {
-        transactions.isPending ? (<p className="dbg">Loading...</p>) :
+        transactions.isPending ? (<TransactionListSkeleton />) :
         transactions.isError ? (<ErrorAlert error={transactions.error} />) :
         transactions.data.length === 0 ? (<EmptyTransactions />) :
         (
@@ -98,6 +100,19 @@ export default function TransactionList({ selectedAccountId, onTransactionClick 
                               {entry.merchant}
                             </ItemDescription>
                           }
+
+                          { entry.tags && entry.tags.length > 0 &&
+                            <div className="flex flex-row flex-wrap gap-1 mt-1">
+                              {entry.tags.map((tag) => (
+                                <Badge
+                                  key={tag.tagId}
+                                  style={{ backgroundColor: tag.color ?? "#a3a3a3" }}
+                                  className="text-white text-[10px] px-1.5 py-0">
+                                  {tag.name}
+                                </Badge>
+                              ))}
+                            </div>
+                          }
                         </ItemContent>
 
                         <ItemActions>
@@ -116,4 +131,42 @@ export default function TransactionList({ selectedAccountId, onTransactionClick 
       }
     </>
   );
+}
+
+/**
+ * Skeleton component to show while loading transactions,
+ * dynamically varies in the number of groups and items.
+ * 
+ * @returns The skeleton component.
+ */
+function TransactionListSkeleton() {
+
+  // Get a random number for a given max value.
+  function getRandomInt(max: number) {
+    return Math.floor(Math.random() * max) + 1; // Ensure at least 1
+  }
+
+  return(
+     <div className="flex flex-col gap-2">
+      {[...Array(getRandomInt(2))].map((_, i) => {
+        const items = [...Array(getRandomInt(4))];
+
+        return (
+          <div key={i} className="mt-5">
+            <Skeleton className="h-4 w-[250px] mb-2" />
+            <ItemGroup className="border border-neutral-200 rounded-lg">
+              {items.map((_, j) => (
+                <div className="gap-2" key={j}>
+                  <div className="p-2">
+                    <Skeleton className="h-8 w-full" />
+                  </div>
+                  {j !== items.length - 1 && <ItemSeparator />}
+                </div>
+              ))}
+            </ItemGroup>
+          </div>
+        )
+      })}
+    </div>
+  )
 }

@@ -1,12 +1,12 @@
 import { Routes, Route } from 'react-router'
 
-import MainLayout from './layouts/MainLayout'
 import Home from './pages/Home'
+import NotFound from './pages/NotFound'
 import Statistics from './pages/Statistics'
 import ProfileSettings from './pages/ProfileSettings'
-import NotFound from './pages/NotFound'
+import MainLayout from './layouts/MainLayout'
 
-function App() {
+export default function App() {
 
   return (
     <Routes>
@@ -19,5 +19,3 @@ function App() {
     </Routes>
   )
 }
-
-export default App
