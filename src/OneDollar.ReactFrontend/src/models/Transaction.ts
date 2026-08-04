@@ -9,13 +9,16 @@ export interface Transaction {
   currency: string;
   merchant?: string;
   isPending: boolean;
+  isTransfer: boolean;
   note?: string;
 
-  categoryId?: number;
+  categoryId?: number | null;
   accountId: number;
+  destinationAccountId?: number | null;
 
   category?: Category;
   account?: Account;
+  destinationAccount?: Account;
 
   tags?: Tag[];
 }

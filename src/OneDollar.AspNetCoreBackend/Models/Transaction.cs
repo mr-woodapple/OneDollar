@@ -1,7 +1,7 @@
 ﻿namespace OneDollar.Api.Models;
 
 /// <summary>
-/// Represents a transaction, income or expense.
+/// Represents an income, expense, or transfer.
 /// </summary>
 public class Transaction : OneDollarBase
 {
@@ -12,10 +12,14 @@ public class Transaction : OneDollarBase
 	public string? Note { get; set; }
 	public string? Merchant { get; set; }
 	public bool? IsPending { get; set; }
+	public bool IsTransfer { get; set; }
 
 
 	public int AccountId { get; set; }
 	public Account? Account { get; set; }
+
+	public int? DestinationAccountId { get; set; }
+	public Account? DestinationAccount { get; set; }
 
 	public int? CategoryId { get; set; }
 	public Category? Category { get; set; }

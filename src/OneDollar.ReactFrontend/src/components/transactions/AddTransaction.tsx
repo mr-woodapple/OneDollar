@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { CalendarClock, Check, Euro, Minus, Plus, Store, Trash } from "lucide-react"
+import { ArrowLeftRight, CalendarClock, Check, Euro, Minus, Plus, Store, Trash } from "lucide-react"
 import { toast } from "sonner"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -37,12 +37,15 @@ export default function AddTransaction({ transaction, isOpen, onOpenChange }: Ad
   const [amount, setAmount] = useState<string>("0");
   const [timestamp, setTimestamp] = useState<Date>(new Date());
   const [isExpense, setIsExpense] = useState<boolean>(true);
+  const [isTransfer, setIsTransfer] = useState<boolean>(false);
   const [selectedCategory, setSelectedCategory] = useState<Category>();
   const [selectedAccount, setSelectedAccount] = useState<Account>();
+  const [selectedDestinationAccount, setSelectedDestinationAccount] = useState<Account>();
   const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
 
   const [categoriesDrawerState, setCategoriesDrawerState] = useState(false)
   const [accountsDrawerState, setAccountsDrawerState] = useState(false)
+  const [destinationAccountsDrawerState, setDestinationAccountsDrawerState] = useState(false)
 
   // Only show the time information if the time is not 00:00
   const humanReadableTimestamp = isTimestampWithoutTimeInfo(timestamp) 
@@ -55,19 +58,24 @@ export default function AddTransaction({ transaction, isOpen, onOpenChange }: Ad
     if (transaction) {
       // Edit mode: populate fields
       setNote(transaction.note ?? "");
-      setIsExpense(transaction.amount < 0);
+      setIsExpense(!transaction.isTransfer && transaction.amount < 0);
+      setIsTransfer(transaction.isTransfer);
       setTimestamp(new Date(transaction.timestamp));
       setAmount(Math.abs(transaction.amount).toFixed(2).toString().replace(".", ","));
       setSelectedCategory(categories.data?.find((category: Category) => category.categoryId === transaction.categoryId));
       setSelectedAccount(accounts.data?.find((account: Account) => account.accountId === transaction.accountId));
+      setSelectedDestinationAccount(accounts.data?.find((account: Account) => account.accountId === transaction.destinationAccountId));
       setSelectedTags(transaction.tags ?? []);
     } else {
       // Add mode: reset fields
       setNote("");
       setAmount("0");
       setTimestamp(new Date);
+      setIsExpense(true);
+      setIsTransfer(false);
       setSelectedCategory(undefined);
       setSelectedAccount(undefined);
+      setSelectedDestinationAccount(undefined);
       setSelectedTags([]);
     }
   }, [isOpen, transaction]);
@@ -107,23 +115,40 @@ export default function AddTransaction({ transaction, isOpen, onOpenChange }: Ad
 
   async function handleSaveOrUpdate(isUpdate: boolean) {
     if (!selectedAccount) {
-      toast.warning("Please select an account!")
+      toast.warning(`Please select a ${isTransfer ? "source " : ""}account!`)
+      return;
+    }
+
+    if (isTransfer && !selectedDestinationAccount) {
+      toast.warning("Please select a destination account!")
+      return;
+    }
+
+    if (isTransfer && selectedDestinationAccount?.accountId === selectedAccount.accountId) {
+      toast.warning("Source and destination accounts must be different!")
       return;
     }
 
     let finalAmount = Number(amount.replace(",", ".")) || 0;
-    finalAmount = isExpense ? -Math.abs(finalAmount) : Math.abs(finalAmount);
+    finalAmount = isTransfer || !isExpense ? Math.abs(finalAmount) : -Math.abs(finalAmount);
+
+    if (isTransfer && finalAmount <= 0) {
+      toast.warning("Transfer amount must be greater than zero!")
+      return;
+    }
 
     const t: Transaction = {
       transactionId: transaction?.transactionId ?? undefined,
-      timestamp: transaction?.timestamp ?? new Date,
-      categoryId: selectedCategory?.categoryId,
+      timestamp,
+      categoryId: isTransfer ? null : selectedCategory?.categoryId ?? null,
       accountId: selectedAccount.accountId!,
+      destinationAccountId: isTransfer ? selectedDestinationAccount!.accountId! : null,
       amount: finalAmount,
       currency: "EUR",
       note: note,
       merchant: transaction?.merchant ?? undefined,
       isPending: transaction?.isPending ?? false,
+      isTransfer,
       tags: selectedTags.map((tag) => ({ tagId: tag.tagId, name: tag.name, color: tag.color }))
     };
 
@@ -135,7 +160,9 @@ export default function AddTransaction({ transaction, isOpen, onOpenChange }: Ad
       onOpenChange(false);
       setAmount("0");
       setIsExpense(true);
+      setIsTransfer(false);
       setSelectedAccount(undefined);
+      setSelectedDestinationAccount(undefined);
       setSelectedCategory(undefined);
       setSelectedTags([]);
     };
@@ -158,6 +185,18 @@ export default function AddTransaction({ transaction, isOpen, onOpenChange }: Ad
         : [...current, tag]);
   }
 
+  function toggleTransfer() {
+    setIsTransfer((current) => {
+      if (current) {
+        setSelectedDestinationAccount(undefined);
+      } else {
+        setSelectedCategory(undefined);
+      }
+
+      return !current;
+    });
+  }
+
   return (
     <>
       <Drawer open={isOpen} onOpenChange={onOpenChange}>
@@ -169,6 +208,12 @@ export default function AddTransaction({ transaction, isOpen, onOpenChange }: Ad
               </Button>
               <Button disabled size="sm" variant="secondary">
                 <Euro />
+              </Button>
+              <Button
+                size="sm"
+                variant={isTransfer ? "default" : "secondary"}
+                onClick={toggleTransfer}>
+                <ArrowLeftRight /> Transfer
               </Button>
             </div>
           </DrawerHeading>
@@ -182,34 +227,41 @@ export default function AddTransaction({ transaction, isOpen, onOpenChange }: Ad
               }
 
               <div className="flex flex-row justify-center items-center mt-2.5">
-                <Button variant="ghost" className="rounded-full w-auto h-auto" onClick={() => setIsExpense(!isExpense)}>
-                  {isExpense ? <Minus className="size-8 stroke-3" /> : <Plus className="size-8 stroke-3" />}     
+                <Button
+                  disabled={isTransfer}
+                  variant="ghost"
+                  className="rounded-full w-auto h-auto"
+                  onClick={() => setIsExpense(!isExpense)}>
+                  {isExpense ? <Minus className="size-8 stroke-3" /> : <Plus className="size-8 stroke-3" />}
                 </Button>  
                 <span className="ml-2 text-5xl font-bold">{ amount } €</span>
               </div>
             </div>
             
             { tags.data && tags.data.length > 0 &&
-              <div className="flex flex-row gap-2 overflow-x-auto mb-4 pb-1 -mx-5 px-5">
-                {tags.data.map((tag) => {
-                  const isActive = selectedTags.some((t) => t.tagId === tag.tagId);
-                  const color = tag.color ?? "#a3a3a3";
+              <>
+                <Label>Tags</Label>
+                <div className="flex flex-row gap-2 overflow-x-auto mb-4 mt-2 pb-1 -mx-5 px-5">
+                  {tags.data.map((tag) => {
+                    const isActive = selectedTags.some((t) => t.tagId === tag.tagId);
+                    const color = tag.color ?? "#a3a3a3";
 
-                  return (
-                    <Badge
-                      key={tag.tagId}
-                      variant="outline"
-                      onClick={() => toggleTag(tag)}
-                      style={isActive
-                        ? { backgroundColor: color, color: "#ffffff" }
-                        : { backgroundColor: `${color}40`, color: color }}
-                      className="shrink-0 cursor-pointer border-transparent transition-colors duration-200">
-                      {isActive && <Check className="mr-1" />}
-                      {tag.name}
-                    </Badge>
-                  );
-                })}
-              </div>
+                    return (
+                      <Badge
+                        key={tag.tagId}
+                        variant="outline"
+                        onClick={() => toggleTag(tag)}
+                        style={isActive
+                          ? { backgroundColor: color, color: "#ffffff" }
+                          : { backgroundColor: `${color}40`, color: color }}
+                        className="shrink-0 cursor-pointer border-transparent transition-colors duration-200">
+                        {isActive && <Check className="mr-1" />}
+                        {tag.name}
+                      </Badge>
+                    );
+                  })}
+                </div>
+              </>
             }
 
             <Label htmlFor="input-addtransaction-note">Note</Label>
@@ -223,28 +275,52 @@ export default function AddTransaction({ transaction, isOpen, onOpenChange }: Ad
 
             <div className="grid grid-cols-2 gap-2.5 my-4">
 
-              <Button variant="secondary" size="lg" onClick={() => setCategoriesDrawerState(true)}>
-                {
-                  selectedCategory?.name
-                  ? <div className="space-x-2.5">
-                      <span>{selectedCategory.icon}</span>
-                      <span>{selectedCategory.name}</span>
-                    </div>
-                  : <span>Select Category</span>
-                }
-              </Button>
+              {isTransfer
+                ? <Button variant="secondary" size="lg" onClick={() => setAccountsDrawerState(true)}>
+                    {
+                      selectedAccount?.name
+                      ? <div className="space-x-2.5">
+                          <span>From</span>
+                          <span>{selectedAccount.name}</span>
+                        </div>
+                      : <span>Select Source</span>
+                    }
+                  </Button>
+                : <Button variant="secondary" size="lg" onClick={() => setCategoriesDrawerState(true)}>
+                    {
+                      selectedCategory?.name
+                      ? <div className="space-x-2.5">
+                          <span>{selectedCategory.icon}</span>
+                          <span>{selectedCategory.name}</span>
+                        </div>
+                      : <span>Select Category</span>
+                    }
+                  </Button>
+              }
 
 
-              <Button variant="secondary" size="lg" onClick={() => setAccountsDrawerState(true)}>
-                {
-                  selectedAccount?.name
-                  ? <div className="space-x-2.5">
-                      <span>💳</span>
-                      <span>{selectedAccount.name}</span>
-                    </div>
-                  : <span>Select Account</span>
-                }
-              </Button>
+              {isTransfer
+                ? <Button variant="secondary" size="lg" onClick={() => setDestinationAccountsDrawerState(true)}>
+                    {
+                      selectedDestinationAccount?.name
+                      ? <div className="space-x-2.5">
+                          <span>To</span>
+                          <span>{selectedDestinationAccount.name}</span>
+                        </div>
+                      : <span>Select Destination</span>
+                    }
+                  </Button>
+                : <Button variant="secondary" size="lg" onClick={() => setAccountsDrawerState(true)}>
+                    {
+                      selectedAccount?.name
+                      ? <div className="space-x-2.5">
+                          <span>💳</span>
+                          <span>{selectedAccount.name}</span>
+                        </div>
+                      : <span>Select Account</span>
+                    }
+                  </Button>
+              }
             </div>
 
             <NumPad handleNumpadInput={handleNumpadInput} />
@@ -287,7 +363,22 @@ export default function AddTransaction({ transaction, isOpen, onOpenChange }: Ad
         useSelectionMode
         isOpen={accountsDrawerState} 
         onOpenChange={setAccountsDrawerState} 
-        onSelectAccount={setSelectedAccount} />
+        onSelectAccount={(account) => {
+          setSelectedAccount(account);
+          if (account.accountId === selectedDestinationAccount?.accountId) {
+            setSelectedDestinationAccount(undefined);
+          }
+        }} />
+      <AccountsDrawer
+        useSelectionMode
+        isOpen={destinationAccountsDrawerState}
+        onOpenChange={setDestinationAccountsDrawerState}
+        onSelectAccount={(account) => {
+          setSelectedDestinationAccount(account);
+          if (account.accountId === selectedAccount?.accountId) {
+            setSelectedAccount(undefined);
+          }
+        }} />
     </>
   )
 }

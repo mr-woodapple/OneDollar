@@ -1,8 +1,11 @@
 import { useMemo } from "react";
+import { ArrowLeftRight } from "lucide-react";
 import { ItemGroup, Item, ItemMedia, ItemContent, ItemTitle, ItemActions, ItemSeparator, ItemDescription } from "../ui/item"
 
 import { useTransactions } from "@/api/hooks/useTransactions";
 import { useCategories } from "@/api/hooks/useCategories";
+import { useAccounts } from "@/api/hooks/useAccounts";
+import type { Account } from "@/models/Account";
 import type { Category } from "@/models/Category";
 import type { Transaction } from "@/models/Transaction"
 import { Badge } from "../ui/badge";
@@ -19,6 +22,7 @@ interface TransactionListProps {
 export default function TransactionList({ selectedAccountId, onTransactionClick }: TransactionListProps) {
   const { transactions } = useTransactions();
   const { categories } = useCategories();
+  const { accounts } = useAccounts();
   
   // Lookup map, according to ai, this makes things faster by lowering rendering complexity.
   const categoryMap = useMemo(() => {
@@ -26,19 +30,28 @@ export default function TransactionList({ selectedAccountId, onTransactionClick 
     return new Map(categories.data.map((c: Category) => [c.categoryId, c]));
   }, [categories.data]);
 
+  const accountMap = useMemo(() => {
+    if (!accounts.data) return new Map<number, Account>();
+    return new Map(accounts.data.map((account) => [account.accountId!, account]));
+  }, [accounts.data]);
+
   // Group transactions by day
   const groupedEntries: { [date: string]: Transaction[] } = useMemo(() => {
     return !transactions.isPending && !transactions.isError && transactions.data
-      ? groupTransactionByDay(transactions.data.filter(t => !selectedAccountId || t.accountId === selectedAccountId))
+      ? groupTransactionByDay(transactions.data.filter(t =>
+          !selectedAccountId
+          || t.accountId === selectedAccountId
+          || (t.isTransfer && t.destinationAccountId === selectedAccountId)))
       : {};
   }, [transactions.data, transactions.isPending, transactions.isError, selectedAccountId]);
 
   // Helper function to sort the Transactions by date.
   function groupTransactionByDay(transactions: Transaction[]) {
     // Sort transactions by date descending
-    transactions.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    const sortedTransactions = [...transactions]
+      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
-    return transactions.reduce((group: { [date: string]: Transaction[] }, entry) => {
+    return sortedTransactions.reduce((group: { [date: string]: Transaction[] }, entry) => {
       const date = new Date(entry.timestamp).toISOString().split("T")[0];
 
       // Check if the key exists, if not create empty array
@@ -77,22 +90,37 @@ export default function TransactionList({ selectedAccountId, onTransactionClick 
               <ItemGroup className="border border-neutral-200 rounded-lg">
                 {Array.isArray(entries) && entries.map((entry: Transaction, index: number) => {
                   const category = categoryMap.get(entry.categoryId) ?? entry.category;
+                  const sourceAccountName = accountMap.get(entry.accountId)?.name ?? "Unknown account";
+                  const destinationAccountName = entry.destinationAccountId
+                    ? accountMap.get(entry.destinationAccountId)?.name ?? "Unknown account"
+                    : "Unknown account";
+                  const isIncomingTransfer = entry.isTransfer && entry.destinationAccountId === selectedAccountId;
+                  const displayedAmount = entry.isTransfer
+                    ? (isIncomingTransfer ? Math.abs(entry.amount) : -Math.abs(entry.amount))
+                    : entry.amount;
 
                   return (
                     <div key={index} onClick={() => onTransactionClick?.(entry)} className="cursor-pointer">
                       <Item key={entry.transactionId} size="sm">
-                        { category && 
-                          <ItemMedia>
-                            { category.icon }
-                          </ItemMedia>
-                        }
+                        <ItemMedia className="w-5">
+                          {entry.isTransfer
+                            ? <ArrowLeftRight className="size-4" />
+                            : category?.icon}
+                        </ItemMedia>
                         
                         <ItemContent>
-                          { category 
-                            ? <ItemTitle>{category.name}</ItemTitle>
-                            : <div>
-                                <span className="rounded-full bg-neutral-200 py-1 px-2 text-xs text-neutral-700">No category selected.</span>
-                              </div>
+                          {entry.isTransfer
+                            ? <>
+                                <ItemTitle>Transfer</ItemTitle>
+                                <ItemDescription>
+                                  {sourceAccountName} to {destinationAccountName}
+                                </ItemDescription>
+                              </>
+                            : category
+                              ? <ItemTitle>{category.name}</ItemTitle>
+                              : <div>
+                                  <span className="rounded-full bg-neutral-200 py-1 px-2 text-xs text-neutral-700">No category selected.</span>
+                                </div>
                           }
 
                           { entry.merchant && 
@@ -116,7 +144,7 @@ export default function TransactionList({ selectedAccountId, onTransactionClick 
                         </ItemContent>
 
                         <ItemActions>
-                          {entry.amount.toLocaleString('en-GB', { style: 'currency', currency: 'EUR' })}
+                          {displayedAmount.toLocaleString('en-GB', { style: 'currency', currency: entry.currency })}
                         </ItemActions>
                       </Item>
 
