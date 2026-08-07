@@ -192,6 +192,7 @@ public class LunchFlowSyncService
 						Timestamp = transaction.Date,
 						Note = transaction.Description,
 						IsPending = transaction.IsPending,
+						IsTransfer = false,
 						Merchant = transaction.Merchant,
 						Amount = transaction.Amount
 					};

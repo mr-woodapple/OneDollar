@@ -34,6 +34,12 @@ public class OneDollarContext(DbContextOptions<OneDollarContext> options) : DbCo
 		modelBuilder.Entity<Transaction>().HasQueryFilter(t => !t.Deleted);
 
 		modelBuilder.Entity<Transaction>()
+			.HasOne(t => t.DestinationAccount)
+			.WithMany()
+			.HasForeignKey(t => t.DestinationAccountId)
+			.OnDelete(DeleteBehavior.Restrict);
+
+		modelBuilder.Entity<Transaction>()
 			.HasMany(t => t.Tags)
 			.WithMany(t => t.Transactions)
 			.UsingEntity(j => j.ToTable("TransactionTag"));

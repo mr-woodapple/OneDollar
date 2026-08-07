@@ -21,6 +21,9 @@ public class TransactionController(OneDollarContext oneDollarContext) : ODataCon
 	{
 		if (transaction == null) { return BadRequest(); }
 
+		var validationError = GetValidationError(transaction);
+		if (validationError != null) { return BadRequest(validationError); }
+
 		try
 		{
 			// Resolve tags to existing entities to avoid creating duplicates
@@ -28,9 +31,7 @@ public class TransactionController(OneDollarContext oneDollarContext) : ODataCon
 
 			oneDollarContext.Transaction.Add(transaction);
 
-			// Update the linked accounts balance before saving
-			var account = await oneDollarContext.Account.SingleAsync(a => a.AccountId == transaction.AccountId);
-			account.Balance += transaction.Amount;
+			await ApplyBalanceImpactAsync(TransactionBalanceState.From(transaction), 1);
 
 			await oneDollarContext.SaveChangesAsync();
 			return Ok(transaction);
@@ -51,8 +52,7 @@ public class TransactionController(OneDollarContext oneDollarContext) : ODataCon
 
 		try
 		{
-			var originalAccountId = transaction.AccountId;
-			var originalAmount = transaction.Amount;
+			var originalState = TransactionBalanceState.From(transaction);
 
 			// Capture incoming tags before patching so we can replace the
 			// navigation collection with existing entities.
@@ -65,26 +65,16 @@ public class TransactionController(OneDollarContext oneDollarContext) : ODataCon
 
 			delta.Patch(transaction);
 
+			var validationError = GetValidationError(transaction);
+			if (validationError != null) { return BadRequest(validationError); }
+
 			if (tagsChanged)
 			{
 				transaction.Tags = await ResolveTagsAsync(incomingTags);
 			}
 
-			if (transaction.AccountId == originalAccountId)
-			{
-				// Case 1: Account didn't change
-				var account = await oneDollarContext.Account.SingleAsync(a => a.AccountId == originalAccountId);
-				account.Balance += transaction.Amount - originalAmount;
-			}
-			else
-			{
-				// Case 2: Account did change
-				var oldAccount = await oneDollarContext.Account.SingleAsync(a => a.AccountId == originalAccountId);
-				var newAccount = await oneDollarContext.Account.SingleAsync(a => a.AccountId == transaction.AccountId);
-
-				oldAccount.Balance -= originalAmount;
-				newAccount.Balance += transaction.Amount;
-			}
+			await ApplyBalanceImpactAsync(originalState, -1);
+			await ApplyBalanceImpactAsync(TransactionBalanceState.From(transaction), 1);
 
 			await oneDollarContext.SaveChangesAsync();
 
@@ -103,9 +93,7 @@ public class TransactionController(OneDollarContext oneDollarContext) : ODataCon
 			var transaction = await oneDollarContext.Transaction.SingleAsync(t => t.TransactionId == key);
 			oneDollarContext.Transaction.Remove(transaction);
 
-			// Update the linked accounts balance before saving
-			var account = await oneDollarContext.Account.SingleAsync(a => a.AccountId == transaction.AccountId);
-			account.Balance -= transaction.Amount;
+			await ApplyBalanceImpactAsync(TransactionBalanceState.From(transaction), -1);
 
 			await oneDollarContext.SaveChangesAsync();
 			return NoContent();
@@ -129,5 +117,84 @@ public class TransactionController(OneDollarContext oneDollarContext) : ODataCon
 
 		var ids = tags.Select(t => t.TagId).ToList();
 		return await oneDollarContext.Tag.Where(t => ids.Contains(t.TagId)).ToListAsync();
+	}
+
+	private static string? GetValidationError(Transaction transaction)
+	{
+		if (!transaction.IsTransfer)
+		{
+			return transaction.DestinationAccountId == null && transaction.DestinationAccount == null
+				? null
+				: "Only transfers can have a destination account.";
+		}
+
+		if (transaction.DestinationAccountId == null)
+		{
+			return "A transfer requires a destination account.";
+		}
+
+		if (transaction.DestinationAccountId == transaction.AccountId)
+		{
+			return "The source and destination accounts must be different.";
+		}
+
+		if (transaction.Amount <= 0)
+		{
+			return "A transfer amount must be greater than zero.";
+		}
+
+		return transaction.CategoryId == null && transaction.Category == null
+			? null
+			: "Transfers cannot have a category.";
+	}
+
+	private async Task ApplyBalanceImpactAsync(TransactionBalanceState transaction, int direction)
+	{
+		var balanceChanges = new Dictionary<int, float>();
+
+		static void AddChange(IDictionary<int, float> changes, int accountId, float amount)
+		{
+			changes.TryGetValue(accountId, out var currentAmount);
+			changes[accountId] = currentAmount + amount;
+		}
+
+		if (transaction.IsTransfer)
+		{
+			AddChange(balanceChanges, transaction.AccountId, -transaction.Amount * direction);
+			AddChange(balanceChanges, transaction.DestinationAccountId!.Value, transaction.Amount * direction);
+		}
+		else
+		{
+			AddChange(balanceChanges, transaction.AccountId, transaction.Amount * direction);
+		}
+
+		var accountIds = balanceChanges.Keys.ToList();
+		var accounts = await oneDollarContext.Account
+			.Where(account => accountIds.Contains(account.AccountId))
+			.ToDictionaryAsync(account => account.AccountId);
+
+		if (accounts.Count != accountIds.Count)
+		{
+			throw new InvalidOperationException("One or more linked accounts do not exist.");
+		}
+
+		foreach (var (accountId, balanceChange) in balanceChanges)
+		{
+			accounts[accountId].Balance += balanceChange;
+		}
+	}
+
+	private readonly record struct TransactionBalanceState(
+		int AccountId,
+		int? DestinationAccountId,
+		float Amount,
+		bool IsTransfer)
+	{
+		public static TransactionBalanceState From(Transaction transaction) =>
+			new(
+				transaction.AccountId,
+				transaction.DestinationAccountId,
+				transaction.Amount,
+				transaction.IsTransfer);
 	}
 }

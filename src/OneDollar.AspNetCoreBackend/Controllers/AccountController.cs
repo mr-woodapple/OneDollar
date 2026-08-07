@@ -66,7 +66,9 @@ public class AccountController(OneDollarContext oneDollarContext) : ODataControl
 			if (account == null) 
 				return NotFound();
 
-			if (oneDollarContext.Transaction.Any(t => t.AccountId == account.AccountId))
+			if (oneDollarContext.Transaction.Any(t =>
+				t.AccountId == account.AccountId ||
+				t.DestinationAccountId == account.AccountId))
 				return Conflict("The account is still used, please remove all transactions from it first.");
 
 			oneDollarContext.Account.Remove(account);

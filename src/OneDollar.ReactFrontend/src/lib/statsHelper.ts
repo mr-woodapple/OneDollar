@@ -42,7 +42,7 @@ function getOutflowChartData({ range, transactions, categories, accountId }: Get
   matchingTransactions = transactions.filter((t) => {
     const matchesAccount = accountId === -1 || t.accountId === accountId;
     const transactionDate = new Date(t.timestamp).getTime();
-    return matchesAccount && transactionDate >= end && transactionDate <= start && t.amount < 0;
+    return !t.isTransfer && matchesAccount && transactionDate >= end && transactionDate <= start && t.amount < 0;
   }) || [];
 
   // create chartdata categories from the entries
@@ -98,7 +98,7 @@ function getIncomesChartData({ range, transactions, categories, accountId }: Get
   matchingTransactions = transactions.filter((t) => {
     const matchesAccount = accountId === -1 || t.accountId === accountId;
     const transactionDate = new Date(t.timestamp).getTime();
-    return matchesAccount && transactionDate >= end && transactionDate <= start && t.amount >= 0;
+    return !t.isTransfer && matchesAccount && transactionDate >= end && transactionDate <= start && t.amount >= 0;
   }) || [];
 
   // create chartdata categories from the entries
