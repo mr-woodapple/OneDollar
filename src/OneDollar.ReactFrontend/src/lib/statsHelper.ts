@@ -1,177 +1,322 @@
+import type { Account } from "@/models/Account";
 import type { Category } from "@/models/Category";
-import type { ChartDataCategory } from "@/models/ChartDataCategories";
+import type {
+  StatisticsBreakdownRow,
+  StatisticsDashboardData,
+  StatisticsDirection,
+  StatisticsFilters,
+  StatisticsGrouping,
+  StatisticsRange,
+  StatisticsTrendPoint,
+} from "@/models/Statistics";
+import type { Tag } from "@/models/Tag";
 import type { Transaction } from "@/models/Transaction";
 
-interface GetChartDataProps {
-  range: "7d" | "30d" | "lastMonth";
-  accountId: number;
+export const UNCATEGORIZED_ID = -1;
+export const UNTAGGED_ID = -1;
+
+const CHART_COLORS = [
+  "var(--chart-1)",
+  "var(--chart-2)",
+  "var(--chart-3)",
+  "var(--chart-4)",
+  "var(--chart-5)",
+];
+
+interface StatisticsDateRange {
+  start: Date;
+  end: Date;
+}
+
+interface GetStatisticsDataProps {
+  filters: StatisticsFilters;
+  direction: StatisticsDirection;
+  grouping: StatisticsGrouping;
   transactions: Transaction[];
+  accounts: Account[];
   categories: Category[];
+  tags: Tag[];
+  now?: Date;
 }
 
-/**
- * Calculates the chart data to render the graph from.
- * Matches this data to the provided account id and date range.
- * 
- * @param param0 
- * @returns The chart data to render graphs from.
- */
-function getOutflowChartData({ range, transactions, categories, accountId }: GetChartDataProps): ChartDataCategory[] {
-  if (!range) throw Error("No range present, cannot determine range to load data for.");
+export function getStatisticsDateRange(
+  range: StatisticsRange,
+  now = new Date(),
+  customFrom?: string,
+  customTo?: string,
+): StatisticsDateRange {
+  const end = new Date(now);
+  let start: Date;
 
-  let matchingTransactions: Transaction[] = [];
-  let start: number;
-  let end: number;
+  if (range === "custom") {
+    const selectedStart = customFrom ? parseLocalDateKey(customFrom) : startOfDay(now);
+    const selectedEnd = customTo ? endOfDay(parseLocalDateKey(customTo)) : endOfDay(selectedStart);
 
-  switch (range) {
-    case "7d":
-      start = Date.now();
-      end = Date.now() - (7 * 24 * 60 * 60 * 1000);
-      break;
-
-    case "30d":
-      start = Date.now();
-      end = Date.now() - (30 * 24 * 60 * 60 * 1000);
-      break;
-
-    default:
-      console.error("No range matched, cannot determine which transactions need to be analyzed.");
-      break;
+    return selectedStart <= selectedEnd
+      ? { start: selectedStart, end: selectedEnd }
+      : { start: startOfDay(selectedEnd), end: endOfDay(selectedStart) };
   }
 
-  matchingTransactions = transactions.filter((t) => {
-    const matchesAccount = accountId === -1 || t.accountId === accountId;
-    const transactionDate = new Date(t.timestamp).getTime();
-    return !t.isTransfer && matchesAccount && transactionDate >= end && transactionDate <= start && t.amount < 0;
-  }) || [];
+  if (range === "lastMonth") {
+    start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    return {
+      start,
+      end: new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999),
+    };
+  }
 
-  // create chartdata categories from the entries
-  let chartCategories: ChartDataCategory[] = [];
+  const days = range === "7d" ? 7 : 30;
+  start = startOfDay(now);
+  start.setDate(start.getDate() - (days - 1));
 
-  for (const t of matchingTransactions) {
-    const categoryId = t.categoryId ?? -1;
-    const existingCategory = chartCategories.find((c) => c.categoryId === categoryId);
+  return { start, end };
+}
 
-    // Add the up the amounts (as absolute values, not including negative values)
-    // to an existing or new entry, depending whether an entry for the given category exists.
-    if (existingCategory) {
-      existingCategory.categoryAmount += Math.abs(t.amount);
+export function getStatisticsData({
+  filters,
+  direction,
+  grouping,
+  transactions,
+  accounts,
+  categories,
+  tags,
+  now = new Date(),
+}: GetStatisticsDataProps): StatisticsDashboardData {
+  const dateRange = getStatisticsDateRange(
+    filters.range,
+    now,
+    filters.customFrom,
+    filters.customTo,
+  );
+  const accountIds = new Set(filters.accountIds);
+  const categoryIds = new Set(filters.categoryIds);
+  const tagIds = new Set(filters.tagIds);
+
+  const filteredTransactions = transactions.filter((transaction) => {
+    if (transaction.isTransfer || transaction.amount === 0) return false;
+
+    const timestamp = new Date(transaction.timestamp);
+    if (
+      Number.isNaN(timestamp.getTime())
+      || timestamp < dateRange.start
+      || timestamp > dateRange.end
+    ) {
+      return false;
+    }
+
+    if (accountIds.size > 0 && !accountIds.has(transaction.accountId)) {
+      return false;
+    }
+
+    const categoryId = transaction.categoryId ?? UNCATEGORIZED_ID;
+    if (categoryIds.size > 0 && !categoryIds.has(categoryId)) {
+      return false;
+    }
+
+    if (tagIds.size > 0) {
+      const transactionTagIds = transaction.tags?.length
+        ? transaction.tags.map((tag) => tag.tagId).filter((id): id is number => id !== undefined)
+        : [UNTAGGED_ID];
+
+      if (!transactionTagIds.some((id) => tagIds.has(id))) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+
+  const income = sumAmounts(filteredTransactions, "income");
+  const outflow = sumAmounts(filteredTransactions, "outflow");
+
+  const summary = {
+    income,
+    outflow,
+    net: income - outflow,
+    transactionCount: filteredTransactions.length,
+  };
+
+  return {
+    summary,
+    trend: buildTrend(filteredTransactions, dateRange),
+    breakdown: buildBreakdown({
+      transactions: filteredTransactions,
+      accounts,
+      categories,
+      tags,
+      direction,
+      grouping,
+      total: direction === "income" ? income : outflow,
+    }),
+  };
+}
+
+function sumAmounts(
+  transactions: Transaction[],
+  direction: StatisticsDirection,
+): number {
+  return transactions.reduce((total, transaction) => {
+    if (direction === "income" && transaction.amount > 0) {
+      return total + transaction.amount;
+    }
+
+    if (direction === "outflow" && transaction.amount < 0) {
+      return total + Math.abs(transaction.amount);
+    }
+
+    return total;
+  }, 0);
+}
+
+function buildTrend(
+  transactions: Transaction[],
+  range: StatisticsDateRange,
+): StatisticsTrendPoint[] {
+  const points = new Map<string, StatisticsTrendPoint>();
+  const cursor = startOfDay(range.start);
+  const finalDay = startOfDay(range.end);
+
+  while (cursor <= finalDay) {
+    const key = toLocalDateKey(cursor);
+    points.set(key, {
+      date: key,
+      label: cursor.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+      }),
+      income: 0,
+      outflow: 0,
+      net: 0,
+    });
+    cursor.setDate(cursor.getDate() + 1);
+  }
+
+  for (const transaction of transactions) {
+    const point = points.get(toLocalDateKey(new Date(transaction.timestamp)));
+    if (!point) continue;
+
+    if (transaction.amount > 0) {
+      point.income += transaction.amount;
     } else {
-      const matchedCategory = categories.find((c: Category) => c.categoryId === categoryId);
+      point.outflow += Math.abs(transaction.amount);
+    }
+    point.net = point.income - point.outflow;
+  }
 
-      chartCategories.push({
-        categoryId: categoryId,
-        categoryName: matchedCategory?.name ?? "Uncategorized",
-        categoryAmount: Math.abs(t.amount),
-        categoryIcon: matchedCategory?.icon,
-        fill: getDominantColorFromEmoji(matchedCategory?.icon),
-      });
+  return [...points.values()];
+}
+
+interface BuildBreakdownProps {
+  transactions: Transaction[];
+  accounts: Account[];
+  categories: Category[];
+  tags: Tag[];
+  direction: StatisticsDirection;
+  grouping: StatisticsGrouping;
+  total: number;
+}
+
+function buildBreakdown({
+  transactions,
+  accounts,
+  categories,
+  tags,
+  direction,
+  grouping,
+  total,
+}: BuildBreakdownProps): StatisticsBreakdownRow[] {
+  const accountMap = new Map(accounts.map((account) => [account.accountId, account]));
+  const categoryMap = new Map(categories.map((category) => [category.categoryId, category]));
+  const tagMap = new Map(tags.map((tag) => [tag.tagId, tag]));
+  const rows = new Map<string, Omit<StatisticsBreakdownRow, "percentage" | "fill">>();
+
+  const matchingTransactions = transactions.filter((transaction) => (
+    direction === "income" ? transaction.amount > 0 : transaction.amount < 0
+  ));
+
+  for (const transaction of matchingTransactions) {
+    const amount = Math.abs(transaction.amount);
+
+    if (grouping === "account") {
+      const account = accountMap.get(transaction.accountId);
+      addToBreakdown(rows, String(transaction.accountId), account?.name ?? "Unknown account", amount);
+      continue;
+    }
+
+    if (grouping === "category") {
+      const categoryId = transaction.categoryId ?? UNCATEGORIZED_ID;
+      const category = categoryMap.get(categoryId);
+      addToBreakdown(
+        rows,
+        String(categoryId),
+        category?.name ?? "Uncategorized",
+        amount,
+        category?.icon,
+      );
+      continue;
+    }
+
+    if (!transaction.tags?.length) {
+      addToBreakdown(rows, String(UNTAGGED_ID), "Untagged", amount);
+      continue;
+    }
+
+    for (const transactionTag of transaction.tags) {
+      const id = transactionTag.tagId ?? UNTAGGED_ID;
+      const tag = tagMap.get(id) ?? transactionTag;
+      addToBreakdown(rows, String(id), tag.name ?? "Unnamed tag", amount);
     }
   }
 
-  return chartCategories;
+  return [...rows.values()]
+    .sort((a, b) => b.amount - a.amount)
+    .map((row, index) => ({
+      ...row,
+      percentage: total === 0 ? 0 : (row.amount / total) * 100,
+      fill: CHART_COLORS[index % CHART_COLORS.length],
+    }));
 }
 
-function getIncomesChartData({ range, transactions, categories, accountId }: GetChartDataProps): ChartDataCategory[] {
-  if (!range) throw Error("No range present, cannot determine range to load data for.");
-
-  let matchingTransactions: Transaction[] = [];
-  let start: number;
-  let end: number;
-
-  switch (range) {
-    case "7d":
-      start = Date.now();
-      end = Date.now() - (7 * 24 * 60 * 60 * 1000);
-      break;
-
-    case "30d":
-      start = Date.now();
-      end = Date.now() - (30 * 24 * 60 * 60 * 1000);
-      break;
-
-    default:
-      console.error("No range matched, cannot determine which transactions need to be analyzed.");
-      break;
+function addToBreakdown(
+  rows: Map<string, Omit<StatisticsBreakdownRow, "percentage" | "fill">>,
+  id: string,
+  name: string,
+  amount: number,
+  icon?: string,
+) {
+  const row = rows.get(id);
+  if (row) {
+    row.amount += amount;
+    return;
   }
 
-  matchingTransactions = transactions.filter((t) => {
-    const matchesAccount = accountId === -1 || t.accountId === accountId;
-    const transactionDate = new Date(t.timestamp).getTime();
-    return !t.isTransfer && matchesAccount && transactionDate >= end && transactionDate <= start && t.amount >= 0;
-  }) || [];
-
-  // create chartdata categories from the entries
-  let chartCategories: ChartDataCategory[] = [];
-
-  for (const t of matchingTransactions) {
-    const categoryId = t.categoryId ?? -1;
-    const existingCategory = chartCategories.find((c) => c.categoryId === categoryId);
-
-    // Add the up the amounts (as absolute values, not including negative values)
-    // to an existing or new entry, depending whether an entry for the given category exists.
-    if (existingCategory) {
-      existingCategory.categoryAmount += Math.abs(t.amount);
-    } else {
-      const matchedCategory = categories.find((c: Category) => c.categoryId === categoryId);
-
-      chartCategories.push({
-        categoryId: categoryId,
-        categoryName: matchedCategory?.name ?? "Uncategorized",
-        categoryAmount: Math.abs(t.amount),
-        categoryIcon: matchedCategory?.icon,
-        fill: getDominantColorFromEmoji(matchedCategory?.icon),
-      });
-    }
-  }
-
-  return chartCategories;
+  rows.set(id, { id, name, icon, amount });
 }
 
-/**
- * Get the most dominant color from a given emoji. If no emoji is present,
- * a grey will be used as a default.
- * 
- * @param emoji The emoji string to extract color for.
- * @returns The most dominant color as an rgb string.
- */
-function getDominantColorFromEmoji(emoji?: string): string {
-  if (emoji === undefined) return "#CCCCCC";
-
-  const canvas = document.createElement("canvas");
-  canvas.width = 30;
-  canvas.height = 30;
-
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return "#CCCCCC";
-
-  ctx.font = "24px Arial";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText(emoji, 15, 15);
-
-  const imageData = ctx.getImageData(0, 0, 30, 30);
-  const data = imageData.data;
-
-  let r = 0, g = 0, b = 0, count = 0;
-
-  for (let i = 0; i < data.length; i += 4) {
-    const alpha = data[i + 3];
-    if (alpha < 10) continue;
-
-    r += data[i];
-    g += data[i + 1];
-    b += data[i + 2];
-    count++;
-  }
-
-  if (count === 0) return "#CCCCCC";
-
-  r = Math.round(r / count);
-  g = Math.round(g / count);
-  b = Math.round(b / count);
-
-  return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+function startOfDay(value: Date): Date {
+  return new Date(value.getFullYear(), value.getMonth(), value.getDate());
 }
 
-export { getOutflowChartData, getIncomesChartData }
+function endOfDay(value: Date): Date {
+  return new Date(
+    value.getFullYear(),
+    value.getMonth(),
+    value.getDate(),
+    23,
+    59,
+    59,
+    999,
+  );
+}
+
+function parseLocalDateKey(value: string): Date {
+  const [year, month, day] = value.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+function toLocalDateKey(value: Date): string {
+  const year = value.getFullYear();
+  const month = String(value.getMonth() + 1).padStart(2, "0");
+  const day = String(value.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}

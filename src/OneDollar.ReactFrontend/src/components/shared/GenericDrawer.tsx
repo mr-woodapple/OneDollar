@@ -60,9 +60,9 @@ function DrawerContent({
             />
           </div>
 
-          <Scroll.Root className="min-h-0">
-            <Scroll.View className="h-full overscroll-contain">
-              <Scroll.Content className="apple-safe-area flex min-h-full flex-col">
+          <Scroll.Root className="min-h-0 min-w-0 w-full max-w-full overflow-hidden">
+            <Scroll.View className="h-full w-full max-w-full overflow-x-hidden overscroll-contain">
+              <Scroll.Content className="apple-safe-area flex min-h-full min-w-0 w-full max-w-full flex-col overflow-x-hidden">
                 {children}
               </Scroll.Content>
             </Scroll.View>

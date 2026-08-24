@@ -1,157 +1,142 @@
-import { useEffect, useState } from "react";
-import { BadgeMinus, BadgePlus, PiggyBank } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
-import { useAccounts } from "@/api/hooks/useAccounts";
-import { useStats } from "@/lib/hooks/useStats";
-import { Skeleton } from "@/components/ui/skeleton";
-import Incomes from "@/components/stats/Incomes";
-import Outflows from "@/components/stats/Outflows"
+import EmptyStats from "../components/shared/empty/EmptyStats";
+import CashFlowTrend from "@/components/stats/CashFlowTrend";
+import StatisticsBreakdown from "@/components/stats/StatisticsBreakdown";
+import StatisticsFilters from "@/components/stats/StatisticsFilters";
+import StatisticsSummary from "@/components/stats/StatisticsSummary";
 import ErrorAlert from "@/components/shared/alerts/ErrorAlert";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Skeleton } from "@/components/ui/skeleton";
+import { useStats } from "@/lib/hooks/useStats";
+import { UNCATEGORIZED_ID, UNTAGGED_ID } from "@/lib/statsHelper";
+import type {
+  StatisticsDirection,
+  StatisticsFilters as StatisticsFilterState,
+  StatisticsGrouping,
+} from "@/models/Statistics";
 
-/**
- * The statistics page component.
- */
+const initialFilters: StatisticsFilterState = {
+  range: "30d",
+  accountIds: [],
+  categoryIds: [],
+  tagIds: [],
+};
+
 export default function Statistics() {
-  // Variables for range and account picker
-  const [selectedRange, setSelectedRange] = useState<"7d" | "30d" | "lastMonth">("30d");
-  const [selectedAccountId, setSelectedAccountId] = useState<number>();
-  
-  // Hooks
-  const { accounts } = useAccounts();
-  const { incomeChartData, outflowChartData, totalIncome, totalOutcome } = useStats(selectedRange, selectedAccountId);
+  const [filters, setFilters] = useState<StatisticsFilterState>(initialFilters);
+  const [direction, setDirection] = useState<StatisticsDirection>("outflow");
+  const [grouping, setGrouping] = useState<StatisticsGrouping>("category");
+  const initializedDefaultAccount = useRef(false);
+  const {
+    data,
+    accounts,
+    categories,
+    tags,
+    isLoading,
+    error,
+  } = useStats(filters, direction, grouping);
 
-  // Calculate values for the overview outflow/income/leftover graph
-  const difference = totalIncome - totalOutcome;
-  const absDifference = Math.abs(difference);
-  const visualizationTotal = totalIncome + totalOutcome + absDifference; // Normalize the bar so that all three values are represented proportionally
-
-  const percentIncome = visualizationTotal === 0 ? 0 : (totalIncome / visualizationTotal) * 100;
-  const percentOutcome = visualizationTotal === 0 ? 0 : (totalOutcome / visualizationTotal) * 100;
-  const percentDifference = visualizationTotal === 0 ? 0 : (absDifference / visualizationTotal) * 100;
-
-  // Initialize the selected account when data loads
   useEffect(() => {
-    // Only initialize if not already selected
-    if (selectedAccountId !== undefined) return;
+    if (initializedDefaultAccount.current || accounts.length === 0) return;
+    initializedDefaultAccount.current = true;
 
-    // Assign the accountId to filter transactions later
-    if (!accounts.isPending && !accounts.isError && accounts.data) {
-      const savedId = localStorage.getItem("defaultAccount");
+    const savedAccountId = localStorage.getItem("defaultAccount");
+    if (!savedAccountId) return;
 
-      if (savedId) {
-        const found = accounts.data.find(a => a.accountId === Number(savedId));
-        if (found) {
-          setSelectedAccountId(found.accountId!);
-          return;
-        }
-      }
-      if (accounts.data.length > 0) {
-        setSelectedAccountId(accounts.data[0].accountId!);
-      }
+    const savedId = Number(savedAccountId);
+    if (Number.isNaN(savedId)) return;
+
+    if (accounts.some((account) => account.accountId === savedId)) {
+      setFilters((current) => ({ ...current, accountIds: [savedId] }));
     }
-  }, [accounts, selectedAccountId]);
+  }, [accounts]);
+
+  useEffect(() => {
+    const accountIds = new Set(accounts.map((account) => account.accountId));
+    const categoryIds = new Set([
+      UNCATEGORIZED_ID,
+      ...categories.map((category) => category.categoryId),
+    ]);
+    const tagIds = new Set([
+      UNTAGGED_ID,
+      ...tags.map((tag) => tag.tagId),
+    ]);
+
+    const validAccountIds = filters.accountIds.filter((id) => accountIds.has(id));
+    const validCategoryIds = filters.categoryIds.filter((id) => categoryIds.has(id));
+    const validTagIds = filters.tagIds.filter((id) => tagIds.has(id));
+
+    if (
+      validAccountIds.length !== filters.accountIds.length
+      || validCategoryIds.length !== filters.categoryIds.length
+      || validTagIds.length !== filters.tagIds.length
+    ) {
+      setFilters((current) => ({
+        ...current,
+        accountIds: validAccountIds,
+        categoryIds: validCategoryIds,
+        tagIds: validTagIds,
+      }));
+    }
+  }, [
+    accounts,
+    categories,
+    filters.accountIds,
+    filters.categoryIds,
+    filters.tagIds,
+    tags,
+  ]);
 
   return (
-    <div className="m-5">
+    <main className="mx-auto w-full max-w-screen-sm space-y-5 overflow-x-hidden px-4 py-5 sm:px-5">
       <div className="text-center">Statistics</div>
 
-      {/* Overall stats section with expenses, income & selectors for date range and account ?? */}
-      <div className="text-sm text-neutral-500 pb-2 ps-4 mt-5">
-        Show data for...
+      <StatisticsFilters
+        filters={filters}
+        accounts={accounts}
+        categories={categories}
+        tags={tags}
+        onChange={setFilters}
+      />
+
+      {isLoading ? (
+        <StatisticsSkeleton />
+      ) : error ? (
+        <ErrorAlert error={error} />
+      ) : data ? (
+        <>
+          <StatisticsSummary summary={data.summary} />
+
+          {data.summary.transactionCount === 0 ? (
+            <EmptyStats />
+          ) : (
+            <>
+              <CashFlowTrend data={data.trend} />
+              <StatisticsBreakdown
+                rows={data.breakdown}
+                direction={direction}
+                grouping={grouping}
+                onDirectionChange={setDirection}
+                onGroupingChange={setGrouping}
+              />
+            </>
+          )}
+        </>
+      ) : null}
+    </main>
+  );
+}
+
+function StatisticsSkeleton() {
+  return (
+    <div className="space-y-5" aria-label="Loading statistics">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <Skeleton className="col-span-2 h-24 sm:col-span-1" />
+        <Skeleton className="h-24" />
+        <Skeleton className="h-24" />
       </div>
-      <div className="border border-neutral-200 rounded-lg p-4 space-y-10">
-        {/* Range and account selectors */}
-        <div className="rangeSelector flex flex-row gap-4">
-          {/* Range selector */}
-          <Select defaultValue="30d" onValueChange={(v) => setSelectedRange(v as "7d" | "30d" | "lastMonth")}>
-            <SelectTrigger>
-              <SelectValue placeholder="Range" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="7d">7 Days</SelectItem>
-              <SelectItem value="30d">30 Days</SelectItem>
-              {/* 
-                <SelectItem value="lastMonth">Last Month</SelectItem>
-                <SelectItem value="365d">365 Days</SelectItem>
-                <SelectItem value="lastYear">Last Year</SelectItem>
-                <SelectItem value="total">Total</SelectItem> 
-              */}
-            </SelectContent>
-          </Select>
-
-          {/* Account selector */}
-          {
-            accounts.isPending ? (<Skeleton className="h-9 w-40" />) :
-            accounts.isError ? (<ErrorAlert error={accounts.error} />) :
-            (
-              <Select
-                disabled={accounts.data.length === 0}
-                value={selectedAccountId?.toString()}
-                onValueChange={(val) => setSelectedAccountId(Number(val))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Create an account first." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="-1">All</SelectItem>
-                  {accounts.data.map((acc) => (
-                    <SelectItem className="cursor-pointer"
-                      value={acc.accountId!.toString()} key={acc.accountId}>
-                      {acc.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )
-          }
-        </div>
-
-        {/* Outflow/income/leftover graph */}
-        <div className="financial-overview space-y-5">
-          <div className="bar-wrapper h-2.5 flex flex-row bg-neutral-300 rounded-sm overflow-hidden">
-            <div className="h-full bg-green-600" style={{ width: `${percentIncome}%` }}></div>
-            <div className="h-full bg-red-600" style={{ width: `${percentOutcome}%` }}></div>
-            <div style={{ width: `${percentDifference}%` }}></div>
-          </div>
-
-          <div className="flex flex-row grid-cols-3 space-x-5">
-            <div className="w-full flex flex-col">
-              <div className="text-green-600 pb-2"><BadgePlus /></div>
-              <div>{totalIncome.toLocaleString('en-GB', { style: 'currency', currency: 'EUR' })}</div>
-              <div className="text-sm text-muted-foreground">{ percentIncome.toFixed(2) } %</div>
-            </div>
-
-            <div className="w-full flex flex-col">
-              <div className="text-red-600 pb-2"><BadgeMinus /></div>
-              <div>{totalOutcome.toLocaleString('en-GB', { style: 'currency', currency: 'EUR' })}</div>
-              <div className="text-sm text-muted-foreground">{ percentOutcome.toFixed(2) } %</div>
-            </div>
-
-            <div className="w-full flex flex-col">
-              <div className="text-neutral-500 pb-2"><PiggyBank /></div>
-              <div>{difference.toLocaleString('en-GB', { style: 'currency', currency: 'EUR' })}</div>
-              <div className="text-sm text-muted-foreground">{ percentDifference.toFixed(2) } %</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="text-sm text-neutral-500 pb-2 ps-4 mt-5">
-        Outflows
-      </div>
-      <Outflows
-        totalAmount={totalOutcome}
-        chartData={outflowChartData} />
-
-      <div className="text-sm text-neutral-500 pb-2 ps-4 mt-5">
-        Incomes
-      </div>
-      <Incomes
-        totalAmount={totalIncome}
-        chartData={incomeChartData} />
-
-      {/* TODO: Add Sankey diagram for general cashflow */}
-    </div >
+      <Skeleton className="h-80 w-full" />
+      <Skeleton className="h-96 w-full" />
+    </div>
   );
 }

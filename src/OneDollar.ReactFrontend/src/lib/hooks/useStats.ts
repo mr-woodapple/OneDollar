@@ -1,58 +1,64 @@
 import { useMemo } from "react";
-import { useTransactions } from "@/api/hooks/useTransactions";
+
+import { useAccounts } from "@/api/hooks/useAccounts";
 import { useCategories } from "@/api/hooks/useCategories";
-import { getIncomesChartData, getOutflowChartData } from "@/lib/statsHelper";
+import { useTags } from "@/api/hooks/useTags";
+import { useTransactions } from "@/api/hooks/useTransactions";
+import { getStatisticsData } from "@/lib/statsHelper";
+import type {
+  StatisticsDirection,
+  StatisticsFilters,
+  StatisticsGrouping,
+} from "@/models/Statistics";
 
-/**
- * Custom hooks to calculate various values used on the statistics page.
- * 
- * @param selectedRange The selected date range as a string. See below for the allowed values.
- * @param selectedAccountId The id of the account to show stats for. "-1" if all accounts are included.
- * @returns 
- */
 export function useStats(
-  selectedRange: "7d" | "30d" | "lastMonth", 
-  selectedAccountId?: number
+  filters: StatisticsFilters,
+  direction: StatisticsDirection,
+  grouping: StatisticsGrouping,
 ) {
-    const { transactions } = useTransactions();
-    const { categories } = useCategories();
+  const { transactions } = useTransactions();
+  const { accounts } = useAccounts();
+  const { categories } = useCategories();
+  const { tags } = useTags();
 
-    const incomeChartData = useMemo(() => {
-        if (!transactions.data || !categories.data) return undefined;
+  const data = useMemo(() => {
+    if (!transactions.data || !accounts.data || !categories.data || !tags.data) {
+      return undefined;
+    }
 
-        return getIncomesChartData({
-            range: selectedRange,
-            accountId: selectedAccountId ?? -1,
-            transactions: transactions.data,
-            categories: categories.data
-        }).sort((a, b) => b.categoryAmount - a.categoryAmount);
-    }, [selectedRange, selectedAccountId, transactions.data, categories.data]);
+    return getStatisticsData({
+      filters,
+      direction,
+      grouping,
+      transactions: transactions.data,
+      accounts: accounts.data,
+      categories: categories.data,
+      tags: tags.data,
+    });
+  }, [
+    accounts.data,
+    categories.data,
+    direction,
+    filters,
+    grouping,
+    tags.data,
+    transactions.data,
+  ]);
 
-    const outflowChartData = useMemo(() => {
-        if (!transactions.data || !categories.data) return undefined;
-
-        return getOutflowChartData({
-            range: selectedRange,
-            accountId: selectedAccountId ?? -1,
-            transactions: transactions.data,
-            categories: categories.data
-        }).sort((a, b) => b.categoryAmount - a.categoryAmount);
-    }, [selectedRange, selectedAccountId, transactions.data, categories.data]);
-
-    const totalIncome = useMemo(() => {
-        return incomeChartData?.reduce((acc, curr) => acc + curr.categoryAmount, 0) || 0;
-    }, [incomeChartData]);
-
-    const totalOutcome = useMemo(() => {
-        return outflowChartData?.reduce((acc, curr) => acc + curr.categoryAmount, 0) || 0;
-    }, [outflowChartData]);
-
-    return {
-        incomeChartData,
-        outflowChartData,
-        totalIncome,
-        totalOutcome,
-        isLoading: transactions.isPending || categories.isPending,
-        isError: transactions.isError || categories.isError
-    };
+  return {
+    data,
+    accounts: accounts.data ?? [],
+    categories: categories.data ?? [],
+    tags: tags.data ?? [],
+    isLoading:
+      transactions.isPending
+      || accounts.isPending
+      || categories.isPending
+      || tags.isPending,
+    error:
+      transactions.error
+      ?? accounts.error
+      ?? categories.error
+      ?? tags.error,
+  };
 }
