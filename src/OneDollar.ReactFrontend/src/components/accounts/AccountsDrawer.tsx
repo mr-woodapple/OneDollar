@@ -102,7 +102,7 @@ export default function AccountsDrawer({
                   { transactionAccounts?.length === 0 && <EmptyAccounts />}
 
                   { transactionAccounts &&
-                    <div className="overflow-y-auto">
+                    <div className="overflow-y-auto scroll-fade scrollbar-none">
                       <ItemGroup className="bg-neutral-100 rounded-xl my-5">
                         {accounts.data.map((account) => (
                           <Item 
