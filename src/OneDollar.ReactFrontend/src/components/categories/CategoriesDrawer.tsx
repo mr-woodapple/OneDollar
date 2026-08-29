@@ -104,7 +104,7 @@ export default function CategoriesDrawer({
                   { transactionCategories?.length === 0 && <EmptyCategories /> }
 
                   { transactionCategories &&
-                    <div className="overflow-y-auto">
+                    <div className="overflow-y-auto scroll-fade no-scrollbar">
                       <ItemGroup className="bg-neutral-100 rounded-xl my-5">
                         {transactionCategories.map((category) => (
                           <Item key={category.categoryId} 

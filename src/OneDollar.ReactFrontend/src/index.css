@@ -1,6 +1,7 @@
 @import "@silk-hq/components/unlayered-styles.css" layer(silk);
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
 /* Font definitions */
 @font-face {

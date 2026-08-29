@@ -120,7 +120,7 @@ export default function TagsDrawer({
                   { tags.data?.length === 0 && <EmptyTags /> }
 
                   { tags.data && tags.data.length > 0 &&
-                    <div className="overflow-y-auto">
+                    <div className="overflow-y-auto scroll-fade no-scrollbar">
                       <ItemGroup className="bg-neutral-100 rounded-xl my-5">
                         {tags.data.map((tag) => (
                           <Item key={tag.tagId}
